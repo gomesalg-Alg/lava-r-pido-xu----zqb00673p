@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Hero } from '@/components/sections/Hero'
 import { SocialProof } from '@/components/sections/SocialProof'
 import { Services } from '@/components/sections/Services'
@@ -6,8 +7,13 @@ import { Pricing } from '@/components/sections/Pricing'
 import { Promotions } from '@/components/sections/Promotions'
 import { HowItWorks } from '@/components/sections/HowItWorks'
 import { FAQ } from '@/components/sections/FAQ'
+import { trackPageView } from '@/lib/analytics'
 
 const Index = () => {
+  useEffect(() => {
+    trackPageView('/')
+  }, [])
+
   return (
     <div className="w-full">
       <Hero />

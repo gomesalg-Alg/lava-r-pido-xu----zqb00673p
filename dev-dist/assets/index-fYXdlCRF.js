@@ -24449,48 +24449,70 @@ function Reveal({ children, className, delay = 0 }) {
 	});
 }
 //#endregion
+//#region src/lib/analytics.ts
+var trackEvent = (eventName, eventData = {}) => {
+	console.log(`[Analytics] Event: ${eventName}`, eventData);
+	if (typeof window !== "undefined") {
+		window.dataLayer = window.dataLayer || [];
+		window.dataLayer.push({
+			event: eventName,
+			...eventData
+		});
+	}
+};
+var trackPageView = (page) => {
+	console.log(`[Analytics] Page View: ${page}`);
+	if (typeof window !== "undefined") {
+		window.dataLayer = window.dataLayer || [];
+		window.dataLayer.push({
+			event: "page_view",
+			page_path: page
+		});
+	}
+};
+//#endregion
 //#region src/components/sections/Hero.tsx
 function Hero() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-		"data-uid": "src/components/sections/Hero.tsx:8:5",
+		"data-uid": "src/components/sections/Hero.tsx:9:5",
 		"data-prohibitions": "[]",
 		className: "relative min-h-[90vh] flex items-center pt-20",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/sections/Hero.tsx:9:7",
+				"data-uid": "src/components/sections/Hero.tsx:10:7",
 				"data-prohibitions": "[editContent]",
 				className: "absolute inset-0 z-0 bg-[url('https://img.usecurling.com/p/1920/1080?q=clean%20shiny%20car')] bg-cover bg-center bg-no-repeat"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/sections/Hero.tsx:10:7",
+				"data-uid": "src/components/sections/Hero.tsx:11:7",
 				"data-prohibitions": "[editContent]",
 				className: "absolute inset-0 z-10 bg-primary/70 mix-blend-multiply"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/sections/Hero.tsx:11:7",
+				"data-uid": "src/components/sections/Hero.tsx:12:7",
 				"data-prohibitions": "[editContent]",
 				className: "absolute inset-0 z-10 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				"data-uid": "src/components/sections/Hero.tsx:13:7",
+				"data-uid": "src/components/sections/Hero.tsx:14:7",
 				"data-prohibitions": "[]",
 				className: "container mx-auto px-4 relative z-20 text-white",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/sections/Hero.tsx:14:9",
+					"data-uid": "src/components/sections/Hero.tsx:15:9",
 					"data-prohibitions": "[]",
 					className: "max-w-3xl",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-							"data-uid": "src/components/sections/Hero.tsx:15:11",
+							"data-uid": "src/components/sections/Hero.tsx:16:11",
 							"data-prohibitions": "[]",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-								"data-uid": "src/components/sections/Hero.tsx:16:13",
+								"data-uid": "src/components/sections/Hero.tsx:17:13",
 								"data-prohibitions": "[]",
 								className: "text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 tracking-tight",
 								children: [
 									"Seu carro em boas mãos — ",
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/components/sections/Hero.tsx:17:40",
+										"data-uid": "src/components/sections/Hero.tsx:18:40",
 										"data-prohibitions": "[]",
 										className: "text-secondary",
 										children: "limpo, cuidado"
@@ -24500,64 +24522,65 @@ function Hero() {
 							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-							"data-uid": "src/components/sections/Hero.tsx:22:11",
+							"data-uid": "src/components/sections/Hero.tsx:23:11",
 							"data-prohibitions": "[]",
 							delay: 150,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								"data-uid": "src/components/sections/Hero.tsx:23:13",
+								"data-uid": "src/components/sections/Hero.tsx:24:13",
 								"data-prohibitions": "[]",
 								className: "text-lg md:text-xl text-slate-200 mb-10 max-w-2xl leading-relaxed",
 								children: "Lavagens simples, completas, polimento, cristalização e muito mais. Buscamos e entregamos seu veículo. Aqui perto de você."
 							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-							"data-uid": "src/components/sections/Hero.tsx:29:11",
+							"data-uid": "src/components/sections/Hero.tsx:30:11",
 							"data-prohibitions": "[]",
 							delay: 300,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								"data-uid": "src/components/sections/Hero.tsx:30:13",
+								"data-uid": "src/components/sections/Hero.tsx:31:13",
 								"data-prohibitions": "[]",
 								className: "flex flex-col sm:flex-row items-start sm:items-center gap-6",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									"data-uid": "src/components/sections/Hero.tsx:31:15",
+									"data-uid": "src/components/sections/Hero.tsx:32:15",
 									"data-prohibitions": "[]",
 									asChild: true,
 									size: "lg",
 									variant: "secondary",
 									className: "h-14 px-8 text-lg rounded-full font-bold shadow-xl hover:shadow-secondary/20",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-										"data-uid": "src/components/sections/Hero.tsx:37:17",
+										"data-uid": "src/components/sections/Hero.tsx:38:17",
 										"data-prohibitions": "[]",
 										href: "https://wa.me/5511953275624",
 										target: "_blank",
 										rel: "noreferrer",
+										onClick: () => trackEvent("conversion", { button: "hero_whatsapp" }),
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, {
-											"data-uid": "src/components/sections/Hero.tsx:38:19",
+											"data-uid": "src/components/sections/Hero.tsx:44:19",
 											"data-prohibitions": "[editContent]",
 											className: "mr-2 h-5 w-5"
 										}), "Agendar pelo WhatsApp"]
 									})
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									"data-uid": "src/components/sections/Hero.tsx:43:15",
+									"data-uid": "src/components/sections/Hero.tsx:49:15",
 									"data-prohibitions": "[]",
 									className: "flex flex-col gap-3",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Badge, {
-										"data-uid": "src/components/sections/Hero.tsx:44:17",
+										"data-uid": "src/components/sections/Hero.tsx:50:17",
 										"data-prohibitions": "[]",
 										variant: "outline",
 										className: "bg-black/30 text-white border-white/20 backdrop-blur-sm py-1.5 px-4 text-sm font-medium",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MapPin, {
-											"data-uid": "src/components/sections/Hero.tsx:48:19",
+											"data-uid": "src/components/sections/Hero.tsx:54:19",
 											"data-prohibitions": "[editContent]",
 											className: "mr-2 h-4 w-4 text-secondary"
 										}), "Av. João Goulart, 387"]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Badge, {
-										"data-uid": "src/components/sections/Hero.tsx:51:17",
+										"data-uid": "src/components/sections/Hero.tsx:57:17",
 										"data-prohibitions": "[]",
 										variant: "outline",
 										className: "bg-black/30 text-white border-white/20 backdrop-blur-sm py-1.5 px-4 text-sm font-medium",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, {
-											"data-uid": "src/components/sections/Hero.tsx:55:19",
+											"data-uid": "src/components/sections/Hero.tsx:61:19",
 											"data-prohibitions": "[editContent]",
 											className: "mr-2 h-4 w-4 text-secondary"
 										}), "(11) 95327-5624"]
@@ -24714,29 +24737,29 @@ var services = [
 ];
 function Services() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-		"data-uid": "src/components/sections/Services.tsx:44:5",
+		"data-uid": "src/components/sections/Services.tsx:45:5",
 		"data-prohibitions": "[editContent]",
 		id: "servicos",
 		className: "py-24 bg-background",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/sections/Services.tsx:45:7",
+			"data-uid": "src/components/sections/Services.tsx:46:7",
 			"data-prohibitions": "[editContent]",
 			className: "container mx-auto px-4",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					"data-uid": "src/components/sections/Services.tsx:46:9",
+					"data-uid": "src/components/sections/Services.tsx:47:9",
 					"data-prohibitions": "[]",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/sections/Services.tsx:47:11",
+						"data-uid": "src/components/sections/Services.tsx:48:11",
 						"data-prohibitions": "[]",
 						className: "text-center mb-16",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							"data-uid": "src/components/sections/Services.tsx:48:13",
+							"data-uid": "src/components/sections/Services.tsx:49:13",
 							"data-prohibitions": "[]",
 							className: "text-3xl md:text-5xl font-bold text-primary mb-4",
 							children: "Tudo que seu veículo precisa"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							"data-uid": "src/components/sections/Services.tsx:51:13",
+							"data-uid": "src/components/sections/Services.tsx:52:13",
 							"data-prohibitions": "[]",
 							className: "text-lg text-slate-600 max-w-2xl mx-auto",
 							children: "Em um só lugar, com produtos de alta qualidade e profissionais qualificados."
@@ -24744,40 +24767,40 @@ function Services() {
 					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/components/sections/Services.tsx:57:9",
+					"data-uid": "src/components/sections/Services.tsx:58:9",
 					"data-prohibitions": "[editContent]",
 					className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12",
 					children: services.map((service, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/Services.tsx:59:13",
+						"data-uid": "src/components/sections/Services.tsx:60:13",
 						"data-prohibitions": "[editContent]",
 						delay: index * 100,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-							"data-uid": "src/components/sections/Services.tsx:60:15",
+							"data-uid": "src/components/sections/Services.tsx:61:15",
 							"data-prohibitions": "[editContent]",
 							className: "group h-full border-border hover:border-accent hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-								"data-uid": "src/components/sections/Services.tsx:61:17",
+								"data-uid": "src/components/sections/Services.tsx:62:17",
 								"data-prohibitions": "[editContent]",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/components/sections/Services.tsx:62:19",
+									"data-uid": "src/components/sections/Services.tsx:63:19",
 									"data-prohibitions": "[]",
 									className: "w-14 h-14 rounded-xl bg-slate-100 text-primary flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-colors",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(service.icon, {
-										"data-uid": "src/components/sections/Services.tsx:63:21",
+										"data-uid": "src/components/sections/Services.tsx:64:21",
 										"data-prohibitions": "[editContent]",
 										size: 28
 									})
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardTitle, {
-									"data-uid": "src/components/sections/Services.tsx:65:19",
+									"data-uid": "src/components/sections/Services.tsx:66:19",
 									"data-prohibitions": "[editContent]",
 									className: "text-xl",
 									children: service.title
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-								"data-uid": "src/components/sections/Services.tsx:67:17",
+								"data-uid": "src/components/sections/Services.tsx:68:17",
 								"data-prohibitions": "[editContent]",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardDescription, {
-									"data-uid": "src/components/sections/Services.tsx:68:19",
+									"data-uid": "src/components/sections/Services.tsx:69:19",
 									"data-prohibitions": "[editContent]",
 									className: "text-base text-slate-600 leading-relaxed",
 									children: service.description
@@ -24787,27 +24810,28 @@ function Services() {
 					}, index))
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					"data-uid": "src/components/sections/Services.tsx:77:9",
+					"data-uid": "src/components/sections/Services.tsx:78:9",
 					"data-prohibitions": "[]",
 					delay: 200,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						"data-uid": "src/components/sections/Services.tsx:78:11",
+						"data-uid": "src/components/sections/Services.tsx:79:11",
 						"data-prohibitions": "[]",
 						className: "text-center",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							"data-uid": "src/components/sections/Services.tsx:79:13",
+							"data-uid": "src/components/sections/Services.tsx:80:13",
 							"data-prohibitions": "[]",
 							asChild: true,
 							variant: "outline",
 							size: "lg",
 							className: "border-primary text-primary hover:bg-primary hover:text-white border-2 text-lg h-14 px-8",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-								"data-uid": "src/components/sections/Services.tsx:85:15",
+								"data-uid": "src/components/sections/Services.tsx:86:15",
 								"data-prohibitions": "[]",
 								href: "https://wa.me/5511953275624",
 								target: "_blank",
 								rel: "noreferrer",
-								children: "Solicitar Orçamento Personalizado"
+								onClick: () => trackEvent("click", { button: "services_quote" }),
+								children: "Solicitar Orçamento"
 							})
 						})
 					})
@@ -24947,29 +24971,29 @@ function Delivery() {
 //#region src/components/sections/Pricing.tsx
 function Pricing() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-		"data-uid": "src/components/sections/Pricing.tsx:9:5",
+		"data-uid": "src/components/sections/Pricing.tsx:10:5",
 		"data-prohibitions": "[editContent]",
 		id: "precos",
 		className: "py-24 bg-slate-50",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/sections/Pricing.tsx:10:7",
+			"data-uid": "src/components/sections/Pricing.tsx:11:7",
 			"data-prohibitions": "[editContent]",
 			className: "container mx-auto px-4",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					"data-uid": "src/components/sections/Pricing.tsx:11:9",
+					"data-uid": "src/components/sections/Pricing.tsx:12:9",
 					"data-prohibitions": "[]",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/sections/Pricing.tsx:12:11",
+						"data-uid": "src/components/sections/Pricing.tsx:13:11",
 						"data-prohibitions": "[]",
 						className: "text-center mb-16",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							"data-uid": "src/components/sections/Pricing.tsx:13:13",
+							"data-uid": "src/components/sections/Pricing.tsx:14:13",
 							"data-prohibitions": "[]",
 							className: "text-3xl md:text-5xl font-bold text-primary mb-4",
 							children: "Preços claros, sem surpresa"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							"data-uid": "src/components/sections/Pricing.tsx:16:13",
+							"data-uid": "src/components/sections/Pricing.tsx:17:13",
 							"data-prohibitions": "[]",
 							className: "text-lg text-slate-600 max-w-2xl mx-auto",
 							children: "Valores justos para um serviço de excelência. Escolha a categoria do seu veículo."
@@ -24977,53 +25001,53 @@ function Pricing() {
 					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/sections/Pricing.tsx:22:9",
+					"data-uid": "src/components/sections/Pricing.tsx:23:9",
 					"data-prohibitions": "[editContent]",
 					className: "grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/Pricing.tsx:24:11",
+						"data-uid": "src/components/sections/Pricing.tsx:25:11",
 						"data-prohibitions": "[editContent]",
 						delay: 100,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-							"data-uid": "src/components/sections/Pricing.tsx:25:13",
+							"data-uid": "src/components/sections/Pricing.tsx:26:13",
 							"data-prohibitions": "[editContent]",
 							className: "flex flex-col h-full bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-									"data-uid": "src/components/sections/Pricing.tsx:26:15",
+									"data-uid": "src/components/sections/Pricing.tsx:27:15",
 									"data-prohibitions": "[]",
 									className: "text-center pb-8 pt-10",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-											"data-uid": "src/components/sections/Pricing.tsx:27:17",
+											"data-uid": "src/components/sections/Pricing.tsx:28:17",
 											"data-prohibitions": "[]",
 											className: "text-2xl font-bold text-primary mb-2",
 											children: "Carro Pequeno"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											"data-uid": "src/components/sections/Pricing.tsx:28:17",
+											"data-uid": "src/components/sections/Pricing.tsx:29:17",
 											"data-prohibitions": "[]",
 											className: "text-slate-500 mb-6",
 											children: "Hatchbacks e compactos"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/sections/Pricing.tsx:29:17",
+											"data-uid": "src/components/sections/Pricing.tsx:30:17",
 											"data-prohibitions": "[]",
 											className: "flex items-baseline justify-center gap-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												"data-uid": "src/components/sections/Pricing.tsx:30:19",
+												"data-uid": "src/components/sections/Pricing.tsx:31:19",
 												"data-prohibitions": "[]",
 												className: "text-2xl font-bold text-slate-400",
 												children: "R$"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												"data-uid": "src/components/sections/Pricing.tsx:31:19",
+												"data-uid": "src/components/sections/Pricing.tsx:32:19",
 												"data-prohibitions": "[]",
 												className: "text-6xl font-extrabold text-primary",
 												children: "42"
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											"data-uid": "src/components/sections/Pricing.tsx:33:17",
+											"data-uid": "src/components/sections/Pricing.tsx:34:17",
 											"data-prohibitions": "[]",
 											className: "text-sm text-slate-500 mt-2",
 											children: "R$ 52 com cera líquida"
@@ -25031,11 +25055,11 @@ function Pricing() {
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-									"data-uid": "src/components/sections/Pricing.tsx:35:15",
+									"data-uid": "src/components/sections/Pricing.tsx:36:15",
 									"data-prohibitions": "[editContent]",
 									className: "flex-1",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-										"data-uid": "src/components/sections/Pricing.tsx:36:17",
+										"data-uid": "src/components/sections/Pricing.tsx:37:17",
 										"data-prohibitions": "[editContent]",
 										className: "space-y-4",
 										children: [
@@ -25044,11 +25068,11 @@ function Pricing() {
 											"Limpeza de painel",
 											"Pretinho nos pneus"
 										].map((feature, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-											"data-uid": "src/components/sections/Pricing.tsx:43:21",
+											"data-uid": "src/components/sections/Pricing.tsx:44:21",
 											"data-prohibitions": "[editContent]",
 											className: "flex items-center gap-3 text-slate-700",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
-												"data-uid": "src/components/sections/Pricing.tsx:44:23",
+												"data-uid": "src/components/sections/Pricing.tsx:45:23",
 												"data-prohibitions": "[editContent]",
 												className: "text-accent shrink-0",
 												size: 20
@@ -25057,19 +25081,20 @@ function Pricing() {
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardFooter, {
-									"data-uid": "src/components/sections/Pricing.tsx:50:15",
+									"data-uid": "src/components/sections/Pricing.tsx:51:15",
 									"data-prohibitions": "[]",
 									className: "pb-10 pt-4",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										"data-uid": "src/components/sections/Pricing.tsx:51:17",
+										"data-uid": "src/components/sections/Pricing.tsx:52:17",
 										"data-prohibitions": "[]",
 										asChild: true,
 										className: "w-full h-12 text-lg",
 										variant: "outline",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-											"data-uid": "src/components/sections/Pricing.tsx:52:19",
+											"data-uid": "src/components/sections/Pricing.tsx:53:19",
 											"data-prohibitions": "[]",
 											href: "https://wa.me/5511953275624",
+											onClick: () => trackEvent("click", { button: "pricing_small_car" }),
 											children: "Agendar Lavagem"
 										})
 									})
@@ -25077,60 +25102,60 @@ function Pricing() {
 							]
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/Pricing.tsx:59:11",
+						"data-uid": "src/components/sections/Pricing.tsx:65:11",
 						"data-prohibitions": "[editContent]",
 						delay: 200,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
-							"data-uid": "src/components/sections/Pricing.tsx:60:13",
+							"data-uid": "src/components/sections/Pricing.tsx:66:13",
 							"data-prohibitions": "[editContent]",
 							className: "flex flex-col h-full bg-white border-2 border-secondary shadow-xl relative transform md:-translate-y-4",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/components/sections/Pricing.tsx:61:15",
+									"data-uid": "src/components/sections/Pricing.tsx:67:15",
 									"data-prohibitions": "[]",
 									className: "absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
-										"data-uid": "src/components/sections/Pricing.tsx:62:17",
+										"data-uid": "src/components/sections/Pricing.tsx:68:17",
 										"data-prohibitions": "[]",
 										className: "bg-secondary text-primary font-bold px-4 py-1 text-sm uppercase tracking-wider border-none",
 										children: "Mais Procurado"
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(CardHeader, {
-									"data-uid": "src/components/sections/Pricing.tsx:66:15",
+									"data-uid": "src/components/sections/Pricing.tsx:72:15",
 									"data-prohibitions": "[]",
 									className: "text-center pb-8 pt-12",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-											"data-uid": "src/components/sections/Pricing.tsx:67:17",
+											"data-uid": "src/components/sections/Pricing.tsx:73:17",
 											"data-prohibitions": "[]",
 											className: "text-2xl font-bold text-primary mb-2",
 											children: "Carro Grande"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											"data-uid": "src/components/sections/Pricing.tsx:68:17",
+											"data-uid": "src/components/sections/Pricing.tsx:74:17",
 											"data-prohibitions": "[]",
 											className: "text-slate-500 mb-6",
 											children: "Sedans, SUVs e Caminhonetes"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											"data-uid": "src/components/sections/Pricing.tsx:69:17",
+											"data-uid": "src/components/sections/Pricing.tsx:75:17",
 											"data-prohibitions": "[]",
 											className: "flex items-baseline justify-center gap-1",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												"data-uid": "src/components/sections/Pricing.tsx:70:19",
+												"data-uid": "src/components/sections/Pricing.tsx:76:19",
 												"data-prohibitions": "[]",
 												className: "text-2xl font-bold text-slate-400",
 												children: "R$"
 											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												"data-uid": "src/components/sections/Pricing.tsx:71:19",
+												"data-uid": "src/components/sections/Pricing.tsx:77:19",
 												"data-prohibitions": "[]",
 												className: "text-6xl font-extrabold text-primary",
 												children: "49"
 											})]
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											"data-uid": "src/components/sections/Pricing.tsx:73:17",
+											"data-uid": "src/components/sections/Pricing.tsx:79:17",
 											"data-prohibitions": "[]",
 											className: "text-sm text-slate-500 mt-2",
 											children: "R$ 59 com cera líquida"
@@ -25138,11 +25163,11 @@ function Pricing() {
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardContent, {
-									"data-uid": "src/components/sections/Pricing.tsx:75:15",
+									"data-uid": "src/components/sections/Pricing.tsx:81:15",
 									"data-prohibitions": "[editContent]",
 									className: "flex-1",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-										"data-uid": "src/components/sections/Pricing.tsx:76:17",
+										"data-uid": "src/components/sections/Pricing.tsx:82:17",
 										"data-prohibitions": "[editContent]",
 										className: "space-y-4",
 										children: [
@@ -25152,11 +25177,11 @@ function Pricing() {
 											"Pretinho nos pneus",
 											"Aromatizante interno"
 										].map((feature, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-											"data-uid": "src/components/sections/Pricing.tsx:84:21",
+											"data-uid": "src/components/sections/Pricing.tsx:90:21",
 											"data-prohibitions": "[editContent]",
 											className: "flex items-center gap-3 text-slate-700 font-medium",
 											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
-												"data-uid": "src/components/sections/Pricing.tsx:85:23",
+												"data-uid": "src/components/sections/Pricing.tsx:91:23",
 												"data-prohibitions": "[editContent]",
 												className: "text-secondary shrink-0",
 												size: 20
@@ -25165,19 +25190,20 @@ function Pricing() {
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardFooter, {
-									"data-uid": "src/components/sections/Pricing.tsx:91:15",
+									"data-uid": "src/components/sections/Pricing.tsx:97:15",
 									"data-prohibitions": "[]",
 									className: "pb-10 pt-4",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										"data-uid": "src/components/sections/Pricing.tsx:92:17",
+										"data-uid": "src/components/sections/Pricing.tsx:98:17",
 										"data-prohibitions": "[]",
 										asChild: true,
 										className: "w-full h-14 text-lg font-bold",
 										variant: "secondary",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-											"data-uid": "src/components/sections/Pricing.tsx:93:19",
+											"data-uid": "src/components/sections/Pricing.tsx:99:19",
 											"data-prohibitions": "[]",
 											href: "https://wa.me/5511953275624",
+											onClick: () => trackEvent("click", { button: "pricing_large_car" }),
 											children: "Agendar Lavagem"
 										})
 									})
@@ -25187,14 +25213,34 @@ function Pricing() {
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					"data-uid": "src/components/sections/Pricing.tsx:100:9",
+					"data-uid": "src/components/sections/Pricing.tsx:111:9",
 					"data-prohibitions": "[]",
 					delay: 300,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						"data-uid": "src/components/sections/Pricing.tsx:101:11",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/sections/Pricing.tsx:112:11",
 						"data-prohibitions": "[]",
-						className: "text-center text-slate-500 mt-12 text-sm max-w-2xl mx-auto",
-						children: "* Nota: Serviços especializados como Polimento, Cristalização e Higienização de Bancos estão sujeitos a avaliação prévia do veículo para orçamento exato."
+						className: "flex flex-col items-center mt-12 gap-6",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							"data-uid": "src/components/sections/Pricing.tsx:113:13",
+							"data-prohibitions": "[]",
+							asChild: true,
+							size: "lg",
+							className: "h-14 px-8 text-lg font-bold",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+								"data-uid": "src/components/sections/Pricing.tsx:114:15",
+								"data-prohibitions": "[]",
+								href: "https://wa.me/5511953275624",
+								target: "_blank",
+								rel: "noreferrer",
+								onClick: () => trackEvent("click", { button: "pricing_whatsapp_all" }),
+								children: "Ver Todos os Preços no WhatsApp"
+							})
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/sections/Pricing.tsx:123:13",
+							"data-prohibitions": "[]",
+							className: "text-center text-slate-500 text-sm max-w-2xl mx-auto",
+							children: "* Nota: Serviços especializados como Polimento, Cristalização e Higienização de Bancos estão sujeitos a avaliação prévia do veículo para orçamento exato."
+						})]
 					})
 				})
 			]
@@ -25205,71 +25251,71 @@ function Pricing() {
 //#region src/components/sections/Promotions.tsx
 function Promotions() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-		"data-uid": "src/components/sections/Promotions.tsx:7:5",
+		"data-uid": "src/components/sections/Promotions.tsx:8:5",
 		"data-prohibitions": "[editContent]",
 		id: "promocoes",
 		className: "py-24 bg-gradient-to-br from-primary to-blue-900 text-white",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/sections/Promotions.tsx:8:7",
+			"data-uid": "src/components/sections/Promotions.tsx:9:7",
 			"data-prohibitions": "[editContent]",
 			className: "container mx-auto px-4",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-				"data-uid": "src/components/sections/Promotions.tsx:9:9",
+				"data-uid": "src/components/sections/Promotions.tsx:10:9",
 				"data-prohibitions": "[]",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/sections/Promotions.tsx:10:11",
+					"data-uid": "src/components/sections/Promotions.tsx:11:11",
 					"data-prohibitions": "[]",
 					className: "text-center mb-16",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						"data-uid": "src/components/sections/Promotions.tsx:11:13",
+						"data-uid": "src/components/sections/Promotions.tsx:12:13",
 						"data-prohibitions": "[]",
 						className: "text-3xl md:text-5xl font-bold mb-4",
 						children: "Vantagens Exclusivas XUÁ"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						"data-uid": "src/components/sections/Promotions.tsx:12:13",
+						"data-uid": "src/components/sections/Promotions.tsx:13:13",
 						"data-prohibitions": "[]",
 						className: "text-lg text-slate-300 max-w-2xl mx-auto",
 						children: "Valorizamos quem escolhe cuidar do carro com a gente."
 					})]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/sections/Promotions.tsx:18:9",
+				"data-uid": "src/components/sections/Promotions.tsx:19:9",
 				"data-prohibitions": "[editContent]",
 				className: "grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					"data-uid": "src/components/sections/Promotions.tsx:20:11",
+					"data-uid": "src/components/sections/Promotions.tsx:21:11",
 					"data-prohibitions": "[]",
 					delay: 100,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/sections/Promotions.tsx:21:13",
+						"data-uid": "src/components/sections/Promotions.tsx:22:13",
 						"data-prohibitions": "[]",
 						className: "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 h-full flex flex-col hover:bg-white/15 transition-colors",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								"data-uid": "src/components/sections/Promotions.tsx:22:15",
+								"data-uid": "src/components/sections/Promotions.tsx:23:15",
 								"data-prohibitions": "[]",
 								className: "bg-secondary/20 text-secondary w-16 h-16 rounded-2xl flex items-center justify-center mb-6",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gift, {
-									"data-uid": "src/components/sections/Promotions.tsx:23:17",
+									"data-uid": "src/components/sections/Promotions.tsx:24:17",
 									"data-prohibitions": "[editContent]",
 									size: 32
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								"data-uid": "src/components/sections/Promotions.tsx:25:15",
+								"data-uid": "src/components/sections/Promotions.tsx:26:15",
 								"data-prohibitions": "[]",
 								className: "text-2xl font-bold mb-3",
 								children: "Cartão Fidelidade"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								"data-uid": "src/components/sections/Promotions.tsx:26:15",
+								"data-uid": "src/components/sections/Promotions.tsx:27:15",
 								"data-prohibitions": "[]",
 								className: "text-slate-200 mb-6 flex-1 text-lg",
 								children: [
 									"Complete 10 lavagens e a",
 									" ",
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/components/sections/Promotions.tsx:28:17",
+										"data-uid": "src/components/sections/Promotions.tsx:29:17",
 										"data-prohibitions": "[]",
 										className: "text-secondary font-bold",
 										children: "11ª é por nossa conta!"
@@ -25278,54 +25324,57 @@ function Promotions() {
 								]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								"data-uid": "src/components/sections/Promotions.tsx:31:15",
+								"data-uid": "src/components/sections/Promotions.tsx:32:15",
 								"data-prohibitions": "[]",
 								asChild: true,
 								variant: "secondary",
 								className: "w-fit",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									"data-uid": "src/components/sections/Promotions.tsx:32:17",
+									"data-uid": "src/components/sections/Promotions.tsx:33:17",
 									"data-prohibitions": "[]",
 									href: "https://wa.me/5511953275624",
-									children: "Quero Meu Cartão"
+									target: "_blank",
+									rel: "noreferrer",
+									onClick: () => trackEvent("click", { button: "loyalty_card" }),
+									children: "Quero Meu Cartão Fidelidade"
 								})
 							})
 						]
 					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-					"data-uid": "src/components/sections/Promotions.tsx:38:11",
+					"data-uid": "src/components/sections/Promotions.tsx:46:11",
 					"data-prohibitions": "[]",
 					delay: 200,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						"data-uid": "src/components/sections/Promotions.tsx:39:13",
+						"data-uid": "src/components/sections/Promotions.tsx:47:13",
 						"data-prohibitions": "[]",
 						className: "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 h-full flex flex-col hover:bg-white/15 transition-colors",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								"data-uid": "src/components/sections/Promotions.tsx:40:15",
+								"data-uid": "src/components/sections/Promotions.tsx:48:15",
 								"data-prohibitions": "[]",
 								className: "bg-accent/20 text-accent w-16 h-16 rounded-2xl flex items-center justify-center mb-6",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, {
-									"data-uid": "src/components/sections/Promotions.tsx:41:17",
+									"data-uid": "src/components/sections/Promotions.tsx:49:17",
 									"data-prohibitions": "[editContent]",
 									size: 32
 								})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								"data-uid": "src/components/sections/Promotions.tsx:43:15",
+								"data-uid": "src/components/sections/Promotions.tsx:51:15",
 								"data-prohibitions": "[]",
 								className: "text-2xl font-bold mb-3",
 								children: "Indique um Amigo"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								"data-uid": "src/components/sections/Promotions.tsx:44:15",
+								"data-uid": "src/components/sections/Promotions.tsx:52:15",
 								"data-prohibitions": "[]",
 								className: "text-slate-200 mb-6 flex-1 text-lg",
 								children: [
 									"Seu amigo ganha 10% de desconto na primeira lavagem e você ganha",
 									" ",
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										"data-uid": "src/components/sections/Promotions.tsx:46:17",
+										"data-uid": "src/components/sections/Promotions.tsx:54:17",
 										"data-prohibitions": "[]",
 										className: "font-bold text-accent",
 										children: "2 selos extras"
@@ -25334,15 +25383,18 @@ function Promotions() {
 								]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								"data-uid": "src/components/sections/Promotions.tsx:49:15",
+								"data-uid": "src/components/sections/Promotions.tsx:57:15",
 								"data-prohibitions": "[]",
 								asChild: true,
 								variant: "outline",
 								className: "w-fit border-white text-white hover:bg-white hover:text-primary",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									"data-uid": "src/components/sections/Promotions.tsx:54:17",
+									"data-uid": "src/components/sections/Promotions.tsx:62:17",
 									"data-prohibitions": "[]",
 									href: "https://wa.me/5511953275624",
+									target: "_blank",
+									rel: "noreferrer",
+									onClick: () => trackEvent("click", { button: "referral_info" }),
 									children: "Saber Mais"
 								})
 							})
@@ -25884,103 +25936,144 @@ function FAQ() {
 		}
 	];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-		"data-uid": "src/components/sections/FAQ.tsx:39:5",
+		"data-uid": "src/components/sections/FAQ.tsx:42:5",
 		"data-prohibitions": "[editContent]",
 		id: "faq",
 		className: "py-24 bg-slate-50",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/sections/FAQ.tsx:40:7",
+			"data-uid": "src/components/sections/FAQ.tsx:43:7",
 			"data-prohibitions": "[editContent]",
 			className: "container mx-auto px-4 max-w-3xl",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-				"data-uid": "src/components/sections/FAQ.tsx:41:9",
-				"data-prohibitions": "[]",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/sections/FAQ.tsx:42:11",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					"data-uid": "src/components/sections/FAQ.tsx:44:9",
 					"data-prohibitions": "[]",
-					className: "text-center mb-16",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						"data-uid": "src/components/sections/FAQ.tsx:43:13",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/sections/FAQ.tsx:45:11",
 						"data-prohibitions": "[]",
-						className: "text-3xl md:text-5xl font-bold text-primary mb-4",
-						children: "Dúvidas Frequentes"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						"data-uid": "src/components/sections/FAQ.tsx:44:13",
-						"data-prohibitions": "[]",
-						className: "text-lg text-slate-600",
-						children: "Tudo o que você precisa saber sobre nossos serviços."
-					})]
-				})
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-				"data-uid": "src/components/sections/FAQ.tsx:50:9",
-				"data-prohibitions": "[editContent]",
-				delay: 200,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Accordion, {
-					"data-uid": "src/components/sections/FAQ.tsx:51:11",
-					"data-prohibitions": "[editContent]",
-					type: "single",
-					collapsible: true,
-					className: "w-full bg-white rounded-2xl shadow-sm p-4 md:p-8",
-					children: faqs.map((faq, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(AccordionItem, {
-						"data-uid": "src/components/sections/FAQ.tsx:57:15",
-						"data-prohibitions": "[editContent]",
-						value: `item-${index}`,
-						className: "border-b-slate-100 last:border-0",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccordionTrigger, {
-							"data-uid": "src/components/sections/FAQ.tsx:62:17",
-							"data-prohibitions": "[editContent]",
-							className: "text-left text-lg font-medium text-primary hover:text-secondary transition-colors py-6",
-							children: faq.question
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccordionContent, {
-							"data-uid": "src/components/sections/FAQ.tsx:65:17",
-							"data-prohibitions": "[editContent]",
-							className: "text-slate-600 text-base leading-relaxed pb-6",
-							children: faq.answer
+						className: "text-center mb-16",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							"data-uid": "src/components/sections/FAQ.tsx:46:13",
+							"data-prohibitions": "[]",
+							className: "text-3xl md:text-5xl font-bold text-primary mb-4",
+							children: "Dúvidas Frequentes"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/sections/FAQ.tsx:47:13",
+							"data-prohibitions": "[]",
+							className: "text-lg text-slate-600",
+							children: "Tudo o que você precisa saber sobre nossos serviços."
 						})]
-					}, index))
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					"data-uid": "src/components/sections/FAQ.tsx:53:9",
+					"data-prohibitions": "[editContent]",
+					delay: 200,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Accordion, {
+						"data-uid": "src/components/sections/FAQ.tsx:54:11",
+						"data-prohibitions": "[editContent]",
+						type: "single",
+						collapsible: true,
+						className: "w-full bg-white rounded-2xl shadow-sm p-4 md:p-8",
+						children: faqs.map((faq, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(AccordionItem, {
+							"data-uid": "src/components/sections/FAQ.tsx:60:15",
+							"data-prohibitions": "[editContent]",
+							value: `item-${index}`,
+							className: "border-b-slate-100 last:border-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccordionTrigger, {
+								"data-uid": "src/components/sections/FAQ.tsx:65:17",
+								"data-prohibitions": "[editContent]",
+								className: "text-left text-lg font-medium text-primary hover:text-secondary transition-colors py-6",
+								children: faq.question
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccordionContent, {
+								"data-uid": "src/components/sections/FAQ.tsx:68:17",
+								"data-prohibitions": "[editContent]",
+								className: "text-slate-600 text-base leading-relaxed pb-6",
+								children: faq.answer
+							})]
+						}, index))
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					"data-uid": "src/components/sections/FAQ.tsx:76:9",
+					"data-prohibitions": "[]",
+					delay: 300,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/sections/FAQ.tsx:77:11",
+						"data-prohibitions": "[]",
+						className: "mt-12 text-center",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/sections/FAQ.tsx:78:13",
+							"data-prohibitions": "[]",
+							className: "text-slate-600 mb-6 text-lg",
+							children: "Ainda tem dúvidas?"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							"data-uid": "src/components/sections/FAQ.tsx:79:13",
+							"data-prohibitions": "[]",
+							asChild: true,
+							size: "lg",
+							className: "h-14 px-8 text-lg font-bold shadow-md",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+								"data-uid": "src/components/sections/FAQ.tsx:80:15",
+								"data-prohibitions": "[]",
+								href: "https://wa.me/5511953275624",
+								target: "_blank",
+								rel: "noreferrer",
+								onClick: () => trackEvent("click", { button: "faq_contact" }),
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, {
+									"data-uid": "src/components/sections/FAQ.tsx:86:17",
+									"data-prohibitions": "[editContent]",
+									className: "mr-2 h-5 w-5"
+								}), "Falar com a Equipe XUÁ"]
+							})
+						})]
+					})
 				})
-			})]
+			]
 		})
 	});
 }
 //#endregion
 //#region src/pages/Index.tsx
 var Index = () => {
+	(0, import_react.useEffect)(() => {
+		trackPageView("/");
+	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-uid": "src/pages/Index.tsx:12:5",
+		"data-uid": "src/pages/Index.tsx:18:5",
 		"data-prohibitions": "[]",
 		className: "w-full",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hero, {
-				"data-uid": "src/pages/Index.tsx:13:7",
-				"data-prohibitions": "[editContent]"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SocialProof, {
-				"data-uid": "src/pages/Index.tsx:14:7",
-				"data-prohibitions": "[editContent]"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Services, {
-				"data-uid": "src/pages/Index.tsx:15:7",
-				"data-prohibitions": "[editContent]"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Delivery, {
-				"data-uid": "src/pages/Index.tsx:16:7",
-				"data-prohibitions": "[editContent]"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pricing, {
-				"data-uid": "src/pages/Index.tsx:17:7",
-				"data-prohibitions": "[editContent]"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Promotions, {
-				"data-uid": "src/pages/Index.tsx:18:7",
-				"data-prohibitions": "[editContent]"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HowItWorks, {
 				"data-uid": "src/pages/Index.tsx:19:7",
 				"data-prohibitions": "[editContent]"
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FAQ, {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SocialProof, {
 				"data-uid": "src/pages/Index.tsx:20:7",
+				"data-prohibitions": "[editContent]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Services, {
+				"data-uid": "src/pages/Index.tsx:21:7",
+				"data-prohibitions": "[editContent]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Delivery, {
+				"data-uid": "src/pages/Index.tsx:22:7",
+				"data-prohibitions": "[editContent]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pricing, {
+				"data-uid": "src/pages/Index.tsx:23:7",
+				"data-prohibitions": "[editContent]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Promotions, {
+				"data-uid": "src/pages/Index.tsx:24:7",
+				"data-prohibitions": "[editContent]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HowItWorks, {
+				"data-uid": "src/pages/Index.tsx:25:7",
+				"data-prohibitions": "[editContent]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FAQ, {
+				"data-uid": "src/pages/Index.tsx:26:7",
 				"data-prohibitions": "[editContent]"
 			})
 		]
@@ -27803,15 +27896,16 @@ function Footer() {
 //#region src/components/FloatingWhatsApp.tsx
 function FloatingWhatsApp() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-		"data-uid": "src/components/FloatingWhatsApp.tsx:5:5",
+		"data-uid": "src/components/FloatingWhatsApp.tsx:6:5",
 		"data-prohibitions": "[]",
 		href: "https://wa.me/5511953275624",
 		target: "_blank",
 		rel: "noreferrer",
 		className: "fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-green-500/30 transition-transform hover:scale-110 hover:shadow-xl animate-bounce",
 		"aria-label": "Agendar pelo WhatsApp",
+		onClick: () => trackEvent("conversion", { button: "floating_whatsapp" }),
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, {
-			"data-uid": "src/components/FloatingWhatsApp.tsx:12:7",
+			"data-uid": "src/components/FloatingWhatsApp.tsx:14:7",
 			"data-prohibitions": "[editContent]",
 			size: 32
 		})
@@ -27910,4 +28004,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BrowserRouter, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-CzY_rgRK.js.map
+//# sourceMappingURL=index-fYXdlCRF.js.map

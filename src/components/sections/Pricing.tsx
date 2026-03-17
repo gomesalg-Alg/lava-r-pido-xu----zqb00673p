@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Reveal } from '@/components/Reveal'
+import { trackEvent } from '@/lib/analytics'
 
 export function Pricing() {
   return (
@@ -49,7 +50,12 @@ export function Pricing() {
               </CardContent>
               <CardFooter className="pb-10 pt-4">
                 <Button asChild className="w-full h-12 text-lg" variant="outline">
-                  <a href="https://wa.me/5511953275624">Agendar Lavagem</a>
+                  <a
+                    href="https://wa.me/5511953275624"
+                    onClick={() => trackEvent('click', { button: 'pricing_small_car' })}
+                  >
+                    Agendar Lavagem
+                  </a>
                 </Button>
               </CardFooter>
             </Card>
@@ -90,7 +96,12 @@ export function Pricing() {
               </CardContent>
               <CardFooter className="pb-10 pt-4">
                 <Button asChild className="w-full h-14 text-lg font-bold" variant="secondary">
-                  <a href="https://wa.me/5511953275624">Agendar Lavagem</a>
+                  <a
+                    href="https://wa.me/5511953275624"
+                    onClick={() => trackEvent('click', { button: 'pricing_large_car' })}
+                  >
+                    Agendar Lavagem
+                  </a>
                 </Button>
               </CardFooter>
             </Card>
@@ -98,10 +109,22 @@ export function Pricing() {
         </div>
 
         <Reveal delay={300}>
-          <p className="text-center text-slate-500 mt-12 text-sm max-w-2xl mx-auto">
-            * Nota: Serviços especializados como Polimento, Cristalização e Higienização de Bancos
-            estão sujeitos a avaliação prévia do veículo para orçamento exato.
-          </p>
+          <div className="flex flex-col items-center mt-12 gap-6">
+            <Button asChild size="lg" className="h-14 px-8 text-lg font-bold">
+              <a
+                href="https://wa.me/5511953275624"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackEvent('click', { button: 'pricing_whatsapp_all' })}
+              >
+                Ver Todos os Preços no WhatsApp
+              </a>
+            </Button>
+            <p className="text-center text-slate-500 text-sm max-w-2xl mx-auto">
+              * Nota: Serviços especializados como Polimento, Cristalização e Higienização de Bancos
+              estão sujeitos a avaliação prévia do veículo para orçamento exato.
+            </p>
+          </div>
         </Reveal>
       </div>
     </section>

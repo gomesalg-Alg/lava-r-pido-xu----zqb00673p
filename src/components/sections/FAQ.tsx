@@ -4,7 +4,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/Reveal'
+import { MessageCircle } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 
 export function FAQ() {
   const faqs = [
@@ -68,6 +71,23 @@ export function FAQ() {
               </AccordionItem>
             ))}
           </Accordion>
+        </Reveal>
+
+        <Reveal delay={300}>
+          <div className="mt-12 text-center">
+            <p className="text-slate-600 mb-6 text-lg">Ainda tem dúvidas?</p>
+            <Button asChild size="lg" className="h-14 px-8 text-lg font-bold shadow-md">
+              <a
+                href="https://wa.me/5511953275624"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackEvent('click', { button: 'faq_contact' })}
+              >
+                <MessageCircle className="mr-2 h-5 w-5" />
+                Falar com a Equipe XUÁ
+              </a>
+            </Button>
+          </div>
         </Reveal>
       </div>
     </section>

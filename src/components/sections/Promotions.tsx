@@ -1,6 +1,7 @@
 import { Gift, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/Reveal'
+import { trackEvent } from '@/lib/analytics'
 
 export function Promotions() {
   return (
@@ -29,7 +30,14 @@ export function Promotions() {
                 cartão físico na próxima visita e comece a pontuar.
               </p>
               <Button asChild variant="secondary" className="w-fit">
-                <a href="https://wa.me/5511953275624">Quero Meu Cartão</a>
+                <a
+                  href="https://wa.me/5511953275624"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackEvent('click', { button: 'loyalty_card' })}
+                >
+                  Quero Meu Cartão Fidelidade
+                </a>
               </Button>
             </div>
           </Reveal>
@@ -51,7 +59,14 @@ export function Promotions() {
                 variant="outline"
                 className="w-fit border-white text-white hover:bg-white hover:text-primary"
               >
-                <a href="https://wa.me/5511953275624">Saber Mais</a>
+                <a
+                  href="https://wa.me/5511953275624"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackEvent('click', { button: 'referral_info' })}
+                >
+                  Saber Mais
+                </a>
               </Button>
             </div>
           </Reveal>

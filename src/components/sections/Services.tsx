@@ -2,6 +2,7 @@ import { Droplets, Sparkles, Wind, SprayCan, ShieldCheck, Wrench } from 'lucide-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/Reveal'
+import { trackEvent } from '@/lib/analytics'
 
 const services = [
   {
@@ -82,8 +83,13 @@ export function Services() {
               size="lg"
               className="border-primary text-primary hover:bg-primary hover:text-white border-2 text-lg h-14 px-8"
             >
-              <a href="https://wa.me/5511953275624" target="_blank" rel="noreferrer">
-                Solicitar Orçamento Personalizado
+              <a
+                href="https://wa.me/5511953275624"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackEvent('click', { button: 'services_quote' })}
+              >
+                Solicitar Orçamento
               </a>
             </Button>
           </div>

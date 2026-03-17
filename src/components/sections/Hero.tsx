@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Phone, MessageSquare } from 'lucide-react'
 import { Reveal } from '@/components/Reveal'
+import { trackEvent } from '@/lib/analytics'
 
 export function Hero() {
   return (
@@ -34,7 +35,12 @@ export function Hero() {
                 variant="secondary"
                 className="h-14 px-8 text-lg rounded-full font-bold shadow-xl hover:shadow-secondary/20"
               >
-                <a href="https://wa.me/5511953275624" target="_blank" rel="noreferrer">
+                <a
+                  href="https://wa.me/5511953275624"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackEvent('conversion', { button: 'hero_whatsapp' })}
+                >
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Agendar pelo WhatsApp
                 </a>
