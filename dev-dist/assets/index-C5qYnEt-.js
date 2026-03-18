@@ -27124,53 +27124,53 @@ function Promotions() {
 						"data-uid": "src/components/sections/Promotions.tsx:12:13",
 						"data-prohibitions": "[]",
 						className: "text-3xl md:text-5xl font-bold mb-4",
-						children: "Vantagens Exclusivas XUÁ"
+						children: "Vantagens Exclusivas XUÁ Lava Rápido"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						"data-uid": "src/components/sections/Promotions.tsx:13:13",
+						"data-uid": "src/components/sections/Promotions.tsx:15:13",
 						"data-prohibitions": "[]",
 						className: "text-lg text-slate-300 max-w-2xl mx-auto",
 						children: "Valorizamos quem escolhe cuidar do carro com a gente."
 					})]
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/sections/Promotions.tsx:19:9",
+				"data-uid": "src/components/sections/Promotions.tsx:21:9",
 				"data-prohibitions": "[editContent]",
 				className: "grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/Promotions.tsx:21:11",
+						"data-uid": "src/components/sections/Promotions.tsx:23:11",
 						"data-prohibitions": "[]",
 						delay: 100,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/sections/Promotions.tsx:22:13",
+							"data-uid": "src/components/sections/Promotions.tsx:24:13",
 							"data-prohibitions": "[]",
 							className: "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 h-full flex flex-col hover:bg-white/15 transition-colors",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/components/sections/Promotions.tsx:23:15",
+									"data-uid": "src/components/sections/Promotions.tsx:25:15",
 									"data-prohibitions": "[]",
 									className: "bg-secondary/20 text-secondary w-16 h-16 rounded-2xl flex items-center justify-center mb-6",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Gift, {
-										"data-uid": "src/components/sections/Promotions.tsx:24:17",
+										"data-uid": "src/components/sections/Promotions.tsx:26:17",
 										"data-prohibitions": "[editContent]",
 										size: 32
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									"data-uid": "src/components/sections/Promotions.tsx:26:15",
+									"data-uid": "src/components/sections/Promotions.tsx:28:15",
 									"data-prohibitions": "[]",
 									className: "text-2xl font-bold mb-3",
 									children: "Cartão Fidelidade"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									"data-uid": "src/components/sections/Promotions.tsx:27:15",
+									"data-uid": "src/components/sections/Promotions.tsx:29:15",
 									"data-prohibitions": "[]",
 									className: "text-slate-200 mb-6 flex-1 text-lg",
 									children: [
 										"Complete 10 lavagens e a",
 										" ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											"data-uid": "src/components/sections/Promotions.tsx:29:17",
+											"data-uid": "src/components/sections/Promotions.tsx:31:17",
 											"data-prohibitions": "[]",
 											className: "text-secondary font-bold",
 											children: "11ª é por nossa conta!"
@@ -27179,13 +27179,13 @@ function Promotions() {
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									"data-uid": "src/components/sections/Promotions.tsx:32:15",
+									"data-uid": "src/components/sections/Promotions.tsx:34:15",
 									"data-prohibitions": "[]",
 									asChild: true,
 									variant: "secondary",
 									className: "w-fit mt-auto",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-										"data-uid": "src/components/sections/Promotions.tsx:33:17",
+										"data-uid": "src/components/sections/Promotions.tsx:35:17",
 										"data-prohibitions": "[]",
 										href: "https://wa.me/5511953275624",
 										target: "_blank",
@@ -27198,39 +27198,39 @@ function Promotions() {
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/Promotions.tsx:46:11",
+						"data-uid": "src/components/sections/Promotions.tsx:48:11",
 						"data-prohibitions": "[]",
 						delay: 200,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/sections/Promotions.tsx:47:13",
+							"data-uid": "src/components/sections/Promotions.tsx:49:13",
 							"data-prohibitions": "[]",
 							className: "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 h-full flex flex-col hover:bg-white/15 transition-colors shadow-lg shadow-yellow-500/10",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/components/sections/Promotions.tsx:48:15",
+									"data-uid": "src/components/sections/Promotions.tsx:50:15",
 									"data-prohibitions": "[]",
 									className: "bg-yellow-400/20 text-yellow-400 w-16 h-16 rounded-2xl flex items-center justify-center mb-6",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CarTaxiFront, {
-										"data-uid": "src/components/sections/Promotions.tsx:49:17",
+										"data-uid": "src/components/sections/Promotions.tsx:51:17",
 										"data-prohibitions": "[editContent]",
 										size: 32
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									"data-uid": "src/components/sections/Promotions.tsx:51:15",
+									"data-uid": "src/components/sections/Promotions.tsx:53:15",
 									"data-prohibitions": "[]",
 									className: "text-2xl font-bold mb-3",
 									children: "Carros de App"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									"data-uid": "src/components/sections/Promotions.tsx:52:15",
+									"data-uid": "src/components/sections/Promotions.tsx:54:15",
 									"data-prohibitions": "[]",
 									className: "text-slate-200 mb-6 flex-1 text-lg",
 									children: [
 										"Trabalha com Uber, 99 ou inDrive? Ganhe",
 										" ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											"data-uid": "src/components/sections/Promotions.tsx:54:17",
+											"data-uid": "src/components/sections/Promotions.tsx:56:17",
 											"data-prohibitions": "[]",
 											className: "text-yellow-400 font-bold",
 											children: "20% de desconto"
@@ -27239,13 +27239,13 @@ function Promotions() {
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									"data-uid": "src/components/sections/Promotions.tsx:57:15",
+									"data-uid": "src/components/sections/Promotions.tsx:59:15",
 									"data-prohibitions": "[]",
 									asChild: true,
 									variant: "outline",
 									className: "w-fit border-white text-white hover:bg-white hover:text-primary mt-auto",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-										"data-uid": "src/components/sections/Promotions.tsx:62:17",
+										"data-uid": "src/components/sections/Promotions.tsx:64:17",
 										"data-prohibitions": "[]",
 										href: "https://wa.me/5511953275624",
 										target: "_blank",
@@ -27258,39 +27258,39 @@ function Promotions() {
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/Promotions.tsx:75:11",
+						"data-uid": "src/components/sections/Promotions.tsx:77:11",
 						"data-prohibitions": "[]",
 						delay: 300,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/sections/Promotions.tsx:76:13",
+							"data-uid": "src/components/sections/Promotions.tsx:78:13",
 							"data-prohibitions": "[]",
 							className: "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 h-full flex flex-col hover:bg-white/15 transition-colors",
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/components/sections/Promotions.tsx:77:15",
+									"data-uid": "src/components/sections/Promotions.tsx:79:15",
 									"data-prohibitions": "[]",
 									className: "bg-accent/20 text-accent w-16 h-16 rounded-2xl flex items-center justify-center mb-6",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, {
-										"data-uid": "src/components/sections/Promotions.tsx:78:17",
+										"data-uid": "src/components/sections/Promotions.tsx:80:17",
 										"data-prohibitions": "[editContent]",
 										size: 32
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									"data-uid": "src/components/sections/Promotions.tsx:80:15",
+									"data-uid": "src/components/sections/Promotions.tsx:82:15",
 									"data-prohibitions": "[]",
 									className: "text-2xl font-bold mb-3",
 									children: "Indique um Amigo"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									"data-uid": "src/components/sections/Promotions.tsx:81:15",
+									"data-uid": "src/components/sections/Promotions.tsx:83:15",
 									"data-prohibitions": "[]",
 									className: "text-slate-200 mb-6 flex-1 text-lg",
 									children: [
 										"Seu amigo ganha 10% de desconto na primeira lavagem e você ganha",
 										" ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											"data-uid": "src/components/sections/Promotions.tsx:83:17",
+											"data-uid": "src/components/sections/Promotions.tsx:85:17",
 											"data-prohibitions": "[]",
 											className: "font-bold text-accent",
 											children: "2 selos extras"
@@ -27299,13 +27299,13 @@ function Promotions() {
 									]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									"data-uid": "src/components/sections/Promotions.tsx:86:15",
+									"data-uid": "src/components/sections/Promotions.tsx:88:15",
 									"data-prohibitions": "[]",
 									asChild: true,
 									variant: "outline",
 									className: "w-fit border-white text-white hover:bg-white hover:text-primary mt-auto",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-										"data-uid": "src/components/sections/Promotions.tsx:91:17",
+										"data-uid": "src/components/sections/Promotions.tsx:93:17",
 										"data-prohibitions": "[]",
 										href: "https://wa.me/5511953275624",
 										target: "_blank",
@@ -27513,7 +27513,7 @@ function Location() {
 							loading: "lazy",
 							referrerPolicy: "no-referrer-when-downgrade",
 							className: "absolute inset-0",
-							title: "Localização do Lava Rápido XUÁ"
+							title: "Localização do XUÁ Lava Rápido"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							"data-uid": "src/components/sections/Location.tsx:34:15",
 							"data-prohibitions": "[editContent]",
@@ -28088,7 +28088,7 @@ function FAQ() {
 									"data-uid": "src/components/sections/FAQ.tsx:86:17",
 									"data-prohibitions": "[editContent]",
 									className: "mr-2 h-5 w-5"
-								}), "Falar com a Equipe XUÁ"]
+								}), "Falar com a Equipe XUÁ Lava Rápido"]
 							})
 						})]
 					})
@@ -29637,8 +29637,8 @@ function Header() {
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						"data-uid": "src/components/Header.tsx:37:11",
 						"data-prohibitions": "[editContent]",
-						className: cn$1("text-2xl font-bold tracking-tight", isScrolled ? "text-primary" : "text-white"),
-						children: "XUÁ"
+						className: cn$1("text-xl sm:text-2xl font-bold tracking-tight", isScrolled ? "text-primary" : "text-white"),
+						children: "XUÁ Lava Rápido"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
@@ -29781,7 +29781,7 @@ function Footer() {
 								"data-uid": "src/components/Footer.tsx:12:13",
 								"data-prohibitions": "[]",
 								className: "text-2xl font-bold text-white tracking-tight",
-								children: "XUÁ"
+								children: "XUÁ Lava Rápido"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -29955,7 +29955,7 @@ function Footer() {
 			children: [
 				"© ",
 				(/* @__PURE__ */ new Date()).getFullYear(),
-				" Lava Rápido XUÁ. Todos os direitos reservados."
+				" XUÁ Lava Rápido. Todos os direitos reservados."
 			]
 		})]
 	});
@@ -30072,4 +30072,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BrowserRouter, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-BltVmBLi.js.map
+//# sourceMappingURL=index-C5qYnEt-.js.map

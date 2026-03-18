@@ -9,7 +9,9 @@ export function Promotions() {
       <div className="container mx-auto px-4">
         <Reveal>
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Vantagens Exclusivas XUÁ</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              Vantagens Exclusivas XUÁ Lava Rápido
+            </h2>
             <p className="text-lg text-slate-300 max-w-2xl mx-auto">
               Valorizamos quem escolhe cuidar do carro com a gente.
             </p>

@@ -29,7 +29,7 @@ export function Location() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="absolute inset-0"
-                title="Localização do Lava Rápido XUÁ"
+                title="Localização do XUÁ Lava Rápido"
               />
               <div className="absolute inset-0 pointer-events-none group-hover:bg-black/5 transition-colors duration-300" />
             </div>

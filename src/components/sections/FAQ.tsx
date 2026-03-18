@@ -84,7 +84,7 @@ export function FAQ() {
                 onClick={() => trackEvent('click', { button: 'faq_contact' })}
               >
                 <MessageCircle className="mr-2 h-5 w-5" />
-                Falar com a Equipe XUÁ
+                Falar com a Equipe XUÁ Lava Rápido
               </a>
             </Button>
           </div>

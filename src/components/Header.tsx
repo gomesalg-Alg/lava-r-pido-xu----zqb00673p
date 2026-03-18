@@ -36,11 +36,11 @@ export function Header() {
           </div>
           <span
             className={cn(
-              'text-2xl font-bold tracking-tight',
+              'text-xl sm:text-2xl font-bold tracking-tight',
               isScrolled ? 'text-primary' : 'text-white',
             )}
           >
-            XUÁ
+            XUÁ Lava Rápido
           </span>
         </a>
 
