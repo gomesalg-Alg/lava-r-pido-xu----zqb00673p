@@ -12,9 +12,9 @@ import { trackEvent } from '@/lib/analytics'
 export function FAQ() {
   const faqs = [
     {
-      question: 'Qual o raio de atendimento do Leva e Traz gratuito?',
+      question: 'Vocês buscam o carro em qualquer endereço?',
       answer:
-        'O serviço de Leva e Traz é totalmente gratuito para endereços localizados em um raio de até 2km do nosso lava rápido. Para distâncias maiores, cobramos uma pequena taxa de deslocamento sob consulta.',
+        'Atendemos num raio de até 2 km da nossa unidade na Av. João Goulart, 387 - Jd. Malia I - São Paulo - SP. O serviço de Leva e Traz é totalmente gratuito para endereços localizados nessa região. Para distâncias maiores, cobramos uma pequena taxa de deslocamento sob consulta.',
     },
     {
       question: 'Quanto tempo demora uma lavagem completa?',

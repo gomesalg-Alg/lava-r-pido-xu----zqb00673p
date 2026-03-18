@@ -56,9 +56,9 @@ export function Footer() {
             <li className="flex items-start gap-3">
               <MapPin size={20} className="text-secondary shrink-0" />
               <span>
-                Av. João Goulart, 387 - Centro
+                Av. João Goulart, 387 - Jd. Malia I
                 <br />
-                São Paulo, SP - 01234-567
+                São Paulo - SP
               </span>
             </li>
             <li className="flex items-center gap-3">

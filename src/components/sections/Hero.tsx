@@ -52,7 +52,7 @@ export function Hero() {
                   className="bg-black/30 text-white border-white/20 backdrop-blur-sm py-1.5 px-4 text-sm font-medium"
                 >
                   <MapPin className="mr-2 h-4 w-4 text-secondary" />
-                  Av. João Goulart, 387
+                  Av. João Goulart, 387 - Jd. Malia I - São Paulo - SP
                 </Badge>
                 <Badge
                   variant="outline"

@@ -1,5 +1,7 @@
 import { MessageSquare, Car, ShieldCheck } from 'lucide-react'
 import { Reveal } from '@/components/Reveal'
+import { Button } from '@/components/ui/button'
+import { trackEvent } from '@/lib/analytics'
 
 export function HowItWorks() {
   const steps = [
@@ -53,6 +55,21 @@ export function HowItWorks() {
             ))}
           </div>
         </div>
+
+        <Reveal delay={600}>
+          <div className="mt-16 text-center">
+            <Button asChild size="lg" className="h-14 px-8 text-lg font-bold shadow-lg">
+              <a
+                href="https://wa.me/5511953275624"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackEvent('conversion', { button: 'how_it_works_schedule' })}
+              >
+                Agendar agora
+              </a>
+            </Button>
+          </div>
+        </Reveal>
       </div>
     </section>
   )

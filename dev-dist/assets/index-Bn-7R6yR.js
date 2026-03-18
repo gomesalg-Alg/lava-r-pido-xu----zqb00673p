@@ -24573,7 +24573,7 @@ function Hero() {
 											"data-uid": "src/components/sections/Hero.tsx:54:19",
 											"data-prohibitions": "[editContent]",
 											className: "mr-2 h-4 w-4 text-secondary"
-										}), "Av. João Goulart, 387"]
+										}), "Av. João Goulart, 387 - Jd. Malia I - São Paulo - SP"]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Badge, {
 										"data-uid": "src/components/sections/Hero.tsx:57:17",
 										"data-prohibitions": "[]",
@@ -25426,82 +25426,111 @@ function HowItWorks() {
 		}
 	];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-		"data-uid": "src/components/sections/HowItWorks.tsx:24:5",
+		"data-uid": "src/components/sections/HowItWorks.tsx:26:5",
 		"data-prohibitions": "[editContent]",
 		id: "como-funciona",
 		className: "py-24 bg-white",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-uid": "src/components/sections/HowItWorks.tsx:25:7",
+			"data-uid": "src/components/sections/HowItWorks.tsx:27:7",
 			"data-prohibitions": "[editContent]",
 			className: "container mx-auto px-4",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-				"data-uid": "src/components/sections/HowItWorks.tsx:26:9",
-				"data-prohibitions": "[]",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					"data-uid": "src/components/sections/HowItWorks.tsx:27:11",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					"data-uid": "src/components/sections/HowItWorks.tsx:28:9",
 					"data-prohibitions": "[]",
-					className: "text-center mb-20",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						"data-uid": "src/components/sections/HowItWorks.tsx:28:13",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						"data-uid": "src/components/sections/HowItWorks.tsx:29:11",
 						"data-prohibitions": "[]",
-						className: "text-3xl md:text-5xl font-bold text-primary mb-4",
-						children: "Como Funciona"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						"data-uid": "src/components/sections/HowItWorks.tsx:29:13",
-						"data-prohibitions": "[]",
-						className: "text-lg text-slate-600 max-w-2xl mx-auto",
-						children: "Três passos simples para deixar seu carro como novo, sem dor de cabeça."
-					})]
-				})
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				"data-uid": "src/components/sections/HowItWorks.tsx:35:9",
-				"data-prohibitions": "[editContent]",
-				className: "relative max-w-5xl mx-auto",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/components/sections/HowItWorks.tsx:37:11",
+						className: "text-center mb-20",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							"data-uid": "src/components/sections/HowItWorks.tsx:30:13",
+							"data-prohibitions": "[]",
+							className: "text-3xl md:text-5xl font-bold text-primary mb-4",
+							children: "Como Funciona"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							"data-uid": "src/components/sections/HowItWorks.tsx:31:13",
+							"data-prohibitions": "[]",
+							className: "text-lg text-slate-600 max-w-2xl mx-auto",
+							children: "Três passos simples para deixar seu carro como novo, sem dor de cabeça."
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-uid": "src/components/sections/HowItWorks.tsx:37:9",
 					"data-prohibitions": "[editContent]",
-					className: "hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-slate-200 border-t-2 border-dashed border-slate-300 -translate-y-1/2 z-0"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					"data-uid": "src/components/sections/HowItWorks.tsx:39:11",
-					"data-prohibitions": "[editContent]",
-					className: "grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10",
-					children: steps.map((step, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
-						"data-uid": "src/components/sections/HowItWorks.tsx:41:15",
+					className: "relative max-w-5xl mx-auto",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						"data-uid": "src/components/sections/HowItWorks.tsx:39:11",
 						"data-prohibitions": "[editContent]",
-						delay: index * 200,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							"data-uid": "src/components/sections/HowItWorks.tsx:42:17",
+						className: "hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-slate-200 border-t-2 border-dashed border-slate-300 -translate-y-1/2 z-0"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						"data-uid": "src/components/sections/HowItWorks.tsx:41:11",
+						"data-prohibitions": "[editContent]",
+						className: "grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10",
+						children: steps.map((step, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+							"data-uid": "src/components/sections/HowItWorks.tsx:43:15",
 							"data-prohibitions": "[editContent]",
-							className: "flex flex-col items-center text-center group",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									"data-uid": "src/components/sections/HowItWorks.tsx:43:19",
-									"data-prohibitions": "[]",
-									className: "w-24 h-24 bg-white rounded-full border-4 border-slate-100 shadow-xl flex items-center justify-center mb-6 group-hover:border-secondary transition-colors duration-300",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(step.icon, {
-										"data-uid": "src/components/sections/HowItWorks.tsx:44:21",
+							delay: index * 200,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								"data-uid": "src/components/sections/HowItWorks.tsx:44:17",
+								"data-prohibitions": "[editContent]",
+								className: "flex flex-col items-center text-center group",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										"data-uid": "src/components/sections/HowItWorks.tsx:45:19",
+										"data-prohibitions": "[]",
+										className: "w-24 h-24 bg-white rounded-full border-4 border-slate-100 shadow-xl flex items-center justify-center mb-6 group-hover:border-secondary transition-colors duration-300",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(step.icon, {
+											"data-uid": "src/components/sections/HowItWorks.tsx:46:21",
+											"data-prohibitions": "[editContent]",
+											size: 40,
+											className: "text-primary group-hover:text-secondary transition-colors duration-300"
+										})
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+										"data-uid": "src/components/sections/HowItWorks.tsx:51:19",
 										"data-prohibitions": "[editContent]",
-										size: 40,
-										className: "text-primary group-hover:text-secondary transition-colors duration-300"
+										className: "text-2xl font-bold text-primary mb-3",
+										children: step.title
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										"data-uid": "src/components/sections/HowItWorks.tsx:52:19",
+										"data-prohibitions": "[editContent]",
+										className: "text-slate-600 leading-relaxed",
+										children: step.description
 									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									"data-uid": "src/components/sections/HowItWorks.tsx:49:19",
-									"data-prohibitions": "[editContent]",
-									className: "text-2xl font-bold text-primary mb-3",
-									children: step.title
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									"data-uid": "src/components/sections/HowItWorks.tsx:50:19",
-									"data-prohibitions": "[editContent]",
-									className: "text-slate-600 leading-relaxed",
-									children: step.description
-								})
-							]
+								]
+							})
+						}, index))
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
+					"data-uid": "src/components/sections/HowItWorks.tsx:59:9",
+					"data-prohibitions": "[]",
+					delay: 600,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						"data-uid": "src/components/sections/HowItWorks.tsx:60:11",
+						"data-prohibitions": "[]",
+						className: "mt-16 text-center",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							"data-uid": "src/components/sections/HowItWorks.tsx:61:13",
+							"data-prohibitions": "[]",
+							asChild: true,
+							size: "lg",
+							className: "h-14 px-8 text-lg font-bold shadow-lg",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+								"data-uid": "src/components/sections/HowItWorks.tsx:62:15",
+								"data-prohibitions": "[]",
+								href: "https://wa.me/5511953275624",
+								target: "_blank",
+								rel: "noreferrer",
+								onClick: () => trackEvent("conversion", { button: "how_it_works_schedule" }),
+								children: "Agendar agora"
+							})
 						})
-					}, index))
-				})]
-			})]
+					})
+				})
+			]
 		})
 	});
 }
@@ -25915,8 +25944,8 @@ AccordionContent.displayName = Content2.displayName;
 function FAQ() {
 	const faqs = [
 		{
-			question: "Qual o raio de atendimento do Leva e Traz gratuito?",
-			answer: "O serviço de Leva e Traz é totalmente gratuito para endereços localizados em um raio de até 2km do nosso lava rápido. Para distâncias maiores, cobramos uma pequena taxa de deslocamento sob consulta."
+			question: "Vocês buscam o carro em qualquer endereço?",
+			answer: "Atendemos num raio de até 2 km da nossa unidade na Av. João Goulart, 387 - Jd. Malia I - São Paulo - SP. O serviço de Leva e Traz é totalmente gratuito para endereços localizados nessa região. Para distâncias maiores, cobramos uma pequena taxa de deslocamento sob consulta."
 		},
 		{
 			question: "Quanto tempo demora uma lavagem completa?",
@@ -27837,12 +27866,12 @@ function Footer() {
 									"data-uid": "src/components/Footer.tsx:58:15",
 									"data-prohibitions": "[]",
 									children: [
-										"Av. João Goulart, 387 - Centro",
+										"Av. João Goulart, 387 - Jd. Malia I",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {
 											"data-uid": "src/components/Footer.tsx:60:17",
 											"data-prohibitions": "[editContent]"
 										}),
-										"São Paulo, SP - 01234-567"
+										"São Paulo - SP"
 									]
 								})]
 							}),
@@ -28004,4 +28033,4 @@ var App = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BrowserRouter, {
 }));
 //#endregion
 
-//# sourceMappingURL=index-fYXdlCRF.js.map
+//# sourceMappingURL=index-Bn-7R6yR.js.map
