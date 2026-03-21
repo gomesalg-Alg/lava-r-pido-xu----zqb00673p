@@ -13,10 +13,41 @@ import { trackPageView } from '@/lib/analytics'
 const Index = () => {
   useEffect(() => {
     trackPageView('/')
+
+    const hideBadge = () => {
+      const badge = document.getElementById('skip-badge')
+      if (badge) {
+        badge.style.display = 'none'
+      }
+      document.querySelectorAll('a').forEach((el) => {
+        if (el.textContent?.includes('Criado por Skip')) {
+          el.style.display = 'none'
+        }
+      })
+    }
+
+    hideBadge()
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.addedNodes.length) {
+          hideBadge()
+        }
+      }
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    return () => observer.disconnect()
   }, [])
 
   return (
     <div className="w-full">
+      <style>{`
+        #skip-badge {
+          display: none !important;
+        }
+      `}</style>
       <Hero />
       <SocialProof />
       <Services />
