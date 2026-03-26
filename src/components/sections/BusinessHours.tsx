@@ -1,0 +1,76 @@
+import { Clock, CalendarDays } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Reveal } from '@/components/Reveal'
+
+export function BusinessHours() {
+  return (
+    <section id="horario" className="py-24 bg-background">
+      <div className="container mx-auto px-4">
+        <Reveal>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-primary mb-4">
+              Horário de Funcionamento
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Planeje sua visita. Estamos prontos para atender você e deixar seu carro impecável.
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={200}>
+          <Card className="max-w-4xl mx-auto border-2 border-slate-100 shadow-xl bg-white overflow-hidden rounded-2xl">
+            <CardContent className="p-0">
+              <div className="flex flex-col md:flex-row">
+                <div className="bg-primary text-white p-10 flex flex-col items-center justify-center md:w-2/5 text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/10 rounded-full blur-2xl transform -translate-x-10 translate-y-10" />
+
+                  <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 relative z-10 border border-white/20">
+                    <Clock size={40} className="text-secondary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 relative z-10 tracking-tight">
+                    XUÁ Lava Rápido
+                  </h3>
+                  <p className="text-primary-foreground/80 text-sm relative z-10 leading-relaxed max-w-[200px]">
+                    Sempre à disposição para cuidar do seu veículo com máxima qualidade.
+                  </p>
+                </div>
+
+                <div className="p-8 sm:p-10 md:w-3/5 flex flex-col justify-center bg-white">
+                  <ul className="space-y-8">
+                    <li className="flex flex-col sm:flex-row sm:items-center justify-between pb-8 border-b border-slate-100 gap-4">
+                      <div className="flex items-center gap-5">
+                        <div className="bg-slate-50 p-3.5 rounded-xl text-primary shrink-0 shadow-sm border border-slate-100">
+                          <CalendarDays size={26} />
+                        </div>
+                        <span className="text-lg md:text-xl font-semibold text-slate-700">
+                          Segunda-Feira até Sábado
+                        </span>
+                      </div>
+                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right">
+                        08:00 às 18:00
+                      </span>
+                    </li>
+                    <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-5">
+                        <div className="bg-orange-50 p-3.5 rounded-xl text-secondary shrink-0 shadow-sm border border-orange-100">
+                          <CalendarDays size={26} />
+                        </div>
+                        <span className="text-lg md:text-xl font-semibold text-slate-700">
+                          Domingos
+                        </span>
+                      </div>
+                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right">
+                        08:00 às 13:00
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
