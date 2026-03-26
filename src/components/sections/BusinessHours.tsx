@@ -48,7 +48,7 @@ export function BusinessHours() {
                           Segunda-Feira até Sábado
                         </span>
                       </div>
-                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right">
+                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right whitespace-nowrap">
                         08:00 às 18:00
                       </span>
                     </li>
@@ -64,7 +64,7 @@ export function BusinessHours() {
                           Domingos
                         </span>
                       </div>
-                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right">
+                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right whitespace-nowrap">
                         08:00 às 13:00
                       </span>
                     </li>
