@@ -45,8 +45,11 @@ const Index = () => {
   return (
     <div className="w-full">
       <style>{`
-        #skip-badge {
+        #skip-badge, a[href*="skip.build"], a[href*="goskip.app"] {
           display: none !important;
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
         }
       `}</style>
       <Hero />

@@ -1,5 +1,6 @@
 import { Clock, CalendarDays } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { Reveal } from '@/components/Reveal'
 
 export function BusinessHours() {
@@ -37,8 +38,8 @@ export function BusinessHours() {
                 </div>
 
                 <div className="p-8 sm:p-10 md:w-3/5 flex flex-col justify-center bg-white">
-                  <ul className="space-y-8">
-                    <li className="flex flex-col sm:flex-row sm:items-center justify-between pb-8 border-b border-slate-100 gap-4">
+                  <ul className="space-y-6">
+                    <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-5">
                         <div className="bg-slate-50 p-3.5 rounded-xl text-primary shrink-0 shadow-sm border border-slate-100">
                           <CalendarDays size={26} />
@@ -51,6 +52,9 @@ export function BusinessHours() {
                         08:00 às 18:00
                       </span>
                     </li>
+
+                    <Separator className="bg-slate-100" />
+
                     <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-5">
                         <div className="bg-orange-50 p-3.5 rounded-xl text-secondary shrink-0 shadow-sm border border-orange-100">
