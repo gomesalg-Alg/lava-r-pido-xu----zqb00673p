@@ -4,6 +4,7 @@ import { SocialProof } from '@/components/sections/SocialProof'
 import { Services } from '@/components/sections/Services'
 import { Delivery } from '@/components/sections/Delivery'
 import { Pricing } from '@/components/sections/Pricing'
+import { SpecialOffers } from '@/components/sections/SpecialOffers'
 import { Promotions } from '@/components/sections/Promotions'
 import { HowItWorks } from '@/components/sections/HowItWorks'
 import { BusinessHours } from '@/components/sections/BusinessHours'
@@ -57,6 +58,7 @@ const Index = () => {
       <Services />
       <Delivery />
       <Pricing />
+      <SpecialOffers />
       <Promotions />
       <HowItWorks />
       <BusinessHours />
