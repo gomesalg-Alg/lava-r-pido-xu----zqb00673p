@@ -10,7 +10,8 @@ export function Promotions() {
         <Reveal>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Vantagens Exclusivas XUÁ Lava Rápido
+              Vantagens Exclusivas Lava Rápido&nbsp;<span>XUÁ</span>
+              <span>&nbsp;</span>
             </h2>
             <p className="text-lg text-slate-300 max-w-2xl mx-auto">
               Valorizamos quem escolhe cuidar do carro com a gente.
