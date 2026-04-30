@@ -25,12 +25,12 @@ export function BusinessHours() {
                 <div className="bg-primary text-white p-10 flex flex-col items-center justify-center md:w-2/5 text-center relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/10 rounded-full blur-2xl transform -translate-x-10 translate-y-10" />
-
                   <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 relative z-10 border border-white/20">
                     <Clock size={40} className="text-secondary" />
                   </div>
                   <h3 className="text-2xl font-bold mb-3 relative z-10 tracking-tight">
-                    XUÁ Lava Rápido
+                    Lava Rápido&nbsp;<span>XUÁ</span>
+                    <span>&nbsp;</span>
                   </h3>
                   <p className="text-primary-foreground/80 text-sm relative z-10 leading-relaxed max-w-[200px]">
                     Sempre à disposição para cuidar do seu veículo com máxima qualidade.
