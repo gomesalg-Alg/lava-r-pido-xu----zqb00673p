@@ -40,7 +40,7 @@ export function Header() {
               isScrolled ? 'text-primary' : 'text-white',
             )}
           >
-            XUÁ Lava Rápido
+            Lava Rápido XUÁ
           </span>
         </a>
 

@@ -9,7 +9,7 @@ export function Footer() {
             <div className="bg-secondary text-primary p-2 rounded-lg">
               <Droplets size={24} />
             </div>
-            <span className="text-2xl font-bold text-white tracking-tight">XUÁ Lava Rápido</span>
+            <span className="text-2xl font-bold text-white tracking-tight">Lava Rápido XUÁ</span>
           </div>
           <p className="text-sm opacity-80 mb-6 leading-relaxed">
             Seu carro em boas mãos. Qualidade, rapidez e conveniência para você e seu veículo.
@@ -97,7 +97,7 @@ export function Footer() {
       </div>
       <div className="container mx-auto px-4 mt-16 pt-8 border-t border-slate-800 text-center text-sm opacity-60 flex flex-col sm:flex-row justify-between items-center gap-4">
         <span>
-          &copy; {new Date().getFullYear()} XUÁ Lava Rápido. Todos os direitos reservados.
+          &copy; {new Date().getFullYear()} Lava Rápido XUÁ. Todos os direitos reservados.
         </span>
       </div>
     </footer>
