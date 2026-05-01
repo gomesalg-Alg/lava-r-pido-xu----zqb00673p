@@ -1,19 +1,89 @@
-import { MapPin, Navigation } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { MapPin, Navigation, Map as MapIcon, AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/Reveal'
 import { trackEvent } from '@/lib/analytics'
+import { calculateDistance } from '@/lib/utils'
+
+const SHOP_COORDS = { lat: -23.7225, lng: -46.6866 }
 
 export function Location() {
+  const [locationStatus, setLocationStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error' | 'denied'
+  >('idle')
+  const [distance, setDistance] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus('error')
+      return
+    }
+
+    setLocationStatus('loading')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const dist = calculateDistance(
+          position.coords.latitude,
+          position.coords.longitude,
+          SHOP_COORDS.lat,
+          SHOP_COORDS.lng,
+        )
+        setDistance(dist)
+        setLocationStatus('success')
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationStatus('denied')
+        } else {
+          setLocationStatus('error')
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    )
+  }, [])
+
   return (
     <section id="localizacao" className="py-24 bg-white border-t border-slate-100">
       <div className="container mx-auto px-4">
         <Reveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-primary mb-4">Como Chegar</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 mb-6">
               <MapPin className="text-secondary shrink-0" />
               <span>Av. João Goulart, 387 - Jd. Mália I - São Paulo - SP</span>
             </p>
+
+            <div className="flex justify-center min-h-[48px]">
+              {locationStatus === 'loading' && (
+                <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-5 py-2.5 rounded-full border border-slate-200">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm sm:text-base font-medium">
+                    Calculando distância até você...
+                  </span>
+                </div>
+              )}
+              {locationStatus === 'success' && distance !== null && (
+                <div className="flex items-center gap-2.5 text-emerald-700 bg-emerald-50 px-6 py-3 rounded-full border-2 border-emerald-200 shadow-sm animate-in fade-in zoom-in duration-500">
+                  <MapIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="font-semibold text-base sm:text-lg">
+                    Você está a {distance.toFixed(1)} km de distância
+                  </span>
+                </div>
+              )}
+              {locationStatus === 'denied' && (
+                <div className="flex items-center gap-2 text-amber-700 bg-amber-50 px-5 py-2.5 rounded-full border border-amber-200 text-sm sm:text-base">
+                  <AlertCircle className="h-5 w-5" />
+                  <span>Permissão negada. Ative a localização para ver a distância.</span>
+                </div>
+              )}
+              {locationStatus === 'error' && (
+                <div className="flex items-center gap-2 text-red-700 bg-red-50 px-5 py-2.5 rounded-full border border-red-200 text-sm sm:text-base">
+                  <AlertCircle className="h-5 w-5" />
+                  <span>Não foi possível obter sua localização automaticamente.</span>
+                </div>
+              )}
+            </div>
           </div>
         </Reveal>
 
