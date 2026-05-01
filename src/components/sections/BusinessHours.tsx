@@ -37,22 +37,21 @@ export function BusinessHours() {
                   </p>
                 </div>
 
-                <div className="p-8 sm:p-10 md:w-3/5 flex flex-col justify-center bg-white">
-                  <ul className="space-y-6">
-                    <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-5">
-                        <div className="bg-slate-50 p-3.5 rounded-xl text-primary shrink-0 shadow-sm border border-slate-100">
-                          <CalendarDays size={26} />
-                        </div>
-                        <span className="text-lg md:text-xl font-semibold text-slate-700">
-                          Segunda-Feira à Sábado
-                        </span>
-                      </div>
-                      <span className="text-xl md:text-2xl font-bold text-primary sm:text-right whitespace-nowrap">
-                        08:00 às 23:00hrs
-                      </span>
-                    </li>
-                  </ul>
+                <div className="p-6 sm:p-8 md:p-10 md:w-3/5 flex flex-col justify-center bg-white overflow-hidden">
+                  <div className="flex items-center gap-4 w-full">
+                    <div className="bg-slate-50 p-3.5 rounded-xl text-primary shrink-0 shadow-sm border border-slate-100 hidden xl:block">
+                      <CalendarDays size={26} />
+                    </div>
+                    <div className="flex-1 w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                      <p className="text-[11px] min-[380px]:text-xs sm:text-sm md:text-[13px] lg:text-sm xl:text-base font-semibold text-slate-700 whitespace-nowrap text-center xl:text-left">
+                        Segunda-Feira à Sábado{' '}
+                        <span className="text-primary font-bold">08:00 às 23:00hrs</span>
+                        <span className="mx-2 text-slate-300">|</span>
+                        Domingos e Feriados{' '}
+                        <span className="text-primary font-bold">08:00 às 13:00hrs</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

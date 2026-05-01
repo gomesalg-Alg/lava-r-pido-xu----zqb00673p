@@ -57,20 +57,17 @@ export function Footer() {
 
         <div>
           <h4 className="text-white font-semibold mb-6 text-lg">Horário de Funcionamento</h4>
-          <ul className="space-y-4 text-sm">
-            <li className="flex flex-col gap-1.5 border-b border-white/10 pb-3">
-              <span className="text-slate-400 font-medium">Segunda-Feira até Sábado</span>
-              <span className="text-white font-semibold text-base tracking-wide">
-                08:00 às 18:00
-              </span>
-            </li>
-            <li className="flex flex-col gap-1.5">
-              <span className="text-slate-400 font-medium">Domingos</span>
-              <span className="text-white font-semibold text-base tracking-wide">
-                08:00 às 13:00
-              </span>
-            </li>
-          </ul>
+          <div className="w-full overflow-hidden">
+            <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2">
+              <p className="text-[11px] min-[380px]:text-xs sm:text-sm md:text-xs lg:text-sm text-slate-300 whitespace-nowrap">
+                <span className="font-medium">Segunda-Feira à Sábado</span>{' '}
+                <span className="text-white font-bold">08:00 às 23:00hrs</span>
+                <span className="mx-2 text-white/20">|</span>
+                <span className="font-medium">Domingos e Feriados</span>{' '}
+                <span className="text-white font-bold">08:00 às 13:00hrs</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         <div>
