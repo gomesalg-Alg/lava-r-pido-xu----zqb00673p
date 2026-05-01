@@ -42,13 +42,18 @@ export function BusinessHours() {
                     <div className="bg-slate-50 p-3.5 rounded-xl text-primary shrink-0 shadow-sm border border-slate-100 hidden xl:block">
                       <CalendarDays size={26} />
                     </div>
-                    <div className="flex-1 w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                      <p className="text-[11px] min-[380px]:text-xs sm:text-sm md:text-[13px] lg:text-sm xl:text-base font-semibold text-slate-700 whitespace-nowrap text-center xl:text-left">
+                    <div className="flex-1 w-full flex flex-col gap-3 sm:gap-4 text-center xl:text-left">
+                      <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-700">
                         Segunda-Feira à Sábado{' '}
-                        <span className="text-primary font-bold">08:00 às 23:00hrs</span>
-                        <span className="mx-2 text-slate-300">|</span>
+                        <span className="text-primary font-bold block sm:inline mt-1 sm:mt-0">
+                          08:00 às 23:00hrs
+                        </span>
+                      </p>
+                      <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-700">
                         Domingos e Feriados{' '}
-                        <span className="text-primary font-bold">08:00 às 13:00hrs</span>
+                        <span className="text-primary font-bold block sm:inline mt-1 sm:mt-0">
+                          08:00 às 13:00hrs
+                        </span>
                       </p>
                     </div>
                   </div>
