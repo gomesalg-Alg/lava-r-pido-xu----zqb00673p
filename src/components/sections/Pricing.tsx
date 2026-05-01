@@ -29,9 +29,11 @@ export function Pricing() {
                 <p className="text-slate-500 mb-6">Hatchbacks e compactos</p>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-bold text-slate-400">R$</span>
-                  <span className="text-6xl font-extrabold text-primary">42</span>
+                  <span className="text-6xl font-extrabold text-primary">45</span>
                 </div>
-                <p className="text-sm text-slate-500 mt-2">R$ 52 com cera líquida</p>
+                <p className="text-sm text-slate-500 mt-2">
+                  R$ 60,00 com aplicação de cera líquida (+ R$ 15,00)
+                </p>
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-4">
@@ -74,9 +76,11 @@ export function Pricing() {
                 <p className="text-slate-500 mb-6">Sedans, SUVs e Caminhonetes</p>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-bold text-slate-400">R$</span>
-                  <span className="text-6xl font-extrabold text-primary">49</span>
+                  <span className="text-6xl font-extrabold text-primary">50</span>
                 </div>
-                <p className="text-sm text-slate-500 mt-2">R$ 59 com cera líquida</p>
+                <p className="text-sm text-slate-500 mt-2">
+                  R$ 65,00 com aplicação de cera líquida (+ R$ 15,00)
+                </p>
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-4">
