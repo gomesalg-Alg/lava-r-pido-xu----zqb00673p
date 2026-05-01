@@ -1,7 +1,6 @@
 import { Check } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Reveal } from '@/components/Reveal'
 import { trackEvent } from '@/lib/analytics'
 
@@ -23,7 +22,7 @@ export function Pricing() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Card 1 */}
           <Reveal delay={100}>
-            <Card className="flex flex-col h-full bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <Card className="flex flex-col h-full bg-white border-2 border-secondary shadow-xl">
               <CardHeader className="text-center pb-8 pt-10">
                 <h3 className="text-2xl font-bold text-primary mb-2">Carro Pequeno</h3>
                 <p className="text-slate-500 mb-6">Hatchbacks e compactos</p>
@@ -43,15 +42,15 @@ export function Pricing() {
                     'Limpeza de painel',
                     'Pretinho nos pneus',
                   ].map((feature, i) => (
-                    <li key={i} className="flex items-center gap-3 text-slate-700">
-                      <Check className="text-accent shrink-0" size={20} />
+                    <li key={i} className="flex items-center gap-3 text-slate-700 font-medium">
+                      <Check className="text-secondary shrink-0" size={20} />
                       {feature}
                     </li>
                   ))}
                 </ul>
               </CardContent>
               <CardFooter className="pb-10 pt-4">
-                <Button asChild className="w-full h-12 text-lg" variant="outline">
+                <Button asChild className="w-full h-14 text-lg font-bold" variant="secondary">
                   <a
                     href="https://wa.me/5511953275624"
                     onClick={() => trackEvent('click', { button: 'pricing_small_car' })}
@@ -63,15 +62,10 @@ export function Pricing() {
             </Card>
           </Reveal>
 
-          {/* Card 2 - Highlighted */}
+          {/* Card 2 */}
           <Reveal delay={200}>
-            <Card className="flex flex-col h-full bg-white border-2 border-secondary shadow-xl relative transform md:-translate-y-4">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <Badge className="bg-secondary text-primary font-bold px-4 py-1 text-sm uppercase tracking-wider border-none">
-                  Mais Procurado
-                </Badge>
-              </div>
-              <CardHeader className="text-center pb-8 pt-12">
+            <Card className="flex flex-col h-full bg-white border-2 border-secondary shadow-xl">
+              <CardHeader className="text-center pb-8 pt-10">
                 <h3 className="text-2xl font-bold text-primary mb-2">Carro Grande</h3>
                 <p className="text-slate-500 mb-6">Sedans, SUVs e Caminhonetes</p>
                 <div className="flex items-baseline justify-center gap-1">
