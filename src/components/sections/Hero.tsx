@@ -51,8 +51,11 @@ export function Hero() {
 
           <Reveal delay={150}>
             <p className="text-lg md:text-xl text-slate-200 mb-10 max-w-2xl leading-relaxed">
-              Lavagens simples, completas, polimento, cristalização e muito mais. Buscamos e
-              entregamos seu veículo. Aqui perto de você.
+              O melhor cuidado para seu carro e sua casa!, Duchas e Lavagens Completas Lavagem
+              Técnica de Motor, Polimento e Cristalização.&nbsp;
+              <span class="font-semibold">NOVIDADE</span>: Limpeza e Higienização de Sofás,&nbsp;
+              <span class="font-semibold">Serviço Leva e Traz</span> na sua região. Agende agora e
+              sinta a diferença de um serviço especializado.&nbsp;Aqui perto de você.
             </p>
           </Reveal>
 
