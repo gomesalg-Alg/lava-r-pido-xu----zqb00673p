@@ -11,7 +11,7 @@ migrate(
       fields: [
         { name: 'name', type: 'text', required: true },
         { name: 'description', type: 'text' },
-        { name: 'price', type: 'number', required: true },
+        { name: 'price', type: 'number' },
         { name: 'is_starting_price', type: 'bool' },
         { name: 'sort_order', type: 'number' },
         { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
