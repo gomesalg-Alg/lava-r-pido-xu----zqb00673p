@@ -11,10 +11,12 @@ import { BusinessHours } from '@/components/sections/BusinessHours'
 import { Location } from '@/components/sections/Location'
 import { FAQ } from '@/components/sections/FAQ'
 import { trackPageView } from '@/lib/analytics'
+import { logPageView } from '@/services/analytics'
 
 const Index = () => {
   useEffect(() => {
     trackPageView('/')
+    logPageView('/', window.navigator.userAgent)
 
     const hideBadge = () => {
       const badge = document.getElementById('skip-badge')

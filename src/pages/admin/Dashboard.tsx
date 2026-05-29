@@ -14,6 +14,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import {
   Sheet,
   SheetContent,
@@ -23,12 +32,17 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 import { toast } from 'sonner'
-import { LogOut, Plus, Trash2, Edit } from 'lucide-react'
+import { LogOut, Plus, Trash2, Edit, RefreshCw } from 'lucide-react'
+import { getPageViewsStats, type PageView } from '@/services/analytics'
 
 export default function AdminDashboard() {
   const { signOut } = useAuth()
   const navigate = useNavigate()
   const [services, setServices] = useState<Service[]>([])
+  const [stats, setStats] = useState<{ total: number; today: number; recent: PageView[] } | null>(
+    null,
+  )
+  const [isLoadingStats, setIsLoadingStats] = useState(false)
 
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -49,8 +63,21 @@ export default function AdminDashboard() {
     }
   }
 
+  const loadAnalytics = async () => {
+    setIsLoadingStats(true)
+    try {
+      const data = await getPageViewsStats()
+      setStats(data)
+    } catch (e) {
+      toast.error('Erro ao carregar estatísticas')
+    } finally {
+      setIsLoadingStats(false)
+    }
+  }
+
   useEffect(() => {
     loadData()
+    loadAnalytics()
   }, [])
 
   const handleLogout = () => {
@@ -127,38 +154,113 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Serviços</h2>
-          <Button onClick={() => openSheet()} variant="secondary" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Item
-          </Button>
-        </div>
+        <Tabs defaultValue="services">
+          <TabsList className="mb-6">
+            <TabsTrigger value="services">Serviços</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
 
-        <div className="grid gap-4">
-          {services.map((service) => (
-            <Card key={service.id} className="bg-white border border-slate-200">
-              <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div>
-                  <h3 className="font-bold text-lg">{service.name}</h3>
-                  <p className="text-sm text-slate-500">{service.description || 'Sem descrição'}</p>
-                  <p className="text-sm font-medium mt-1 text-primary">
-                    {service.is_starting_price ? 'A partir de ' : ''}R${' '}
-                    {service.price.toFixed(2).replace('.', ',')}
-                  </p>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button variant="outline" size="sm" onClick={() => openSheet(service)}>
-                    <Edit className="w-4 h-4 mr-2" /> Editar
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(service.id)}>
-                    <Trash2 className="w-4 h-4 mr-2" /> Remover
-                  </Button>
-                </div>
+          <TabsContent value="services">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">Serviços</h2>
+              <Button onClick={() => openSheet()} variant="secondary" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Item
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {services.map((service) => (
+                <Card key={service.id} className="bg-white border border-slate-200">
+                  <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                      <h3 className="font-bold text-lg">{service.name}</h3>
+                      <p className="text-sm text-slate-500">
+                        {service.description || 'Sem descrição'}
+                      </p>
+                      <p className="text-sm font-medium mt-1 text-primary">
+                        {service.is_starting_price ? 'A partir de ' : ''}R${' '}
+                        {service.price.toFixed(2).replace('.', ',')}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Button variant="outline" size="sm" onClick={() => openSheet(service)}>
+                        <Edit className="w-4 h-4 mr-2" /> Editar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(service.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" /> Remover
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">Visitas</h2>
+              <Button onClick={loadAnalytics} disabled={isLoadingStats} variant="outline" size="sm">
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingStats ? 'animate-spin' : ''}`} />
+                Atualizar
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-sm font-medium text-slate-500 mb-2">Total de Visitas</h3>
+                  <p className="text-4xl font-bold text-slate-900">{stats?.total || 0}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-sm font-medium text-slate-500 mb-2">
+                    Visitas nas últimas 24h
+                  </h3>
+                  <p className="text-4xl font-bold text-slate-900">{stats?.today || 0}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[180px]">Data / Hora</TableHead>
+                      <TableHead>Navegador (User Agent)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stats?.recent && stats.recent.length > 0 ? (
+                      stats.recent.map((view) => (
+                        <TableRow key={view.id}>
+                          <TableCell className="font-medium">
+                            {new Date(view.created).toLocaleString('pt-BR')}
+                          </TableCell>
+                          <TableCell className="max-w-[300px] truncate" title={view.user_agent}>
+                            {view.user_agent || 'Desconhecido'}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} className="text-center py-6 text-slate-500">
+                          Nenhuma visita registrada ainda.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
