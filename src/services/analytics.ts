@@ -16,24 +16,19 @@ export const logPageView = async (path: string, userAgent: string) => {
 }
 
 export const getPageViewsStats = async () => {
-  const path = '/'
-
   // Total visits
-  const totalRes = await pb.collection('page_views').getList(1, 1, {
-    filter: `path = "${path}"`,
-  })
+  const totalRes = await pb.collection('page_views').getList(1, 1)
 
   // Visits in the last 24 hours
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
   const yesterdayStr = yesterday.toISOString().replace('T', ' ')
 
   const todayRes = await pb.collection('page_views').getList(1, 1, {
-    filter: `path = "${path}" && created >= "${yesterdayStr}"`,
+    filter: `created >= "${yesterdayStr}"`,
   })
 
   // Recent activity
   const recentRes = await pb.collection('page_views').getList<PageView>(1, 10, {
-    filter: `path = "${path}"`,
     sort: '-created',
   })
 

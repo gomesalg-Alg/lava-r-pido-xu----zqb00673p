@@ -156,13 +156,13 @@ export default function AdminDashboard() {
       <main className="container mx-auto px-4 py-8 max-w-5xl">
         <Tabs defaultValue="services">
           <TabsList className="mb-6">
-            <TabsTrigger value="services">Serviços</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="services">Preços</TabsTrigger>
+            <TabsTrigger value="analytics">Monitoramento</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Serviços</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Preços</h2>
               <Button onClick={() => openSheet()} variant="secondary" size="sm">
                 <Plus className="w-4 h-4 mr-2" />
                 Adicionar Item
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="analytics">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">Visitas</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Monitoramento</h2>
               <Button onClick={loadAnalytics} disabled={isLoadingStats} variant="outline" size="sm">
                 <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingStats ? 'animate-spin' : ''}`} />
                 Atualizar
@@ -233,6 +233,7 @@ export default function AdminDashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[180px]">Data / Hora</TableHead>
+                      <TableHead>Caminho</TableHead>
                       <TableHead>Navegador (User Agent)</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -243,6 +244,7 @@ export default function AdminDashboard() {
                           <TableCell className="font-medium">
                             {new Date(view.created).toLocaleString('pt-BR')}
                           </TableCell>
+                          <TableCell>{view.path}</TableCell>
                           <TableCell className="max-w-[300px] truncate" title={view.user_agent}>
                             {view.user_agent || 'Desconhecido'}
                           </TableCell>

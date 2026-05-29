@@ -26,7 +26,7 @@ export default function Login() {
 
     const { error } = await signIn(email, password)
     if (error) {
-      toast.error('Credenciais inválidas. Verifique seu e-mail e senha.')
+      toast.error('E-mail ou senha incorretos')
     } else {
       toast.success('Login realizado com sucesso')
       navigate('/admin')
