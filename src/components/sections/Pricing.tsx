@@ -98,8 +98,8 @@ export function Pricing() {
             <div className="flex-1 text-center md:text-left">
               <h4 className="text-xl font-bold text-slate-800 mb-2">Informação Importante</h4>
               <p className="text-slate-600 text-lg">
-                Atendemos com hora marcada e residencial. Agende seu horário com antecedência para
-                garantir o melhor serviço no conforto da sua casa.
+                Atendemos com hora marcada e residencial. Avaliação de serviços no local. Agende seu
+                horário com antecedência para garantir o melhor serviço no conforto da sua casa.
               </p>
             </div>
           </div>
