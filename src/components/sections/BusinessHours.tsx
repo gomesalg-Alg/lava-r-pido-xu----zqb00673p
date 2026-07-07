@@ -46,7 +46,7 @@ export function BusinessHours() {
                       <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-700">
                         Segunda-Feira à Sábado{' '}
                         <span className="text-primary font-bold block sm:inline mt-1 sm:mt-0">
-                          08:00 às 23:00hrs
+                          08:00 às 18:00hrs
                         </span>
                       </p>
                       <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-700">
