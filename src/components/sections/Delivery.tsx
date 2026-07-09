@@ -6,7 +6,7 @@ export function Delivery() {
   const benefits = [
     'Buscamos no seu endereço',
     'Devolvemos o carro impecável',
-    'Grátis para raio de até 2km',
+    'Grátis para raio de até 1Km',
     'Motoristas qualificados',
   ]
 

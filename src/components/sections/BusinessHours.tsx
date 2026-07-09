@@ -43,17 +43,13 @@ export function BusinessHours() {
                       <CalendarDays size={26} />
                     </div>
                     <div className="flex-1 w-full flex flex-col gap-3 sm:gap-4 text-center xl:text-left">
-                      <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-700">
+                      <p className="text-sm sm:text-lg md:text-xl font-semibold text-slate-700 whitespace-nowrap">
                         Segunda-Feira à Sábado{' '}
-                        <span className="text-primary font-bold block sm:inline mt-1 sm:mt-0">
-                          08:00 às 18:00hrs
-                        </span>
+                        <span className="text-primary font-bold inline">08:00 às 18:00hrs</span>
                       </p>
-                      <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-700">
+                      <p className="text-sm sm:text-lg md:text-xl font-semibold text-slate-700 whitespace-nowrap">
                         Domingos e Feriados{' '}
-                        <span className="text-primary font-bold block sm:inline mt-1 sm:mt-0">
-                          08:00 às 13:00hrs
-                        </span>
+                        <span className="text-primary font-bold inline">08:00 às 13:00hrs</span>
                       </p>
                     </div>
                   </div>

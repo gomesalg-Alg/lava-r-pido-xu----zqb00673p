@@ -60,7 +60,7 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             <p className="text-sm sm:text-base text-slate-300">
               <span className="font-medium block">Segunda-Feira à Sábado</span>
-              <span className="text-white font-bold block mt-1">08:00 às 23:00hrs</span>
+              <span className="text-white font-bold block mt-1">08:00 às 18:00hrs</span>
             </p>
             <p className="text-sm sm:text-base text-slate-300">
               <span className="font-medium block">Domingos e Feriados</span>
@@ -74,10 +74,9 @@ export function Footer() {
           <ul className="space-y-4 text-sm">
             <li className="flex items-start gap-3">
               <MapPin size={20} className="text-secondary shrink-0 mt-0.5" />
-              <span className="leading-relaxed">
-                Av. João Goulart, 387 - Jd. Malia I
-                <br />
-                São Paulo - SP
+              <span className="leading-relaxed text-xs sm:text-sm">
+                <span className="block whitespace-nowrap">Av. João Goulart, 387 - Jd. Malia I</span>
+                <span className="block whitespace-nowrap">São Paulo - SP</span>
               </span>
             </li>
             <li className="flex items-center gap-3">
