@@ -15,7 +15,13 @@ export function Footer() {
             Seu carro em boas mãos. Qualidade, rapidez e conveniência para você e seu veículo.
           </p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-secondary transition-colors" aria-label="Instagram">
+            <a
+              href="https://instagram.com/xua.esteticaautomotiva"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-secondary transition-colors"
+              aria-label="Instagram"
+            >
               <Instagram size={20} />
             </a>
             <a href="#" className="hover:text-secondary transition-colors" aria-label="Facebook">
