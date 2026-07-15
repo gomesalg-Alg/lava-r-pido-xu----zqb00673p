@@ -81,10 +81,10 @@ export function Hero() {
               <div className="flex flex-col gap-3">
                 <Badge
                   variant="outline"
-                  className="bg-black/30 text-white border-white/20 backdrop-blur-sm py-1.5 px-4 text-sm font-medium"
+                  className="bg-black/30 text-white border-white/20 backdrop-blur-sm py-1.5 px-4 text-sm font-medium whitespace-nowrap"
                 >
-                  <MapPin className="mr-2 h-4 w-4 text-secondary" />
-                  Av. João Goulart, 387 - Jd. Mália I - São Paulo - SP
+                  <MapPin className="mr-2 h-4 w-4 text-secondary shrink-0" />
+                  Av. João Goulart, 387 — Jd. Mália I — São Paulo — SP, CEP 04823-000
                 </Badge>
                 <Badge
                   variant="outline"
