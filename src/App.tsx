@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import AdminDashboard from './pages/admin/Dashboard'
+import NewCustomer from './pages/admin/NewCustomer'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -33,6 +34,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/clientes/novo"
+            element={
+              <ProtectedRoute>
+                <NewCustomer />
               </ProtectedRoute>
             }
           />

@@ -32,7 +32,8 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 import { toast } from 'sonner'
-import { LogOut, Plus, Trash2, Edit, RefreshCw } from 'lucide-react'
+import { LogOut, Plus, Trash2, Edit, RefreshCw, UserPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { getPageViewsStats, type PageView } from '@/services/analytics'
 
 export default function AdminDashboard() {
@@ -146,10 +147,18 @@ export default function AdminDashboard() {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="text-xl font-bold text-primary">Painel de Preços</h1>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/admin/clientes/novo">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Novo Cliente
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
