@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { VEHICLE_TYPES, FUEL_OPTIONS } from '@/lib/vehicle-options'
 
 export type VehicleRow = {
   id: string
@@ -15,9 +16,8 @@ export type VehicleRow = {
   brand: string
   model: string
   year: string
+  fuel: string
 }
-
-const VEHICLE_TYPES = ['Carro', 'Moto', 'Pick-up', 'Caminhonete', 'Van']
 
 interface Props {
   vehicles: VehicleRow[]
@@ -27,7 +27,10 @@ interface Props {
 
 export function VehicleGrid({ vehicles, onChange, errors }: Props) {
   const add = () =>
-    onChange([...vehicles, { id: crypto.randomUUID(), type: '', brand: '', model: '', year: '' }])
+    onChange([
+      ...vehicles,
+      { id: crypto.randomUUID(), type: '', brand: '', model: '', year: '', fuel: '' },
+    ])
 
   const remove = (id: string) => onChange(vehicles.filter((v) => v.id !== id))
 
@@ -75,7 +78,7 @@ export function VehicleGrid({ vehicles, onChange, errors }: Props) {
             />
             {errors[i]?.model && <p className="text-xs text-red-500">{errors[i].model}</p>}
           </div>
-          <div className="sm:col-span-2 space-y-1">
+          <div className="sm:col-span-1 space-y-1">
             <label className="text-xs font-medium text-slate-600">Ano</label>
             <Input
               type="number"
@@ -84,7 +87,22 @@ export function VehicleGrid({ vehicles, onChange, errors }: Props) {
               placeholder="Ano"
             />
           </div>
-          <div className="sm:col-span-2 flex justify-end">
+          <div className="sm:col-span-2 space-y-1">
+            <label className="text-xs font-medium text-slate-600">Combustível</label>
+            <Select value={v.fuel} onValueChange={(val) => update(v.id, 'fuel', val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Combustível" />
+              </SelectTrigger>
+              <SelectContent>
+                {FUEL_OPTIONS.map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {f}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="sm:col-span-1 flex justify-end">
             <Button type="button" variant="destructive" size="icon" onClick={() => remove(v.id)}>
               <Trash2 className="w-4 h-4" />
             </Button>

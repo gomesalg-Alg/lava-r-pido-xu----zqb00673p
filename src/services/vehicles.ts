@@ -7,6 +7,7 @@ export type Vehicle = {
   brand: string
   model: string
   year?: number | null
+  fuel?: string
 }
 
 export const getVehiclesByCustomer = (customerId: string) =>
@@ -20,7 +21,8 @@ export const getAllVehicles = () =>
     expand: 'customer_id',
   })
 
-export const getVehicle = (id: string) => pb.collection('vehicles').getOne<Vehicle>(id)
+export const getVehicle = (id: string) =>
+  pb.collection('vehicles').getOne<Vehicle>(id, { expand: 'customer_id' })
 
 export const createVehicle = (data: Partial<Vehicle>) =>
   pb.collection('vehicles').create<Vehicle>(data)

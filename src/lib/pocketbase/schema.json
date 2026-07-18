@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T01:15:21.214Z",
+  "generatedAt": "2026-07-18T23:18:48.858Z",
   "collections": [
     {
       "name": "users",
@@ -271,7 +271,7 @@
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": ["Carro", "Moto", "Pick-up", "Caminhonete", "Van"]
+          "selectValues": ["Automóvel", "Moto", "Pick-up", "Caminhonete", "Van"]
         },
         {
           "name": "brand",
@@ -304,6 +304,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "fuel",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,36 +12,48 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getVehicle, updateVehicle } from '@/services/vehicles'
+import { VEHICLE_TYPES, FUEL_OPTIONS } from '@/lib/vehicle-options'
 import { toast } from 'sonner'
-
-const VEHICLE_TYPES = ['Carro', 'Moto', 'Pick-up', 'Caminhonete', 'Van']
 
 export default function EditVehicle() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
+  const [form, setForm] = useState({
+    type: '',
+    brand: '',
+    model: '',
+    year: '',
+    fuel: '',
+  })
+  const [customerName, setCustomerName] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({ type: '', brand: '', model: '', year: '' })
 
   useEffect(() => {
-    if (!id) return
     const load = async () => {
+      if (!id) return
       try {
         const v = await getVehicle(id)
         setForm({
-          type: v.type,
-          brand: v.brand,
-          model: v.model,
+          type: v.type || '',
+          brand: v.brand || '',
+          model: v.model || '',
           year: v.year?.toString() || '',
+          fuel: v.fuel || '',
         })
+        setCustomerName((v as any)?.expand?.customer_id?.name || '')
       } catch {
-        toast.error('Erro ao carregar veículo')
+        toast.error('Veículo não encontrado')
+        navigate('/admin/veiculos')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [id])
+  }, [id, navigate])
+
+  const set = (k: string, val: string) => setForm((p) => ({ ...p, [k]: val }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,6 +65,7 @@ export default function EditVehicle() {
         brand: form.brand,
         model: form.model,
         year: form.year ? parseInt(form.year) : null,
+        fuel: form.fuel,
       })
       toast.success('Veículo atualizado com sucesso!')
       navigate('/admin/veiculos')
@@ -63,56 +76,77 @@ export default function EditVehicle() {
     }
   }
 
-  if (loading) return <p className="text-center py-8 text-slate-400">Carregando...</p>
+  if (loading) return <div className="text-center text-slate-500 py-8">Carregando...</div>
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-2xl mx-auto">
       <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
         <Link to="/admin/veiculos">
           <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
         </Link>
       </Button>
       <h1 className="text-2xl font-bold text-slate-800 mb-6">Editar Veículo</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg border p-6">
-        <div className="space-y-2">
-          <Label>Tipo</Label>
-          <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione" />
-            </SelectTrigger>
-            <SelectContent>
-              {VEHICLE_TYPES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-lg border p-6 space-y-4">
+          {customerName && (
+            <div className="space-y-1.5">
+              <Label>Cliente</Label>
+              <Input value={customerName} disabled />
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Tipo *</Label>
+              <Select value={form.type} onValueChange={(v) => set('type', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {VEHICLE_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Combustível</Label>
+              <Select value={form.fuel} onValueChange={(v) => set('fuel', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FUEL_OPTIONS.map((f) => (
+                    <SelectItem key={f} value={f}>
+                      {f}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Marca *</Label>
+              <Input value={form.brand} onChange={(e) => set('brand', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Modelo *</Label>
+              <Input value={form.model} onChange={(e) => set('model', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Ano</Label>
+              <Input
+                type="number"
+                value={form.year}
+                onChange={(e) => set('year', e.target.value)}
+              />
+            </div>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label>Marca</Label>
-          <Input
-            value={form.brand}
-            onChange={(e) => setForm((p) => ({ ...p, brand: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Modelo</Label>
-          <Input
-            value={form.model}
-            onChange={(e) => setForm((p) => ({ ...p, model: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Ano</Label>
-          <Input
-            type="number"
-            value={form.year}
-            onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
-          />
-        </div>
-        <Button type="submit" disabled={saving} className="w-full">
-          {saving ? 'Salvando...' : 'Salvar Alterações'}
+
+        <Button type="submit" disabled={saving} className="w-full" size="lg">
+          <Save className="w-4 h-4 mr-2" /> {saving ? 'Salvando...' : 'Salvar Alterações'}
         </Button>
       </form>
     </div>
