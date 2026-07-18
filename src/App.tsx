@@ -10,6 +10,10 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import AdminDashboard from './pages/admin/Dashboard'
 import NewCustomer from './pages/admin/NewCustomer'
+import AdminLayout from './components/admin/AdminLayout'
+import CompanyPage from './pages/admin/CompanyPage'
+import UsersPage from './pages/admin/UsersPage'
+import CustomersPage from './pages/admin/CustomersPage'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -33,18 +37,16 @@ const App = () => (
             path="/admin"
             element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/admin/clientes/novo"
-            element={
-              <ProtectedRoute>
-                <NewCustomer />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="empresa" element={<CompanyPage />} />
+            <Route path="usuarios" element={<UsersPage />} />
+            <Route path="clientes" element={<CustomersPage />} />
+            <Route path="clientes/novo" element={<NewCustomer />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </TooltipProvider>

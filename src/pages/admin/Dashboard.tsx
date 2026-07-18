@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/use-auth'
+
 import {
   getServices,
   createService,
@@ -32,13 +31,10 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 import { toast } from 'sonner'
-import { LogOut, Plus, Trash2, Edit, RefreshCw, UserPlus } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Plus, Trash2, Edit, RefreshCw } from 'lucide-react'
 import { getPageViewsStats, type PageView } from '@/services/analytics'
 
 export default function AdminDashboard() {
-  const { signOut } = useAuth()
-  const navigate = useNavigate()
   const [services, setServices] = useState<Service[]>([])
   const [stats, setStats] = useState<{ total: number; today: number; recent: PageView[] } | null>(
     null,
@@ -80,11 +76,6 @@ export default function AdminDashboard() {
     loadData()
     loadAnalytics()
   }, [])
-
-  const handleLogout = () => {
-    signOut()
-    navigate('/login')
-  }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza?')) return
@@ -143,26 +134,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">Painel de Preços</h1>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/admin/clientes/novo">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Novo Cliente
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="max-w-5xl mx-auto">
+      <main>
         <Tabs defaultValue="services">
           <TabsList className="mb-6">
             <TabsTrigger value="services">Preços</TabsTrigger>
