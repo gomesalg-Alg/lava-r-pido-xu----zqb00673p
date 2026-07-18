@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getCompany, updateCompany, createCompany, type Company } from '@/services/company'
+import { useParams, Link } from 'react-router-dom'
+import { getCompanyById, updateCompany, createCompany, type Company } from '@/services/company'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,7 +14,7 @@ import {
 import { maskCEP, maskPhone } from '@/lib/masks'
 import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
-import { Save } from 'lucide-react'
+import { Save, ArrowLeft } from 'lucide-react'
 
 const UFS = [
   'AC',
@@ -46,8 +47,9 @@ const UFS = [
 ]
 
 export default function CompanyPage() {
+  const { id } = useParams<{ id: string }>()
   const [company, setCompany] = useState<Company | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!!id)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     name: '',
@@ -66,8 +68,12 @@ export default function CompanyPage() {
 
   useEffect(() => {
     const load = async () => {
+      if (!id) {
+        setLoading(false)
+        return
+      }
       try {
-        const c = await getCompany()
+        const c = await getCompanyById(id)
         setCompany(c)
         if (c) {
           setForm({
@@ -92,7 +98,7 @@ export default function CompanyPage() {
       }
     }
     load()
-  }, [])
+  }, [id])
 
   const set = (k: string, v: unknown) => setForm((p) => ({ ...p, [k]: v }))
 
@@ -135,8 +141,15 @@ export default function CompanyPage() {
   if (loading) return <p className="text-center py-8 text-slate-400">Carregando...</p>
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Empresa</h1>
+    <div className="max-w-2xl mx-auto">
+      <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
+        <Link to="/admin/empresa">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
+        </Link>
+      </Button>
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">
+        {company ? 'Editar Empresa' : 'Nova Empresa'}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         <div className="bg-white rounded-lg border p-6 space-y-4">
           <h2 className="font-bold text-lg">Dados da Empresa</h2>

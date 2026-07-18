@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { getUsers, updateUser, type User } from '@/services/users'
+import { useEffect, useState, useRef } from 'react'
+import { getUsers, updateUser, deleteUser, type User } from '@/services/users'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Table,
   TableBody,
@@ -20,8 +21,10 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
-import { Edit } from 'lucide-react'
+import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import pb from '@/lib/pocketbase/client'
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -30,7 +33,10 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadData = async () => {
     try {
@@ -50,10 +56,11 @@ export default function UsersPage() {
     loadData()
   })
 
-  const openEdit = (user: User) => {
-    setEditingUser(user)
-    setName(user.name)
-    setEmail(user.email)
+  const openEdit = (u: User) => {
+    setEditingUser(u)
+    setName(u.name)
+    setEmail(u.email)
+    setAvatarFile(null)
     setSheetOpen(true)
   }
 
@@ -61,7 +68,15 @@ export default function UsersPage() {
     if (!editingUser) return
     setSaving(true)
     try {
-      await updateUser(editingUser.id, { name, email })
+      if (avatarFile) {
+        const fd = new FormData()
+        fd.append('name', name)
+        fd.append('email', email)
+        fd.append('avatar', avatarFile)
+        await updateUser(editingUser.id, fd)
+      } else {
+        await updateUser(editingUser.id, { name, email })
+      }
       toast.success('Usuário atualizado com sucesso!')
       setSheetOpen(false)
       loadData()
@@ -71,6 +86,21 @@ export default function UsersPage() {
       setSaving(false)
     }
   }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await deleteUser(deleteTarget.id)
+      toast.success('Usuário excluído!')
+      setDeleteTarget(null)
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir usuário')
+    }
+  }
+
+  const avatarUrl = (u: User) =>
+    u.avatar ? `${pb.baseUrl}/api/files/users/${u.id}/${u.avatar}` : null
 
   return (
     <div>
@@ -101,13 +131,31 @@ export default function UsersPage() {
             ) : (
               users.map((u) => (
                 <TableRow key={u.id} className="even:bg-slate-50">
-                  <TableCell className="font-medium">{u.name || '-'}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        {avatarUrl(u) && <AvatarImage src={avatarUrl(u)!} alt={u.name} />}
+                        <AvatarFallback>{u.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                      </Avatar>
+                      {u.name || '-'}
+                    </div>
+                  </TableCell>
                   <TableCell>{u.email}</TableCell>
                   <TableCell>{new Date(u.created).toLocaleDateString('pt-BR')}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(u)}>
-                      <Edit className="w-4 h-4 mr-1" /> Editar
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => openEdit(u)}>
+                        <Edit className="w-4 h-4 mr-1" /> Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeleteTarget(u)}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" /> Excluir
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -124,6 +172,39 @@ export default function UsersPage() {
           </SheetHeader>
           <div className="space-y-4">
             <div className="space-y-2">
+              <Label>Avatar</Label>
+              <div className="flex items-center gap-4">
+                <Avatar className="w-16 h-16">
+                  {avatarFile ? (
+                    <AvatarImage src={URL.createObjectURL(avatarFile)} alt="Preview" />
+                  ) : editingUser && avatarUrl(editingUser) ? (
+                    <AvatarImage src={avatarUrl(editingUser)!} alt={editingUser.name} />
+                  ) : null}
+                  <AvatarFallback className="text-lg">
+                    {name?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Selecionar imagem
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) setAvatarFile(f)
+                  }}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label>Nome</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
@@ -139,6 +220,12 @@ export default function UsersPage() {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      <DeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }

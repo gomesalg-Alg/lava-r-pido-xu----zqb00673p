@@ -21,8 +21,12 @@ export const getCompany = async (): Promise<Company | null> => {
   return list[0] || null
 }
 
+export const getCompanyById = (id: string) => pb.collection('company').getOne<Company>(id)
+
 export const createCompany = (data: Partial<Company>) =>
   pb.collection('company').create<Company>(data)
 
 export const updateCompany = (id: string, data: Partial<Company>) =>
   pb.collection('company').update<Company>(id, data)
+
+export const deleteCompany = (id: string) => pb.collection('company').delete(id)

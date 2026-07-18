@@ -13,5 +13,7 @@ export const getUsers = () => pb.collection('users').getFullList<User>({ sort: '
 
 export const getUser = (id: string) => pb.collection('users').getOne<User>(id)
 
-export const updateUser = (id: string, data: Partial<{ name: string; email: string }>) =>
-  pb.collection('users').update<User>(id, data)
+export const updateUser = (id: string, data: Partial<{ name: string; email: string }> | FormData) =>
+  pb.collection('users').update<User>(id, data as any)
+
+export const deleteUser = (id: string) => pb.collection('users').delete(id)

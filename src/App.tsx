@@ -11,7 +11,9 @@ import Login from './pages/Login'
 import AdminDashboard from './pages/admin/Dashboard'
 import NewCustomer from './pages/admin/NewCustomer'
 import AdminLayout from './components/admin/AdminLayout'
+import CompanyListPage from './pages/admin/CompanyListPage'
 import CompanyPage from './pages/admin/CompanyPage'
+import ServicesPage from './pages/admin/ServicesPage'
 import UsersPage from './pages/admin/UsersPage'
 import CustomersPage from './pages/admin/CustomersPage'
 import EditCustomer from './pages/admin/EditCustomer'
@@ -45,7 +47,10 @@ const App = () => (
             }
           >
             <Route index element={<AdminDashboard />} />
-            <Route path="empresa" element={<CompanyPage />} />
+            <Route path="empresa" element={<CompanyListPage />} />
+            <Route path="empresa/novo" element={<CompanyPage />} />
+            <Route path="empresa/:id/editar" element={<CompanyPage />} />
+            <Route path="servicos" element={<ServicesPage />} />
             <Route path="usuarios" element={<UsersPage />} />
             <Route path="clientes" element={<CustomersPage />} />
             <Route path="clientes/novo" element={<NewCustomer />} />

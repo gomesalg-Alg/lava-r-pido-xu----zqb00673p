@@ -1,17 +1,33 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
-import { Droplets, LayoutDashboard, Building2, Users, UserCheck, LogOut } from 'lucide-react'
+import {
+  Droplets,
+  LayoutDashboard,
+  Building2,
+  Users,
+  UserCheck,
+  Car,
+  Tag,
+  LogOut,
+} from 'lucide-react'
 
 const topItems = [{ label: 'Painel', path: '/admin', icon: LayoutDashboard, end: true }]
 
 const groups = [
   {
-    label: 'Cadastro',
+    label: 'Operações',
+    items: [
+      { label: 'Clientes', path: '/admin/clientes', icon: UserCheck },
+      { label: 'Veículos', path: '/admin/veiculos', icon: Car },
+      { label: 'Serviços', path: '/admin/servicos', icon: Tag },
+    ],
+  },
+  {
+    label: 'Configurações',
     items: [
       { label: 'Empresa', path: '/admin/empresa', icon: Building2 },
       { label: 'Usuários', path: '/admin/usuarios', icon: Users },
-      { label: 'Clientes', path: '/admin/clientes', icon: UserCheck },
     ],
   },
 ]

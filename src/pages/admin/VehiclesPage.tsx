@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Plus } from 'lucide-react'
+import { Edit, Trash2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -10,13 +10,16 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table'
-import { getAllVehicles } from '@/services/vehicles'
+import { getAllVehicles, deleteVehicle } from '@/services/vehicles'
 import { useRealtime } from '@/hooks/use-realtime'
+import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import type { RecordModel } from 'pocketbase'
+import { toast } from 'sonner'
 
 export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<RecordModel[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState<RecordModel | null>(null)
 
   const loadData = async () => {
     try {
@@ -32,10 +35,21 @@ export default function VehiclesPage() {
   useEffect(() => {
     loadData()
   }, [])
-
   useRealtime('vehicles', () => {
     loadData()
   })
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await deleteVehicle(deleteTarget.id)
+      toast.success('Veículo excluído com sucesso!')
+      setDeleteTarget(null)
+      loadData()
+    } catch {
+      toast.error('Erro ao excluir veículo')
+    }
+  }
 
   return (
     <div>
@@ -51,7 +65,7 @@ export default function VehiclesPage() {
       <div className="bg-white rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-100 hover:bg-slate-100">
+            <TableRow>
               <TableHead className="font-semibold text-slate-700">Cliente</TableHead>
               <TableHead className="font-semibold text-slate-700">Tipo</TableHead>
               <TableHead className="font-semibold text-slate-700">Marca</TableHead>
@@ -75,8 +89,8 @@ export default function VehiclesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              vehicles.map((v, i) => (
-                <TableRow key={v.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+              vehicles.map((v) => (
+                <TableRow key={v.id} className="even:bg-slate-50">
                   <TableCell className="font-medium text-slate-800">
                     {v.expand?.customer_id?.name || '—'}
                   </TableCell>
@@ -86,11 +100,21 @@ export default function VehiclesPage() {
                   <TableCell className="text-slate-600">{v.year || '—'}</TableCell>
                   <TableCell className="text-slate-600">{v.fuel || '—'}</TableCell>
                   <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link to={`/admin/veiculos/${v.id}/editar`}>
-                        <Pencil className="w-4 h-4" />
-                      </Link>
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/admin/veiculos/${v.id}/editar`}>
+                          <Edit className="w-4 h-4 mr-1" /> Editar
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeleteTarget(v)}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" /> Excluir
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -98,6 +122,12 @@ export default function VehiclesPage() {
           </TableBody>
         </Table>
       </div>
+
+      <DeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }
