@@ -14,6 +14,14 @@ export const getVehiclesByCustomer = (customerId: string) =>
     filter: `customer_id = "${customerId}"`,
   })
 
+export const getAllVehicles = () =>
+  pb.collection('vehicles').getFullList({
+    sort: '-created',
+    expand: 'customer_id',
+  })
+
+export const getVehicle = (id: string) => pb.collection('vehicles').getOne<Vehicle>(id)
+
 export const createVehicle = (data: Partial<Vehicle>) =>
   pb.collection('vehicles').create<Vehicle>(data)
 

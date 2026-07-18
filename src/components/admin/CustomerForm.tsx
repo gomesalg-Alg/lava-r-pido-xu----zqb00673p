@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { VehicleGrid, type VehicleRow } from './VehicleGrid'
-import { createCustomer } from '@/services/customers'
-import { createVehicle } from '@/services/vehicles'
+import { createCustomer, updateCustomer, type Customer } from '@/services/customers'
+import { createVehicle, updateVehicle, deleteVehicle, type Vehicle } from '@/services/vehicles'
 import { maskCPF, maskPhone, maskCEP, validateCPF } from '@/lib/masks'
 import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
@@ -49,24 +49,42 @@ const UFS = [
   'TO',
 ]
 
-export function CustomerForm() {
+interface CustomerFormProps {
+  initialCustomer?: Customer | null
+  initialVehicles?: Vehicle[]
+}
+
+export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormProps) {
   const navigate = useNavigate()
+  const isEditMode = !!initialCustomer
+  const existingVehicleIds = useRef<string[]>(initialVehicles?.map((v) => v.id) || [])
+
   const [form, setForm] = useState({
-    name: '',
-    social_name: '',
-    birth_date: '',
-    cpf: '',
-    phone: '',
-    has_whatsapp: false,
-    email: '',
-    cep: '',
-    address: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: '',
+    name: initialCustomer?.name || '',
+    social_name: initialCustomer?.social_name || '',
+    birth_date: initialCustomer?.birth_date
+      ? initialCustomer.birth_date.split(' ')[0].split('T')[0]
+      : '',
+    cpf: initialCustomer?.cpf || '',
+    phone: initialCustomer?.phone || '',
+    has_whatsapp: initialCustomer?.has_whatsapp || false,
+    email: initialCustomer?.email || '',
+    cep: initialCustomer?.cep || '',
+    address: initialCustomer?.address || '',
+    complement: initialCustomer?.complement || '',
+    neighborhood: initialCustomer?.neighborhood || '',
+    city: initialCustomer?.city || '',
+    state: initialCustomer?.state || '',
   })
-  const [vehicles, setVehicles] = useState<VehicleRow[]>([])
+  const [vehicles, setVehicles] = useState<VehicleRow[]>(
+    initialVehicles?.map((v) => ({
+      id: v.id,
+      type: v.type,
+      brand: v.brand,
+      model: v.model,
+      year: v.year?.toString() || '',
+    })) || [],
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [vehicleErrors, setVehicleErrors] = useState<Record<number, Record<string, string>>>({})
   const [saving, setSaving] = useState(false)
@@ -125,23 +143,44 @@ export function CustomerForm() {
     }
     setSaving(true)
     try {
-      const customer = await createCustomer({
-        ...form,
-        birth_date: form.birth_date || null,
-      })
-      for (const v of vehicles) {
-        await createVehicle({
-          customer_id: customer.id,
-          type: v.type,
-          brand: v.brand,
-          model: v.model,
-          year: v.year ? parseInt(v.year) : null,
-        })
+      const payload = { ...form, birth_date: form.birth_date || null }
+      if (isEditMode && initialCustomer) {
+        await updateCustomer(initialCustomer.id, payload)
+        const currentIds = vehicles.map((v) => v.id)
+        for (const oldId of existingVehicleIds.current) {
+          if (!currentIds.includes(oldId)) await deleteVehicle(oldId)
+        }
+        for (const v of vehicles) {
+          const vd = {
+            type: v.type,
+            brand: v.brand,
+            model: v.model,
+            year: v.year ? parseInt(v.year) : null,
+          }
+          if (existingVehicleIds.current.includes(v.id)) {
+            await updateVehicle(v.id, vd)
+          } else {
+            await createVehicle({ customer_id: initialCustomer.id, ...vd })
+          }
+        }
+        toast.success('Cliente atualizado com sucesso!')
+        navigate('/admin/clientes')
+      } else {
+        const customer = await createCustomer(payload)
+        for (const v of vehicles) {
+          await createVehicle({
+            customer_id: customer.id,
+            type: v.type,
+            brand: v.brand,
+            model: v.model,
+            year: v.year ? parseInt(v.year) : null,
+          })
+        }
+        toast.success('Cliente cadastrado com sucesso!')
+        navigate('/admin/clientes')
       }
-      toast.success('Cliente cadastrado com sucesso!')
-      navigate('/admin')
     } catch {
-      toast.error('Erro ao cadastrar cliente')
+      toast.error(isEditMode ? 'Erro ao atualizar cliente' : 'Erro ao cadastrar cliente')
     } finally {
       setSaving(false)
     }
@@ -238,7 +277,8 @@ export function CustomerForm() {
         <VehicleGrid vehicles={vehicles} onChange={setVehicles} errors={vehicleErrors} />
       </div>
       <Button type="submit" disabled={saving} className="w-full" size="lg">
-        <Save className="w-4 h-4 mr-2" /> {saving ? 'Salvando...' : 'Cadastrar Cliente'}
+        <Save className="w-4 h-4 mr-2" />{' '}
+        {saving ? 'Salvando...' : isEditMode ? 'Salvar Alterações' : 'Cadastrar Cliente'}
       </Button>
     </form>
   )

@@ -151,35 +151,45 @@ export default function AdminDashboard() {
               </Button>
             </div>
 
-            <div className="grid gap-4">
-              {services.map((service) => (
-                <Card key={service.id} className="bg-white border border-slate-200">
-                  <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                    <div>
-                      <h3 className="font-bold text-lg">{service.name}</h3>
-                      <p className="text-sm text-slate-500">
+            <div className="bg-white rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Preço</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {services.map((service) => (
+                    <TableRow key={service.id} className="even:bg-slate-50">
+                      <TableCell className="font-medium">{service.name}</TableCell>
+                      <TableCell className="text-sm text-slate-500">
                         {service.description || 'Sem descrição'}
-                      </p>
-                      <p className="text-sm font-medium mt-1 text-primary">
+                      </TableCell>
+                      <TableCell className="text-sm font-medium text-primary">
                         {service.is_starting_price ? 'A partir de ' : ''}R${' '}
                         {service.price.toFixed(2).replace('.', ',')}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <Button variant="outline" size="sm" onClick={() => openSheet(service)}>
-                        <Edit className="w-4 h-4 mr-2" /> Editar
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(service.id)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" /> Remover
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button variant="outline" size="sm" onClick={() => openSheet(service)}>
+                            <Edit className="w-4 h-4 mr-1" /> Editar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(service.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
 
@@ -222,7 +232,7 @@ export default function AdminDashboard() {
                   <TableBody>
                     {stats?.recent && stats.recent.length > 0 ? (
                       stats.recent.map((view) => (
-                        <TableRow key={view.id}>
+                        <TableRow key={view.id} className="even:bg-slate-50">
                           <TableCell className="font-medium">
                             {new Date(view.created).toLocaleString('pt-BR')}
                           </TableCell>
@@ -234,7 +244,7 @@ export default function AdminDashboard() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={2} className="text-center py-6 text-slate-500">
+                        <TableCell colSpan={3} className="text-center py-6 text-slate-500">
                           Nenhuma visita registrada ainda.
                         </TableCell>
                       </TableRow>

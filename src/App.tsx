@@ -14,6 +14,9 @@ import AdminLayout from './components/admin/AdminLayout'
 import CompanyPage from './pages/admin/CompanyPage'
 import UsersPage from './pages/admin/UsersPage'
 import CustomersPage from './pages/admin/CustomersPage'
+import EditCustomer from './pages/admin/EditCustomer'
+import VehiclesPage from './pages/admin/VehiclesPage'
+import EditVehicle from './pages/admin/EditVehicle'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -46,6 +49,9 @@ const App = () => (
             <Route path="usuarios" element={<UsersPage />} />
             <Route path="clientes" element={<CustomersPage />} />
             <Route path="clientes/novo" element={<NewCustomer />} />
+            <Route path="clientes/:id/editar" element={<EditCustomer />} />
+            <Route path="veiculos" element={<VehiclesPage />} />
+            <Route path="veiculos/:id/editar" element={<EditVehicle />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

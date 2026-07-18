@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
-import { getCompany, saveCompany } from '@/services/company'
-import { fetchCep } from '@/lib/cep'
-import { maskCEP, maskPhone } from '@/lib/masks'
+import { getCompany, updateCompany, createCompany, type Company } from '@/services/company'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -13,8 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { maskCEP, maskPhone } from '@/lib/masks'
+import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
-import { Save, Building2 } from 'lucide-react'
+import { Save } from 'lucide-react'
 
 const UFS = [
   'AC',
@@ -46,47 +45,63 @@ const UFS = [
   'TO',
 ]
 
-const emptyForm = {
-  name: '',
-  trading_name: '',
-  cnpj: '',
-  phone: '',
-  email: '',
-  cep: '',
-  address: '',
-  number: '',
-  complement: '',
-  neighborhood: '',
-  city: '',
-  state: '',
-}
-
 export default function CompanyPage() {
-  const [id, setId] = useState<string | null>(null)
-  const [form, setForm] = useState(emptyForm)
+  const [company, setCompany] = useState<Company | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({
+    name: '',
+    trading_name: '',
+    cnpj: '',
+    phone: '',
+    email: '',
+    cep: '',
+    address: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+  })
 
   useEffect(() => {
-    getCompany()
-      .then((c) => {
+    const load = async () => {
+      try {
+        const c = await getCompany()
+        setCompany(c)
         if (c) {
-          setId(c.id)
-          setForm({ ...emptyForm, ...c })
+          setForm({
+            name: c.name || '',
+            trading_name: c.trading_name || '',
+            cnpj: c.cnpj || '',
+            phone: c.phone || '',
+            email: c.email || '',
+            cep: c.cep || '',
+            address: c.address || '',
+            number: c.number || '',
+            complement: c.complement || '',
+            neighborhood: c.neighborhood || '',
+            city: c.city || '',
+            state: c.state || '',
+          })
         }
-      })
-      .catch(() => toast.error('Erro ao carregar dados'))
-      .finally(() => setLoading(false))
+      } catch {
+        toast.error('Erro ao carregar dados da empresa')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
   }, [])
 
-  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }))
+  const set = (k: string, v: unknown) => setForm((p) => ({ ...p, [k]: v }))
 
   const handleCep = async (cep: string) => {
     const masked = maskCEP(cep)
     set('cep', masked)
     if (masked.replace(/\D/g, '').length === 8) {
       const data = await fetchCep(masked)
-      if (data) {
+      if (data)
         setForm((p) => ({
           ...p,
           address: data.logradouro,
@@ -95,7 +110,6 @@ export default function CompanyPage() {
           city: data.localidade,
           state: data.uf,
         }))
-      }
     }
   }
 
@@ -103,112 +117,110 @@ export default function CompanyPage() {
     e.preventDefault()
     setSaving(true)
     try {
-      await saveCompany(id, form)
-      toast.success(id ? 'Dados atualizados!' : 'Empresa cadastrada!')
+      if (company) {
+        await updateCompany(company.id, form)
+        toast.success('Dados da empresa atualizados com sucesso!')
+      } else {
+        const created = await createCompany(form)
+        setCompany(created)
+        toast.success('Empresa cadastrada com sucesso!')
+      }
     } catch {
-      toast.error('Erro ao salvar')
+      toast.error('Erro ao salvar dados da empresa')
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Carregando...</div>
+  if (loading) return <p className="text-center py-8 text-slate-400">Carregando...</p>
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Building2 className="text-primary" size={28} />
-        <h1 className="text-2xl font-bold text-slate-800">Dados da Empresa</h1>
-      </div>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <h2 className="font-bold text-lg">Identificação</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Razão Social *" value={form.name} onChange={(v) => set('name', v)} />
-              <Field
-                label="Nome Fantasia"
+    <div>
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">Empresa</h1>
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+        <div className="bg-white rounded-lg border p-6 space-y-4">
+          <h2 className="font-bold text-lg">Dados da Empresa</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Razão Social *</Label>
+              <Input value={form.name} onChange={(e) => set('name', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Nome Fantasia</Label>
+              <Input
                 value={form.trading_name}
-                onChange={(v) => set('trading_name', v)}
+                onChange={(e) => set('trading_name', e.target.value)}
               />
-              <Field label="CNPJ" value={form.cnpj} onChange={(v) => set('cnpj', v)} />
-              <Field
-                label="Telefone"
-                value={form.phone}
-                onChange={(v) => set('phone', maskPhone(v))}
-              />
-              <Field
-                label="E-mail"
+            </div>
+            <div className="space-y-1.5">
+              <Label>CNPJ</Label>
+              <Input value={form.cnpj} onChange={(e) => set('cnpj', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Telefone</Label>
+              <Input value={form.phone} onChange={(e) => set('phone', maskPhone(e.target.value))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input
                 type="email"
                 value={form.email}
-                onChange={(v) => set('email', v)}
+                onChange={(e) => set('email', e.target.value)}
               />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <h2 className="font-bold text-lg">Endereço</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="CEP" value={form.cep} onChange={handleCep} />
-              <Field label="Número" value={form.number} onChange={(v) => set('number', v)} />
-              <div className="sm:col-span-2">
-                <Field label="Endereço" value={form.address} onChange={(v) => set('address', v)} />
-              </div>
-              <div className="sm:col-span-2">
-                <Field
-                  label="Complemento"
-                  value={form.complement}
-                  onChange={(v) => set('complement', v)}
-                />
-              </div>
-              <Field
-                label="Bairro"
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border p-6 space-y-4">
+          <h2 className="font-bold text-lg">Endereço</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>CEP</Label>
+              <Input value={form.cep} onChange={(e) => handleCep(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Número</Label>
+              <Input value={form.number} onChange={(e) => set('number', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Endereço</Label>
+              <Input value={form.address} onChange={(e) => set('address', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Complemento</Label>
+              <Input value={form.complement} onChange={(e) => set('complement', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Bairro</Label>
+              <Input
                 value={form.neighborhood}
-                onChange={(v) => set('neighborhood', v)}
+                onChange={(e) => set('neighborhood', e.target.value)}
               />
-              <Field label="Cidade" value={form.city} onChange={(v) => set('city', v)} />
-              <div className="space-y-1.5">
-                <Label>UF</Label>
-                <Select value={form.state} onValueChange={(v) => set('state', v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {UFS.map((uf) => (
-                      <SelectItem key={uf} value={uf}>
-                        {uf}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
-          </CardContent>
-        </Card>
-        <Button type="submit" disabled={saving} size="lg" className="w-full">
-          <Save className="w-4 h-4 mr-2" /> {saving ? 'Salvando...' : 'Salvar Dados'}
+            <div className="space-y-1.5">
+              <Label>Cidade</Label>
+              <Input value={form.city} onChange={(e) => set('city', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>UF</Label>
+              <Select value={form.state} onValueChange={(v) => set('state', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {UFS.map((uf) => (
+                    <SelectItem key={uf} value={uf}>
+                      {uf}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <Button type="submit" disabled={saving} size="lg">
+          <Save className="w-4 h-4 mr-2" /> {saving ? 'Salvando...' : 'Salvar Alterações'}
         </Button>
       </form>
-    </div>
-  )
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  type = 'text',
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  type?: string
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   )
 }
