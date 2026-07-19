@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import AdminDashboard from './pages/admin/Dashboard'
+import WelcomePage from './pages/admin/Welcome'
 import NewCustomer from './pages/admin/NewCustomer'
 import AdminLayout from './components/admin/AdminLayout'
 import CompanyListPage from './pages/admin/CompanyListPage'
@@ -49,7 +50,8 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<WelcomePage />} />
+            <Route path="monitoramento" element={<AdminDashboard />} />
             <Route path="empresa" element={<CompanyListPage />} />
             <Route path="empresa/novo" element={<CompanyPage />} />
             <Route path="empresa/:id/editar" element={<CompanyPage />} />

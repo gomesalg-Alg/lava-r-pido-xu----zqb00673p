@@ -22,6 +22,7 @@ import {
   User,
   PanelLeftClose,
   PanelLeftOpen,
+  LayoutDashboard,
 } from 'lucide-react'
 
 interface MenuItem {
@@ -37,6 +38,11 @@ interface MenuGroup {
 }
 
 const menuGroups: MenuGroup[] = [
+  {
+    label: 'INÍCIO',
+    icon: LayoutDashboard,
+    items: [{ label: 'Painel', to: '/admin', icon: LayoutDashboard }],
+  },
   {
     label: 'CADASTRO',
     icon: ClipboardList,
@@ -54,7 +60,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'RELATÓRIO',
     icon: BarChart3,
-    items: [{ label: 'Monitoramento', to: '/admin', icon: Activity }],
+    items: [{ label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity }],
   },
   {
     label: 'CONFIGURAÇÕES',
