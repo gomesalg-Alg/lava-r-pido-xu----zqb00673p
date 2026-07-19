@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { getVehicle, updateVehicle } from '@/services/vehicles'
 import { VEHICLE_TYPES, FUEL_OPTIONS } from '@/lib/vehicle-options'
+import { maskPlaca } from '@/lib/masks'
 import { toast } from 'sonner'
 
 export default function EditVehicle() {
@@ -25,6 +26,7 @@ export default function EditVehicle() {
     model: '',
     year: '',
     fuel: '',
+    placa: '',
   })
   const [customerName, setCustomerName] = useState('')
   const [loading, setLoading] = useState(true)
@@ -41,6 +43,7 @@ export default function EditVehicle() {
           model: v.model || '',
           year: v.year?.toString() || '',
           fuel: v.fuel || '',
+          placa: v.placa || '',
         })
         setCustomerName((v as any)?.expand?.customer_id?.name || '')
       } catch {
@@ -66,6 +69,7 @@ export default function EditVehicle() {
         model: form.model,
         year: form.year ? parseInt(form.year) : null,
         fuel: form.fuel,
+        placa: form.placa,
       })
       toast.success('Veículo atualizado com sucesso!')
       navigate('/admin/veiculos')
@@ -125,6 +129,15 @@ export default function EditVehicle() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Placa</Label>
+              <Input
+                value={form.placa}
+                onChange={(e) => set('placa', maskPlaca(e.target.value))}
+                placeholder="ABC-1D23"
+                className="uppercase"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Marca *</Label>

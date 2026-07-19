@@ -18,6 +18,18 @@ export function maskCEP(value: string): string {
   return d.replace(/(\d{5})(\d)/, '$1-$2')
 }
 
+export function maskPlaca(value: string): string {
+  const upper = value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (upper.length <= 3) return upper
+  if (upper.length <= 7) {
+    const letters = upper.slice(0, 3)
+    const rest = upper.slice(3)
+    if (rest.length <= 1) return `${letters}-${rest}`
+    return `${letters}-${rest.slice(0, 1)}${rest.slice(1, 4)}`
+  }
+  return upper.slice(0, 7)
+}
+
 export function validateCPF(cpf: string): boolean {
   const d = cpf.replace(/\D/g, '')
   if (d.length !== 11) return false

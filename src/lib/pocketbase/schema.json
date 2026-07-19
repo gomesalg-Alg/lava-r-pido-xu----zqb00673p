@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T23:36:17.700Z",
+  "generatedAt": "2026-07-18T23:56:14.277Z",
   "collections": [
     {
       "name": "users",
@@ -307,6 +307,12 @@
         },
         {
           "name": "fuel",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "placa",
           "type": "text",
           "required": false,
           "system": false

@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { VEHICLE_TYPES, FUEL_OPTIONS } from '@/lib/vehicle-options'
+import { maskPlaca } from '@/lib/masks'
 
 export type VehicleRow = {
   id: string
@@ -17,6 +18,7 @@ export type VehicleRow = {
   model: string
   year: string
   fuel: string
+  placa: string
 }
 
 interface Props {
@@ -29,7 +31,7 @@ export function VehicleGrid({ vehicles, onChange, errors }: Props) {
   const add = () =>
     onChange([
       ...vehicles,
-      { id: crypto.randomUUID(), type: '', brand: '', model: '', year: '', fuel: '' },
+      { id: crypto.randomUUID(), type: '', brand: '', model: '', year: '', fuel: '', placa: '' },
     ])
 
   const remove = (id: string) => onChange(vehicles.filter((v) => v.id !== id))
@@ -60,7 +62,17 @@ export function VehicleGrid({ vehicles, onChange, errors }: Props) {
             </Select>
             {errors[i]?.type && <p className="text-xs text-red-500">{errors[i].type}</p>}
           </div>
-          <div className="sm:col-span-3 space-y-1">
+          <div className="sm:col-span-2 space-y-1">
+            <label className="text-xs font-medium text-slate-600">Placa</label>
+            <Input
+              value={v.placa}
+              onChange={(e) => update(v.id, 'placa', maskPlaca(e.target.value))}
+              placeholder="ABC-1D23"
+              className="uppercase"
+            />
+            {errors[i]?.placa && <p className="text-xs text-red-500">{errors[i].placa}</p>}
+          </div>
+          <div className="sm:col-span-2 space-y-1">
             <label className="text-xs font-medium text-slate-600">Marca</label>
             <Input
               value={v.brand}
@@ -69,7 +81,7 @@ export function VehicleGrid({ vehicles, onChange, errors }: Props) {
             />
             {errors[i]?.brand && <p className="text-xs text-red-500">{errors[i].brand}</p>}
           </div>
-          <div className="sm:col-span-3 space-y-1">
+          <div className="sm:col-span-2 space-y-1">
             <label className="text-xs font-medium text-slate-600">Modelo</label>
             <Input
               value={v.model}

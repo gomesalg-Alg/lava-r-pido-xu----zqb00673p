@@ -84,6 +84,7 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
       model: v.model,
       year: v.year?.toString() || '',
       fuel: v.fuel || '',
+      placa: v.placa || '',
     })) || [],
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -158,6 +159,7 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
             model: v.model,
             year: v.year ? parseInt(v.year) : null,
             fuel: v.fuel,
+            placa: v.placa,
           }
           if (existingVehicleIds.current.includes(v.id)) {
             await updateVehicle(v.id, vd)
@@ -177,6 +179,7 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
             model: v.model,
             year: v.year ? parseInt(v.year) : null,
             fuel: v.fuel,
+            placa: v.placa,
           })
         }
         toast.success('Cliente cadastrado com sucesso!')

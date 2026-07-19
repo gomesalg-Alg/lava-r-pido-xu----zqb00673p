@@ -67,24 +67,25 @@ export default function VehiclesPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="font-semibold text-slate-700">Cliente</TableHead>
+              <TableHead className="font-semibold text-slate-700">Placa</TableHead>
               <TableHead className="font-semibold text-slate-700">Tipo</TableHead>
               <TableHead className="font-semibold text-slate-700">Marca</TableHead>
               <TableHead className="font-semibold text-slate-700">Modelo</TableHead>
               <TableHead className="font-semibold text-slate-700">Ano</TableHead>
               <TableHead className="font-semibold text-slate-700">Combustível</TableHead>
-              <TableHead className="font-semibold text-slate-700 text-right">Ações</TableHead>
+              <TableHead className="font-semibold text-slate-700 text-right">Ações</TableHead>{' '}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-slate-500 py-8">
+                <TableCell colSpan={8} className="text-center text-slate-500 py-8">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : vehicles.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-slate-500 py-8">
+                <TableCell colSpan={8} className="text-center text-slate-500 py-8">
                   Nenhum veículo cadastrado.
                 </TableCell>
               </TableRow>
@@ -93,6 +94,9 @@ export default function VehiclesPage() {
                 <TableRow key={v.id} className="even:bg-slate-50">
                   <TableCell className="font-medium text-slate-800">
                     {v.expand?.customer_id?.name || '—'}
+                  </TableCell>
+                  <TableCell className="font-medium text-slate-700 uppercase">
+                    {v.placa || '—'}
                   </TableCell>
                   <TableCell className="text-slate-600">{v.type}</TableCell>
                   <TableCell className="text-slate-600">{v.brand}</TableCell>

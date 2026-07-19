@@ -8,6 +8,7 @@ export type Vehicle = {
   model: string
   year?: number | null
   fuel?: string
+  placa?: string
 }
 
 export const getVehiclesByCustomer = (customerId: string) =>
