@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CustomerVehicleSearch } from './CustomerVehicleSearch'
-import { ServiceOrderItems, type ItemRow, calcGrandTotal } from './ServiceOrderItems'
+import { ServiceOrderItems, type ItemRow } from './ServiceOrderItems'
 import {
   formatCurrency,
   formatDuration,

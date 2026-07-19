@@ -243,9 +243,10 @@ export function ServiceOrderItems({ items, onChange }: Props) {
         <Plus className="w-4 h-4 mr-2" /> Adicionar Item
       </Button>
       {items.length > 0 && (
-        <div className="flex justify-end pt-2 border-t">
-          <span className="text-base font-bold">
-            Total Geral: {formatCurrency(calcGrandTotal(items))}
+        <div className="flex items-center justify-between pt-3 mt-2 border-t">
+          <span className="text-sm font-medium text-slate-500">Valor Geral</span>
+          <span className="text-lg font-bold text-slate-800">
+            {formatCurrency(calcGrandTotal(items))}
           </span>
         </div>
       )}

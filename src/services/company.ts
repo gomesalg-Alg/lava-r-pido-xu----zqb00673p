@@ -7,6 +7,7 @@ export type Company = {
   cnpj: string
   phone: string
   home_page: string
+  logo: string
   cep: string
   address: string
   number: string
@@ -23,10 +24,10 @@ export const getCompany = async (): Promise<Company | null> => {
 
 export const getCompanyById = (id: string) => pb.collection('company').getOne<Company>(id)
 
-export const createCompany = (data: Partial<Company>) =>
+export const createCompany = (data: Record<string, unknown>) =>
   pb.collection('company').create<Company>(data)
 
-export const updateCompany = (id: string, data: Partial<Company>) =>
+export const updateCompany = (id: string, data: Record<string, unknown>) =>
   pb.collection('company').update<Company>(id, data)
 
 export const deleteCompany = (id: string) => pb.collection('company').delete(id)

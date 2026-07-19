@@ -14,8 +14,9 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
-import { Plus, Edit, Trash2, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Printer } from 'lucide-react'
 import { toast } from 'sonner'
+import { generateServiceOrderPdf } from '@/lib/service-order-pdf'
 
 export default function ServiceOrdersPage() {
   const [orders, setOrders] = useState<ServiceOrder[]>([])
@@ -64,6 +65,14 @@ export default function ServiceOrdersPage() {
   const badgeVariant = (s: string): 'default' | 'secondary' | 'outline' =>
     s === 'Finalizado' ? 'default' : s === 'Em Andamento' ? 'secondary' : 'outline'
 
+  const handlePrint = async (orderId: string) => {
+    try {
+      await generateServiceOrderPdf(orderId)
+    } catch {
+      toast.error('Erro ao gerar PDF da ordem de serviço')
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -90,10 +99,11 @@ export default function ServiceOrdersPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Ticket</TableHead>
+              <TableHead>Foto</TableHead>
+              <TableHead>Emissão</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Veículo</TableHead>
-              <TableHead>Foto</TableHead>
-              <TableHead>Entrada</TableHead>
+              <TableHead>Nº Prisma</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -101,13 +111,13 @@ export default function ServiceOrdersPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Nenhuma ordem de serviço encontrada.
                 </TableCell>
               </TableRow>
@@ -116,14 +126,6 @@ export default function ServiceOrdersPage() {
                 <TableRow key={o.id} className="even:bg-slate-50">
                   <TableCell className="font-bold text-blue-600">
                     #{String(o.ticket_number).padStart(4, '0')}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {o.expand?.customer_id?.name || '-'}
-                  </TableCell>
-                  <TableCell>
-                    {o.expand?.vehicle_id
-                      ? `${o.expand.vehicle_id.brand} ${o.expand.vehicle_id.model}`
-                      : '-'}
                   </TableCell>
                   <TableCell>
                     {o.photo ? (
@@ -137,19 +139,27 @@ export default function ServiceOrdersPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {o.entry_at ? (
+                    {o.emission_date ? new Date(o.emission_date).toLocaleDateString('pt-BR') : '-'}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {o.expand?.customer_id?.name || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {o.expand?.vehicle_id ? (
                       <div className="flex flex-col">
-                        <span>{new Date(o.entry_at).toLocaleDateString('pt-BR')}</span>
-                        <span className="text-slate-500 text-sm">
-                          {new Date(o.entry_at).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
+                        <span>{`${o.expand.vehicle_id.brand} ${o.expand.vehicle_id.model}`}</span>
+                        {o.expand.vehicle_id.placa && (
+                          <span className="text-slate-500 text-sm uppercase">
+                            {o.expand.vehicle_id.placa}
+                          </span>
+                        )}
                       </div>
                     ) : (
                       '-'
                     )}
+                  </TableCell>
+                  <TableCell>
+                    {o.prisma_number || <span className="text-slate-400">-</span>}
                   </TableCell>
                   <TableCell>
                     <Badge variant={badgeVariant(o.status)}>{o.status || '-'}</Badge>
@@ -160,6 +170,14 @@ export default function ServiceOrdersPage() {
                         <Link to={`/admin/ordem-servico/${o.id}/editar`}>
                           <Edit className="w-4 h-4 mr-1" /> Editar
                         </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePrint(o.id)}
+                        className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <Printer className="w-4 h-4 mr-1" /> PDF
                       </Button>
                       <Button
                         variant="outline"

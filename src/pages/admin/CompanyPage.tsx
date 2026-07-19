@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getCompanyById, updateCompany, createCompany, type Company } from '@/services/company'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ import {
 import { maskCEP, maskPhone } from '@/lib/masks'
 import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
-import { Save, ArrowLeft } from 'lucide-react'
+import { Save, ArrowLeft, Upload, X, Image as ImageIcon } from 'lucide-react'
 
 const UFS = [
   'AC',
@@ -48,10 +48,14 @@ const UFS = [
 
 export default function CompanyPage() {
   const { id } = useParams<{ id: string }>()
+  const logoInputRef = useRef<HTMLInputElement>(null)
   const [company, setCompany] = useState<Company | null>(null)
   const [loading, setLoading] = useState(!!id)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [existingLogo, setExistingLogo] = useState('')
+  const [logoDeleted, setLogoDeleted] = useState(false)
   const [form, setForm] = useState({
     name: '',
     trading_name: '',
@@ -91,6 +95,7 @@ export default function CompanyPage() {
             city: c.city || '',
             state: c.state || '',
           })
+          setExistingLogo(c.logo || '')
         }
       } catch {
         toast.error('Erro ao carregar dados da empresa')
@@ -127,6 +132,20 @@ export default function CompanyPage() {
     }
   }
 
+  const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setLogoFile(file)
+      setLogoDeleted(false)
+    }
+  }
+
+  const handleDeleteLogo = () => {
+    setLogoFile(null)
+    setExistingLogo('')
+    setLogoDeleted(true)
+  }
+
   const validate = () => {
     const e: Record<string, string> = {}
     if (!form.name.trim()) e.name = 'Obrigatório'
@@ -145,11 +164,15 @@ export default function CompanyPage() {
     }
     setSaving(true)
     try {
+      const payload: Record<string, unknown> = { ...form }
+      if (logoFile) payload.logo = logoFile
+      else if (logoDeleted) payload.logo = null
+
       if (company) {
-        await updateCompany(company.id, form)
+        await updateCompany(company.id, payload)
         toast.success('Dados da empresa atualizados com sucesso!')
       } else {
-        const created = await createCompany(form)
+        const created = await createCompany(payload)
         setCompany(created)
         toast.success('Empresa cadastrada com sucesso!')
       }
@@ -161,6 +184,12 @@ export default function CompanyPage() {
   }
 
   if (loading) return <p className="text-center py-8 text-slate-400">Carregando...</p>
+
+  const logoUrl = logoFile
+    ? URL.createObjectURL(logoFile)
+    : existingLogo && !logoDeleted && company
+      ? `${import.meta.env.VITE_POCKETBASE_URL}/api/files/company/${company.id}/${existingLogo}`
+      : ''
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -205,6 +234,47 @@ export default function CompanyPage() {
                 onChange={(e) => set('home_page', e.target.value)}
               />
               {errors.home_page && <p className="text-xs text-red-500">{errors.home_page}</p>}
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Logo da Empresa</Label>
+              <div className="flex items-center gap-4">
+                {logoUrl ? (
+                  <div className="relative">
+                    <img
+                      src={logoUrl}
+                      alt="Logo da Empresa"
+                      className="w-24 h-24 object-contain rounded-lg border bg-white p-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleDeleteLogo}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                    <ImageIcon className="w-8 h-8" />
+                  </div>
+                )}
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleLogo}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {existingLogo && !logoDeleted ? 'Trocar Logo' : 'Enviar Logo'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

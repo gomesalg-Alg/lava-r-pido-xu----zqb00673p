@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T02:07:55.972Z",
+  "generatedAt": "2026-07-19T02:35:06.473Z",
   "collections": [
     {
       "name": "users",
@@ -420,6 +420,12 @@
         {
           "name": "home_page",
           "type": "url",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "logo",
+          "type": "file",
           "required": false,
           "system": false
         }
