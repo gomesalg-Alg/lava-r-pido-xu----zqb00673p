@@ -27,6 +27,7 @@ import ServiceOrdersPage from './pages/admin/ServiceOrdersPage'
 import NewServiceOrder from './pages/admin/NewServiceOrder'
 import EditServiceOrder from './pages/admin/EditServiceOrder'
 import PrintServiceOrderPage from './pages/admin/PrintServiceOrderPage'
+import PublicServiceOrder from './pages/PublicServiceOrder'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
           </Route>
           <Route path="/login" element={<Login />} />
+          <Route path="/os/:id" element={<PublicServiceOrder />} />
           <Route
             path="/admin"
             element={

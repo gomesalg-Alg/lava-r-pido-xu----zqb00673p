@@ -1,6 +1,7 @@
 import pb from '@/lib/pocketbase/client'
 import type { Customer } from './customers'
 import type { Vehicle } from './vehicles'
+import type { Company } from './company'
 
 export type ServiceOrderStatus = 'Em Andamento' | 'Finalizado' | 'Orçamento'
 export type PaymentMethod = 'Pix' | 'Dinheiro' | 'Cartão de Crédito' | 'Cartão de Débito'
@@ -87,6 +88,15 @@ export const updateServiceOrderItem = (id: string, data: Record<string, unknown>
 
 export const deleteServiceOrderItem = (id: string) =>
   pb.collection('service_order_items').delete(id)
+
+export type PublicServiceOrderData = {
+  order: ServiceOrder
+  items: ServiceOrderItem[]
+  company: Company | null
+}
+
+export const getPublicServiceOrder = (id: string) =>
+  pb.send(`/backend/v1/public/os/${id}`, { method: 'GET' }) as Promise<PublicServiceOrderData>
 
 export const searchByPlacaOrCpf = async (query: string): Promise<CustomerVehicleSearchResult[]> => {
   const q = query.trim()

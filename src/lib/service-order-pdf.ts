@@ -29,7 +29,7 @@ function buildItemsRows(items: ServiceOrderItem[]): string {
       const operatorName = item.expand?.operator_id?.name || '--'
       const qty = item.quantity || 1
       const unit = formatCurrency(item.unit_price || 0)
-      const total = formatCurrency(item.total_price || 0)
+      const total = formatCurrency(qty * (item.unit_price || 0))
       return `
         <tr style="border-bottom:1px solid #e2e8f0;">
           <td style="padding:8px 12px;">${serviceName}</td>
@@ -42,8 +42,23 @@ function buildItemsRows(items: ServiceOrderItem[]): string {
     .join('')
 }
 
+function calcSubtotal(items: ServiceOrderItem[]): number {
+  return items.reduce((sum, i) => sum + (i.unit_price || 0) * (i.quantity || 1), 0)
+}
+
 function calcGrandTotal(items: ServiceOrderItem[]): number {
-  return items.reduce((sum, i) => sum + (i.total_price || 0), 0)
+  const subtotal = calcSubtotal(items)
+  const discount = calcTotalDiscount(items)
+  const surcharge = calcTotalSurcharge(items)
+  return subtotal - discount + surcharge
+}
+
+function calcTotalDiscount(items: ServiceOrderItem[]): number {
+  return items.reduce((sum, i) => sum + (i.discount_amount || 0), 0)
+}
+
+function calcTotalSurcharge(items: ServiceOrderItem[]): number {
+  return items.reduce((sum, i) => sum + (i.surcharge_amount || 0), 0)
 }
 
 function buildLogoHtml(company: Company): string {
@@ -73,6 +88,9 @@ function buildAddressHtml(company: Company): string {
 function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderItem[]): string {
   const customer = order.expand?.customer_id
   const vehicle = order.expand?.vehicle_id
+  const subtotal = calcSubtotal(items)
+  const totalDiscount = calcTotalDiscount(items)
+  const totalSurcharge = calcTotalSurcharge(items)
   const grandTotal = calcGrandTotal(items)
   const logo = buildLogoHtml(company)
   const address = buildAddressHtml(company)
@@ -183,6 +201,9 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
     </div>
     <div class="totals">
       <div class="box">
+        <div class="row"><span>Subtotal</span><span>${formatCurrency(subtotal)}</span></div>
+        ${totalDiscount > 0 ? `<div class="row" style="color:#dc2626;"><span>Desconto</span><span>- ${formatCurrency(totalDiscount)}</span></div>` : ''}
+        ${totalSurcharge > 0 ? `<div class="row" style="color:#059669;"><span>Acréscimo</span><span>+ ${formatCurrency(totalSurcharge)}</span></div>` : ''}
         <div class="row"><span>Total Geral</span><span class="grand">${formatCurrency(grandTotal)}</span></div>
       </div>
     </div>
@@ -191,7 +212,7 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
       <div class="obs-box">${order.observation || 'Sem observações.'}</div>
     </div>
     <div class="footer">
-      Documento gerado em ${new Date().toLocaleString('pt-BR')} &middot; ${company.trading_name || company.name}
+      Copyright &copy; ${new Date().getFullYear()} ${company.trading_name || company.name} - Todos os direitos reservados.
     </div>
   </div>
   <script>

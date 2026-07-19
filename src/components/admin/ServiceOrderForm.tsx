@@ -202,10 +202,7 @@ export function ServiceOrderForm({ orderId }: Props) {
           discount_reason: item.discount_reason,
           surcharge_amount: item.surcharge_amount,
           surcharge_reason: item.surcharge_reason,
-          total_price:
-            (item.quantity || 0) * (item.unit_price || 0) -
-            (item.discount_amount || 0) +
-            (item.surcharge_amount || 0),
+          total_price: (item.quantity || 0) * (item.unit_price || 0),
         }
         if (item.id && existingItemIds.current.includes(item.id)) {
           await updateServiceOrderItem(item.id, itemData)

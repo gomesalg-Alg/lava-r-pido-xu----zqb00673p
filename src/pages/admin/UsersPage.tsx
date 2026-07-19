@@ -25,6 +25,7 @@ import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import pb from '@/lib/pocketbase/client'
+import { UserCreateSheet } from '@/components/admin/UserCreateSheet'
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -104,7 +105,10 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Usuários</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-slate-800">Usuários</h1>
+        <UserCreateSheet onCreated={loadData} />
+      </div>
       <div className="bg-white rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>

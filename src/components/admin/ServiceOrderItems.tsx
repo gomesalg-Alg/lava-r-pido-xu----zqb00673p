@@ -82,15 +82,14 @@ export type ItemRow = {
 }
 
 export function calcItemTotal(row: ItemRow): number {
-  return (
-    (row.quantity || 0) * (row.unit_price || 0) -
-    (row.discount_amount || 0) +
-    (row.surcharge_amount || 0)
-  )
+  return (row.quantity || 0) * (row.unit_price || 0)
 }
 
 export function calcGrandTotal(rows: ItemRow[]): number {
-  return rows.reduce((sum, r) => sum + calcItemTotal(r), 0)
+  const subtotal = rows.reduce((sum, r) => sum + calcItemTotal(r), 0)
+  const discounts = rows.reduce((sum, r) => sum + (r.discount_amount || 0), 0)
+  const surcharges = rows.reduce((sum, r) => sum + (r.surcharge_amount || 0), 0)
+  return subtotal - discounts + surcharges
 }
 
 export const emptyItemRow = (): ItemRow => ({
@@ -234,7 +233,7 @@ export function ServiceOrderItems({ items, onChange }: Props) {
           )}
           <div className="flex justify-end">
             <span className="text-sm font-bold text-slate-700">
-              Total: {formatCurrency(calcItemTotal(row))}
+              Total: {formatCurrency((row.quantity || 0) * (row.unit_price || 0))}
             </span>
           </div>
         </div>

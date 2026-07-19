@@ -1,65 +1,50 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { Printer, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
-  getServiceOrder,
-  getServiceOrderItems,
+  getPublicServiceOrder,
   type ServiceOrder,
   type ServiceOrderItem,
 } from '@/services/service-orders'
-import { getCompany, type Company } from '@/services/company'
+import type { Company } from '@/services/company'
 import { calculateOrderTotals } from '@/lib/order-calculations'
 import { formatCurrency, formatDuration, toDateInput } from '@/lib/format'
-import pb from '@/lib/pocketbase/client'
+import { sanitizePhone, buildOrderShareMessage, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
 import '@/styles/print.css'
 
-export default function PrintServiceOrderPage() {
+export default function PublicServiceOrder() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<ServiceOrder | null>(null)
   const [items, setItems] = useState<ServiceOrderItem[]>([])
   const [company, setCompany] = useState<Company | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!id) return
-      try {
-        const [ord, itms, comp] = await Promise.all([
-          getServiceOrder(id),
-          getServiceOrderItems(id),
-          getCompany(),
-        ])
-        setOrder(ord)
-        setItems(itms)
-        setCompany(comp)
-      } catch (err) {
-        console.error('Failed to load print data:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
+    if (!id) return
+    getPublicServiceOrder(id)
+      .then((data) => {
+        setOrder(data.order)
+        setItems(data.items)
+        setCompany(data.company)
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
   }, [id])
-
-  useEffect(() => {
-    if (!loading && order) {
-      const timer = setTimeout(() => window.print(), 500)
-      return () => clearTimeout(timer)
-    }
-  }, [loading, order])
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-gray-500">
+      <div className="flex items-center justify-center min-h-screen text-slate-500">
         Carregando...
       </div>
     )
   }
-  if (!order) {
+
+  if (error || !order) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-gray-500">
-        Ordem não encontrada
+      <div className="flex items-center justify-center min-h-screen text-slate-500">
+        Ordem de serviço não encontrada.
       </div>
     )
   }
@@ -68,23 +53,36 @@ export default function PrintServiceOrderPage() {
   const companyName = company?.trading_name || company?.name || 'Lava Rápido XUÁ'
   const currentYear = new Date().getFullYear()
   const logoUrl = company?.logo
-    ? pb.files.getURL({ id: company.id, collectionName: 'company' } as never, company.logo)
+    ? `${import.meta.env.VITE_POCKETBASE_URL}/api/files/company/${company.id}/${company.logo}`
     : null
-  const photoUrl = order.photo
-    ? pb.files.getURL({ id: order.id, collectionName: 'service_orders' } as never, order.photo)
+
+  const customerPhone = order.expand?.customer_id?.phone || ''
+  const cleanPhone = sanitizePhone(customerPhone)
+  const waUrl = cleanPhone
+    ? buildWhatsAppShareUrl(
+        customerPhone,
+        buildOrderShareMessage(
+          order.expand?.customer_id?.name || 'Cliente',
+          order.ticket_number,
+          companyName,
+          window.location.href,
+        ),
+      )
     : null
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-slate-100">
       <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
-        <Button variant="outline" asChild>
-          <Link to="/admin/ordem-servico">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
-          </Link>
-        </Button>
-        <Button onClick={() => window.print()}>
+        <Button variant="outline" onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
         </Button>
+        {waUrl && (
+          <Button asChild className="bg-[#25D366] hover:bg-[#1da851] text-white">
+            <a href={waUrl} target="_blank" rel="noreferrer">
+              <MessageCircle className="w-4 h-4 mr-2" /> Enviar via WhatsApp
+            </a>
+          </Button>
+        )}
       </div>
 
       <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
@@ -127,9 +125,6 @@ export default function PrintServiceOrderPage() {
             {order.expand?.customer_id?.phone && (
               <p className="text-sm">Tel: {order.expand.customer_id.phone}</p>
             )}
-            {order.expand?.customer_id?.cpf && (
-              <p className="text-sm">CPF: {order.expand.customer_id.cpf}</p>
-            )}
           </div>
           <div>
             <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Veículo</h3>
@@ -138,9 +133,6 @@ export default function PrintServiceOrderPage() {
             </p>
             {order.expand?.vehicle_id?.placa && (
               <p className="text-sm">Placa: {order.expand.vehicle_id.placa}</p>
-            )}
-            {order.expand?.vehicle_id?.type && (
-              <p className="text-sm">Tipo: {order.expand.vehicle_id.type}</p>
             )}
           </div>
         </div>
@@ -236,13 +228,6 @@ export default function PrintServiceOrderPage() {
           <div className="mt-6">
             <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Observações</h3>
             <p className="text-sm">{order.observation}</p>
-          </div>
-        )}
-
-        {photoUrl && (
-          <div className="mt-6">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Foto</h3>
-            <img src={photoUrl} alt="Foto da OS" className="max-h-48 rounded" />
           </div>
         )}
 
