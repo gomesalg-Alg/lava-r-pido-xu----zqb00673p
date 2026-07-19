@@ -1,0 +1,18 @@
+import { Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { SupplierForm } from '@/components/admin/SupplierForm'
+
+export default function NewSupplier() {
+  return (
+    <div className="max-w-4xl mx-auto">
+      <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
+        <Link to="/admin/fornecedores">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
+        </Link>
+      </Button>
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">Novo Fornecedor</h1>
+      <SupplierForm />
+    </div>
+  )
+}

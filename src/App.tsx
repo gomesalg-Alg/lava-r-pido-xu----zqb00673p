@@ -19,6 +19,9 @@ import CustomersPage from './pages/admin/CustomersPage'
 import EditCustomer from './pages/admin/EditCustomer'
 import VehiclesPage from './pages/admin/VehiclesPage'
 import EditVehicle from './pages/admin/EditVehicle'
+import SuppliersPage from './pages/admin/SuppliersPage'
+import NewSupplier from './pages/admin/NewSupplier'
+import EditSupplier from './pages/admin/EditSupplier'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -57,6 +60,9 @@ const App = () => (
             <Route path="clientes/:id/editar" element={<EditCustomer />} />
             <Route path="veiculos" element={<VehiclesPage />} />
             <Route path="veiculos/:id/editar" element={<EditVehicle />} />
+            <Route path="fornecedores" element={<SuppliersPage />} />
+            <Route path="fornecedores/novo" element={<NewSupplier />} />
+            <Route path="fornecedores/:id/editar" element={<EditSupplier />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
