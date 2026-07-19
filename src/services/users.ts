@@ -20,7 +20,16 @@ export const createUser = (data: FormData) => pb.collection('users').create<User
 
 export const updateUser = (
   id: string,
-  data: Partial<{ name: string; email: string; role: UserRole }> | FormData,
+  data:
+    | Partial<{
+        name: string
+        email: string
+        role: UserRole
+        password: string
+        passwordConfirm: string
+        avatar: string | null
+      }>
+    | FormData,
 ) => pb.collection('users').update<User>(id, data as any)
 
 export const deleteUser = (id: string) => pb.collection('users').delete(id)

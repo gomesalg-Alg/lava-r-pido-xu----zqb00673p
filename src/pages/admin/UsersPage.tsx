@@ -29,11 +29,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import pb from '@/lib/pocketbase/client'
 import { cn } from '@/lib/utils'
 import { UserCreateSheet } from '@/components/admin/UserCreateSheet'
+import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -44,8 +45,12 @@ export default function UsersPage() {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<UserRole>('Operador')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [removeAvatar, setRemoveAvatar] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadData = async () => {
@@ -66,34 +71,60 @@ export default function UsersPage() {
     loadData()
   })
 
+  const avatarUrl = (u: User) =>
+    u.avatar ? `${pb.baseUrl}/api/files/users/${u.id}/${u.avatar}` : null
+
   const openEdit = (u: User) => {
     setEditingUser(u)
     setName(u.name)
     setEmail(u.email)
     setRole(u.role || 'Operador')
     setAvatarFile(null)
+    setRemoveAvatar(false)
+    setNewPassword('')
+    setConfirmPassword('')
+    setFieldErrors({})
     setSheetOpen(true)
   }
 
   const handleSave = async () => {
     if (!editingUser) return
+    if (newPassword && newPassword !== confirmPassword) {
+      toast.error('As senhas não coincidem')
+      return
+    }
+    if (newPassword && newPassword.length < 8) {
+      toast.error('A senha deve ter no mínimo 8 caracteres')
+      return
+    }
+
     setSaving(true)
+    setFieldErrors({})
+
     try {
+      const fd = new FormData()
+      fd.append('name', name)
+      fd.append('email', email)
+      fd.append('role', role)
+
       if (avatarFile) {
-        const fd = new FormData()
-        fd.append('name', name)
-        fd.append('email', email)
-        fd.append('role', role)
         fd.append('avatar', avatarFile)
-        await updateUser(editingUser.id, fd)
-      } else {
-        await updateUser(editingUser.id, { name, email, role })
+      } else if (removeAvatar) {
+        fd.append('avatar', '')
       }
+
+      if (newPassword) {
+        fd.append('password', newPassword)
+        fd.append('passwordConfirm', confirmPassword)
+      }
+
+      await updateUser(editingUser.id, fd)
       toast.success('Usuário atualizado com sucesso!')
       setSheetOpen(false)
       loadData()
-    } catch {
-      toast.error('Erro ao atualizar usuário')
+    } catch (err) {
+      setFieldErrors(extractFieldErrors(err))
+      toast.error(getErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -111,8 +142,13 @@ export default function UsersPage() {
     }
   }
 
-  const avatarUrl = (u: User) =>
-    u.avatar ? `${pb.baseUrl}/api/files/users/${u.id}/${u.avatar}` : null
+  const showAvatarPreview = avatarFile
+    ? URL.createObjectURL(avatarFile)
+    : !removeAvatar && editingUser && avatarUrl(editingUser)
+      ? avatarUrl(editingUser)!
+      : null
+
+  const hasAvatar = !!avatarFile || (!removeAvatar && !!editingUser?.avatar)
 
   return (
     <div>
@@ -203,23 +239,35 @@ export default function UsersPage() {
               <Label>Avatar</Label>
               <div className="flex items-center gap-4">
                 <Avatar className="w-16 h-16">
-                  {avatarFile ? (
-                    <AvatarImage src={URL.createObjectURL(avatarFile)} alt="Preview" />
-                  ) : editingUser && avatarUrl(editingUser) ? (
-                    <AvatarImage src={avatarUrl(editingUser)!} alt={editingUser.name} />
-                  ) : null}
+                  {showAvatarPreview && <AvatarImage src={showAvatarPreview} alt="Preview" />}
                   <AvatarFallback className="text-lg">
                     {name?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Selecionar imagem
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Selecionar imagem
+                  </Button>
+                  {hasAvatar && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setRemoveAvatar(true)
+                        setAvatarFile(null)
+                      }}
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4 mr-1" /> Remover Foto
+                    </Button>
+                  )}
+                </div>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -227,7 +275,10 @@ export default function UsersPage() {
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0]
-                    if (f) setAvatarFile(f)
+                    if (f) {
+                      setAvatarFile(f)
+                      setRemoveAvatar(false)
+                    }
                   }}
                 />
               </div>
@@ -235,10 +286,12 @@ export default function UsersPage() {
             <div className="space-y-2">
               <Label>Nome</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
+              {fieldErrors.name && <p className="text-sm text-red-500">{fieldErrors.name}</p>}
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              {fieldErrors.email && <p className="text-sm text-red-500">{fieldErrors.email}</p>}
             </div>
             <div className="space-y-2">
               <Label>Perfil de Acesso *</Label>
@@ -251,6 +304,35 @@ export default function UsersPage() {
                   <SelectItem value="Operador">Operador</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="border-t pt-4 mt-4">
+              <p className="text-sm text-slate-500 mb-3">
+                Deixe os campos de senha em branco para manter a senha atual.
+              </p>
+              <div className="space-y-2">
+                <Label>Nova Senha</Label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+                {fieldErrors.password && (
+                  <p className="text-sm text-red-500">{fieldErrors.password}</p>
+                )}
+              </div>
+              <div className="space-y-2 mt-4">
+                <Label>Confirmar Nova Senha</Label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+                {fieldErrors.passwordConfirm && (
+                  <p className="text-sm text-red-500">{fieldErrors.passwordConfirm}</p>
+                )}
+              </div>
             </div>
           </div>
           <SheetFooter className="mt-8">
