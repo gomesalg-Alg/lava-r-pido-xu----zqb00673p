@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T00:30:19.471Z",
+  "generatedAt": "2026-07-19T00:48:54.463Z",
   "collections": [
     {
       "name": "users",
@@ -416,6 +416,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "home_page",
+          "type": "url",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -474,6 +480,36 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "cep",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "complement",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "neighborhood",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []

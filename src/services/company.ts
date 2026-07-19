@@ -6,7 +6,7 @@ export type Company = {
   trading_name: string
   cnpj: string
   phone: string
-  email: string
+  home_page: string
   cep: string
   address: string
   number: string

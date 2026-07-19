@@ -7,6 +7,11 @@ export type Supplier = {
   phone: string
   email: string
   address: string
+  cep: string
+  complement: string
+  neighborhood: string
+  city: string
+  state: string
 }
 
 export const getSuppliers = () =>

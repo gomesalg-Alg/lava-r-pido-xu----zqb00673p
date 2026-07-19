@@ -51,12 +51,13 @@ export default function CompanyPage() {
   const [company, setCompany] = useState<Company | null>(null)
   const [loading, setLoading] = useState(!!id)
   const [saving, setSaving] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [form, setForm] = useState({
     name: '',
     trading_name: '',
     cnpj: '',
     phone: '',
-    email: '',
+    home_page: '',
     cep: '',
     address: '',
     number: '',
@@ -81,7 +82,7 @@ export default function CompanyPage() {
             trading_name: c.trading_name || '',
             cnpj: c.cnpj || '',
             phone: c.phone || '',
-            email: c.email || '',
+            home_page: c.home_page || '',
             cep: c.cep || '',
             address: c.address || '',
             number: c.number || '',
@@ -100,7 +101,14 @@ export default function CompanyPage() {
     load()
   }, [id])
 
-  const set = (k: string, v: unknown) => setForm((p) => ({ ...p, [k]: v }))
+  const set = (k: string, v: unknown) => {
+    setForm((p) => ({ ...p, [k]: v }))
+    setErrors((p) => {
+      const n = { ...p }
+      delete n[k]
+      return n
+    })
+  }
 
   const handleCep = async (cep: string) => {
     const masked = maskCEP(cep)
@@ -119,8 +127,22 @@ export default function CompanyPage() {
     }
   }
 
+  const validate = () => {
+    const e: Record<string, string> = {}
+    if (!form.name.trim()) e.name = 'Obrigatório'
+    if (form.home_page && !/^https?:\/\/[^\s@]+(\.[^\s@]+)+([/?#].*)?$/i.test(form.home_page)) {
+      e.home_page = 'URL inválida (ex: https://www.exemplo.com.br)'
+    }
+    setErrors(e)
+    return !Object.keys(e).length
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!validate()) {
+      toast.error('Verifique os campos do formulário')
+      return
+    }
     setSaving(true)
     try {
       if (company) {
@@ -157,6 +179,7 @@ export default function CompanyPage() {
             <div className="space-y-1.5">
               <Label>Razão Social *</Label>
               <Input value={form.name} onChange={(e) => set('name', e.target.value)} />
+              {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Nome Fantasia</Label>
@@ -173,13 +196,15 @@ export default function CompanyPage() {
               <Label>Telefone</Label>
               <Input value={form.phone} onChange={(e) => set('phone', maskPhone(e.target.value))} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Email</Label>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Home Page</Label>
               <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => set('email', e.target.value)}
+                type="url"
+                placeholder="https://www.exemplo.com.br"
+                value={form.home_page}
+                onChange={(e) => set('home_page', e.target.value)}
               />
+              {errors.home_page && <p className="text-xs text-red-500">{errors.home_page}</p>}
             </div>
           </div>
         </div>

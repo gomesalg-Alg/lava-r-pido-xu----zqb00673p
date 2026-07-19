@@ -68,7 +68,7 @@ export default function CompanyListPage() {
               <TableHead>Nome Fantasia</TableHead>
               <TableHead>CNPJ</TableHead>
               <TableHead>Telefone</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>Home Page</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -92,7 +92,20 @@ export default function CompanyListPage() {
                   <TableCell className="text-slate-600">{c.trading_name || '-'}</TableCell>
                   <TableCell className="text-slate-600">{c.cnpj || '-'}</TableCell>
                   <TableCell className="text-slate-600">{c.phone || '-'}</TableCell>
-                  <TableCell className="text-slate-600">{c.email || '-'}</TableCell>
+                  <TableCell className="text-slate-600">
+                    {c.home_page ? (
+                      <a
+                        href={c.home_page}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {c.home_page}
+                      </a>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="sm" asChild>
