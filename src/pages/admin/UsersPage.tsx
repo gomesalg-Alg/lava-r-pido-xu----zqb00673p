@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { getUsers, updateUser, deleteUser, type User } from '@/services/users'
+import { getUsers, updateUser, deleteUser, type User, type UserRole } from '@/services/users'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,10 +21,18 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import pb from '@/lib/pocketbase/client'
+import { cn } from '@/lib/utils'
 import { UserCreateSheet } from '@/components/admin/UserCreateSheet'
 
 export default function UsersPage() {
@@ -34,6 +42,7 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [role, setRole] = useState<UserRole>('Operador')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null)
@@ -61,6 +70,7 @@ export default function UsersPage() {
     setEditingUser(u)
     setName(u.name)
     setEmail(u.email)
+    setRole(u.role || 'Operador')
     setAvatarFile(null)
     setSheetOpen(true)
   }
@@ -73,10 +83,11 @@ export default function UsersPage() {
         const fd = new FormData()
         fd.append('name', name)
         fd.append('email', email)
+        fd.append('role', role)
         fd.append('avatar', avatarFile)
         await updateUser(editingUser.id, fd)
       } else {
-        await updateUser(editingUser.id, { name, email })
+        await updateUser(editingUser.id, { name, email, role })
       }
       toast.success('Usuário atualizado com sucesso!')
       setSheetOpen(false)
@@ -115,6 +126,7 @@ export default function UsersPage() {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Perfil de Acesso</TableHead>
               <TableHead>Criado em</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -122,13 +134,13 @@ export default function UsersPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Nenhum usuário encontrado.
                 </TableCell>
               </TableRow>
@@ -145,6 +157,18 @@ export default function UsersPage() {
                     </div>
                   </TableCell>
                   <TableCell>{u.email}</TableCell>
+                  <TableCell>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                        u.role === 'Administrador'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-slate-100 text-slate-700',
+                      )}
+                    >
+                      {u.role || 'Operador'}
+                    </span>
+                  </TableCell>
                   <TableCell>{new Date(u.created).toLocaleDateString('pt-BR')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -215,6 +239,18 @@ export default function UsersPage() {
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Perfil de Acesso *</Label>
+              <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Administrador">Administrador</SelectItem>
+                  <SelectItem value="Operador">Operador</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <SheetFooter className="mt-8">
