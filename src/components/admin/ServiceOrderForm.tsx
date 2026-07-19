@@ -380,13 +380,6 @@ export function ServiceOrderForm({ orderId }: Props) {
         <h2 className="font-bold text-lg">Itens do Serviço</h2>
         {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
         <ServiceOrderItems items={items} onChange={setItems} />
-        {items.length > 0 && (
-          <div className="flex justify-end pt-2 border-t">
-            <span className="text-base font-bold">
-              Total Geral: {formatCurrency(calcGrandTotal(items))}
-            </span>
-          </div>
-        )}
       </div>
 
       <Button type="submit" disabled={saving} className="w-full" size="lg">

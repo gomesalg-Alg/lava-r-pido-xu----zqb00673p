@@ -14,6 +14,61 @@ import { getServices, type Service } from '@/services/services'
 import { getUsers, type User } from '@/services/users'
 import { formatCurrency } from '@/lib/format'
 
+const parseLocalFloat = (val: string) => {
+  const clean = val.replace(/[^0-9.,-]/g, '')
+  if (!clean) return 0
+  const lastComma = clean.lastIndexOf(',')
+  const lastDot = clean.lastIndexOf('.')
+  const lastSep = Math.max(lastComma, lastDot)
+
+  if (lastSep === -1) return parseFloat(clean) || 0
+
+  const integerPart = clean.substring(0, lastSep).replace(/[.,]/g, '')
+  const decimalPart = clean.substring(lastSep + 1)
+  return parseFloat(`${integerPart}.${decimalPart}`) || 0
+}
+
+function LocalNumberInput({
+  value,
+  onChange,
+  prefix,
+}: {
+  value: number
+  onChange: (v: number) => void
+  prefix?: string
+}) {
+  const [str, setStr] = useState(() => (value || 0).toFixed(2).replace('.', ','))
+
+  useEffect(() => {
+    if (parseLocalFloat(str) !== value) {
+      setStr((value || 0).toFixed(2).replace('.', ','))
+    }
+  }, [value])
+
+  const handleBlur = () => {
+    const parsed = parseLocalFloat(str)
+    setStr(parsed.toFixed(2).replace('.', ','))
+    onChange(parsed)
+  }
+
+  return (
+    <div className="relative">
+      {prefix && (
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">
+          {prefix}
+        </span>
+      )}
+      <Input
+        type="text"
+        className={prefix ? 'pl-9' : ''}
+        value={str}
+        onChange={(e) => setStr(e.target.value)}
+        onBlur={handleBlur}
+      />
+    </div>
+  )
+}
+
 export type ItemRow = {
   id?: string
   service_id: string
@@ -129,40 +184,33 @@ export function ServiceOrderItems({ items, onChange }: Props) {
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Quantidade</Label>
-              <Input
-                type="number"
-                min={1}
+              <LocalNumberInput
                 value={row.quantity}
-                onChange={(e) => updateRow(i, { quantity: parseInt(e.target.value) || 0 })}
+                onChange={(v) => updateRow(i, { quantity: v })}
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Preço Unit. (R$)</Label>
-              <Input
-                type="number"
-                step="0.01"
+              <LocalNumberInput
+                prefix="R$"
                 value={row.unit_price}
-                onChange={(e) => updateRow(i, { unit_price: parseFloat(e.target.value) || 0 })}
+                onChange={(v) => updateRow(i, { unit_price: v })}
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Desconto (R$)</Label>
-              <Input
-                type="number"
-                step="0.01"
+              <LocalNumberInput
+                prefix="R$"
                 value={row.discount_amount}
-                onChange={(e) => updateRow(i, { discount_amount: parseFloat(e.target.value) || 0 })}
+                onChange={(v) => updateRow(i, { discount_amount: v })}
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Acréscimo (R$)</Label>
-              <Input
-                type="number"
-                step="0.01"
+              <LocalNumberInput
+                prefix="R$"
                 value={row.surcharge_amount}
-                onChange={(e) =>
-                  updateRow(i, { surcharge_amount: parseFloat(e.target.value) || 0 })
-                }
+                onChange={(v) => updateRow(i, { surcharge_amount: v })}
               />
             </div>
           </div>

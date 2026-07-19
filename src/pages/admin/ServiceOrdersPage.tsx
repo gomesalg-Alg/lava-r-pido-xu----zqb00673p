@@ -92,6 +92,7 @@ export default function ServiceOrdersPage() {
               <TableHead>Ticket</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Veículo</TableHead>
+              <TableHead>Foto</TableHead>
               <TableHead>Entrada</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -100,13 +101,13 @@ export default function ServiceOrdersPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
                   Nenhuma ordem de serviço encontrada.
                 </TableCell>
               </TableRow>
@@ -125,7 +126,30 @@ export default function ServiceOrdersPage() {
                       : '-'}
                   </TableCell>
                   <TableCell>
-                    {o.entry_at ? new Date(o.entry_at).toLocaleString('pt-BR') : '-'}
+                    {o.photo ? (
+                      <img
+                        src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/service_orders/${o.id}/${o.photo}?thumb=100x100t`}
+                        alt="Foto da Placa"
+                        className="w-16 h-16 object-cover rounded border"
+                      />
+                    ) : (
+                      <span className="text-slate-400 text-xs">Sem foto</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {o.entry_at ? (
+                      <div className="flex flex-col">
+                        <span>{new Date(o.entry_at).toLocaleDateString('pt-BR')}</span>
+                        <span className="text-slate-500 text-sm">
+                          {new Date(o.entry_at).toLocaleTimeString('pt-BR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    ) : (
+                      '-'
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={badgeVariant(o.status)}>{o.status || '-'}</Badge>
