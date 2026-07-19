@@ -19,9 +19,15 @@ export type ServiceOrder = {
   payment_method: PaymentMethod | ''
   status: ServiceOrderStatus | ''
   observation: string
+  created: string
+  updated: string
+  created_by: string
+  updated_by: string
   expand?: {
     customer_id?: Customer
     vehicle_id?: Vehicle
+    created_by?: { id: string; name: string }
+    updated_by?: { id: string; name: string }
   }
 }
 
@@ -56,7 +62,7 @@ export const getServiceOrders = () =>
 
 export const getServiceOrder = (id: string) =>
   pb.collection('service_orders').getOne<ServiceOrder>(id, {
-    expand: 'customer_id,vehicle_id',
+    expand: 'customer_id,vehicle_id,created_by,updated_by',
   })
 
 export const getNextTicketNumber = async () => {

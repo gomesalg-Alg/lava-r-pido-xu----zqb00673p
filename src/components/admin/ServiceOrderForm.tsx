@@ -68,6 +68,10 @@ export function ServiceOrderForm({ orderId }: Props) {
   const [items, setItems] = useState<ItemRow[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [createdBy, setCreatedBy] = useState<{ name: string } | null>(null)
+  const [updatedBy, setUpdatedBy] = useState<{ name: string } | null>(null)
+  const [orderCreated, setOrderCreated] = useState('')
+  const [orderUpdated, setOrderUpdated] = useState('')
 
   useEffect(() => {
     if (orderId) {
@@ -89,6 +93,10 @@ export function ServiceOrderForm({ orderId }: Props) {
           setExistingPhoto(order.photo || '')
           if (order.expand?.customer_id) setCustomer(order.expand.customer_id)
           if (order.expand?.vehicle_id) setVehicle(order.expand.vehicle_id)
+          if (order.expand?.created_by) setCreatedBy(order.expand.created_by)
+          if (order.expand?.updated_by) setUpdatedBy(order.expand.updated_by)
+          setOrderCreated(order.created || '')
+          setOrderUpdated(order.updated || '')
           const existingItems = await getServiceOrderItems(orderId)
           existingItemIds.current = existingItems.map((i) => i.id)
           setItems(
@@ -378,6 +386,28 @@ export function ServiceOrderForm({ orderId }: Props) {
         {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
         <ServiceOrderItems items={items} onChange={setItems} />
       </div>
+
+      {isEdit && (createdBy || updatedBy) && (
+        <div className="bg-white rounded-lg border p-6 space-y-3">
+          <h2 className="font-bold text-lg">Auditoria</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-slate-500">Criado por</p>
+              <p className="font-medium">
+                {createdBy?.name || '—'}
+                {orderCreated && ` em ${new Date(orderCreated).toLocaleString('pt-BR')}`}
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-500">Última alteração por</p>
+              <p className="font-medium">
+                {updatedBy?.name || '—'}
+                {orderUpdated && ` em ${new Date(orderUpdated).toLocaleString('pt-BR')}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Button type="submit" disabled={saving} className="w-full" size="lg">
         <Save className="w-4 h-4 mr-2" />
