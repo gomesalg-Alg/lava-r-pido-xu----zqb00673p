@@ -23,6 +23,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   LayoutDashboard,
+  Wrench,
 } from 'lucide-react'
 
 interface MenuItem {
@@ -55,7 +56,10 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'OPERAÇÕES',
     icon: Tag,
-    items: [{ label: 'Serviços', to: '/admin/servicos', icon: Tag }],
+    items: [
+      { label: 'Serviços', to: '/admin/servicos', icon: Tag },
+      { label: 'Ordem de Serviço', to: '/admin/ordem-servico', icon: Wrench },
+    ],
   },
   {
     label: 'RELATÓRIO',

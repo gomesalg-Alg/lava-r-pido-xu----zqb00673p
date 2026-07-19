@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T01:00:43.315Z",
+  "generatedAt": "2026-07-19T01:43:21.087Z",
   "collections": [
     {
       "name": "users",
@@ -510,6 +510,195 @@
           "type": "text",
           "required": false,
           "system": false
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "service_orders",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "ticket_number",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "prisma_number",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "customer_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "customers"
+        },
+        {
+          "name": "vehicle_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "vehicles"
+        },
+        {
+          "name": "emission_date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "entry_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "exit_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "photo",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "payment_method",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Pix", "Dinheiro", "Cartão de Crédito", "Cartão de Débito"]
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Em Andamento", "Finalizado", "Orçamento"]
+        },
+        {
+          "name": "observation",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "service_order_items",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "service_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "services"
+        },
+        {
+          "name": "operator_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "quantity",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "unit_price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "discount_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "discount_reason",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "surcharge_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "surcharge_reason",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "total_price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
