@@ -6,6 +6,7 @@ export type Promotion = {
   image: string
   is_active: boolean
   description: string
+  expires_at: string | null
   created: string
   updated: string
 }
@@ -15,7 +16,12 @@ export const getPromotions = () =>
 
 export const getActivePromotion = async (): Promise<Promotion | null> => {
   try {
-    return await pb.collection('promotions').getFirstListItem<Promotion>('is_active = true')
+    const now = new Date().toISOString().replace('T', ' ').split('.')[0]
+    const promotions = await pb.collection('promotions').getFullList<Promotion>({
+      filter: `is_active = true && (expires_at = null || expires_at > "${now}")`,
+      sort: '-created',
+    })
+    return promotions.length > 0 ? promotions[0] : null
   } catch {
     return null
   }

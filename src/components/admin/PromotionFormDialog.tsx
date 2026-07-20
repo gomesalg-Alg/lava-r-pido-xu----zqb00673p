@@ -19,6 +19,7 @@ import {
   getPromotionImageUrl,
   type Promotion,
 } from '@/services/promotions'
+import { toDateInput, fromDatetimeLocal } from '@/lib/format'
 import { Image as ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -33,6 +34,7 @@ export function PromotionFormDialog({ open, onOpenChange, promotion, onSaved }: 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isActive, setIsActive] = useState(false)
+  const [expiresAt, setExpiresAt] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -42,6 +44,7 @@ export function PromotionFormDialog({ open, onOpenChange, promotion, onSaved }: 
       setName(promotion?.name || '')
       setDescription(promotion?.description || '')
       setIsActive(promotion?.is_active || false)
+      setExpiresAt(promotion?.expires_at ? toDateInput(promotion.expires_at) : '')
       setImageFile(null)
     }
   }, [open, promotion])
@@ -63,6 +66,11 @@ export function PromotionFormDialog({ open, onOpenChange, promotion, onSaved }: 
       fd.append('name', name)
       fd.append('description', description)
       fd.append('is_active', String(isActive))
+      if (expiresAt) {
+        fd.append('expires_at', fromDatetimeLocal(expiresAt + 'T00:00'))
+      } else {
+        fd.append('expires_at', '')
+      }
       if (imageFile) fd.append('image', imageFile)
 
       let savedId: string
@@ -114,6 +122,13 @@ export function PromotionFormDialog({ open, onOpenChange, promotion, onSaved }: 
               placeholder="Descrição da promoção"
               rows={3}
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Data de Validade</Label>
+            <Input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+            <p className="text-xs text-slate-500">
+              Opcional. Se definido, o pop-up não será exibido após esta data.
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Imagem do Pop-up</Label>

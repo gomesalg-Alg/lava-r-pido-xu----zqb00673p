@@ -27,6 +27,7 @@ import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { PromotionFormDialog } from '@/components/admin/PromotionFormDialog'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { toDateInput } from '@/lib/format'
 
 export default function EnvironmentConfigPage() {
   const { user } = useAuth()
@@ -131,6 +132,7 @@ export default function EnvironmentConfigPage() {
               <TableHead>Imagem</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Descrição</TableHead>
+              <TableHead className="hidden md:table-cell">Validade</TableHead>
               <TableHead>Ativo</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -138,54 +140,63 @@ export default function EnvironmentConfigPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : promotions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Nenhuma promoção encontrada.
                 </TableCell>
               </TableRow>
             ) : (
-              promotions.map((p) => (
-                <TableRow key={p.id} className="even:bg-slate-50">
-                  <TableCell>
-                    {p.image ? (
-                      <img
-                        src={getPromotionImageUrl(p)!}
-                        alt={p.name}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg bg-slate-100" />
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{p.name}</TableCell>
-                  <TableCell className="hidden md:table-cell max-w-[200px] truncate text-slate-500">
-                    {p.description || '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Switch checked={p.is_active} onCheckedChange={() => handleToggleActive(p)} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEdit(p)}>
-                        <Edit className="w-4 h-4 mr-1" /> Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteTarget(p)}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" /> Excluir
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              promotions.map((p) => {
+                const isExpired = p.expires_at && new Date(p.expires_at) < new Date()
+                return (
+                  <TableRow key={p.id} className="even:bg-slate-50">
+                    <TableCell>
+                      {p.image ? (
+                        <img
+                          src={getPromotionImageUrl(p)!}
+                          alt={p.name}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-slate-100" />
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="hidden md:table-cell max-w-[200px] truncate text-slate-500">
+                      {p.description || '-'}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-sm text-slate-500">
+                      {p.expires_at ? toDateInput(p.expires_at) : '-'}
+                      {isExpired && (
+                        <span className="ml-2 text-xs text-red-500 font-medium">Expirada</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Switch checked={p.is_active} onCheckedChange={() => handleToggleActive(p)} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={() => openEdit(p)}>
+                          <Edit className="w-4 h-4 mr-1" /> Editar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDeleteTarget(p)}
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" /> Excluir
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>
