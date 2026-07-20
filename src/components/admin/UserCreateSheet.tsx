@@ -21,6 +21,7 @@ import {
 import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createUser, type UserRole } from '@/services/users'
+import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
 
 interface UserCreateSheetProps {
   onCreated: () => void
@@ -34,6 +35,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [role, setRole] = useState<UserRole>('Operador')
   const [saving, setSaving] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   const reset = () => {
     setName('')
@@ -41,6 +43,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
     setPassword('')
     setPasswordConfirm('')
     setRole('Operador')
+    setFieldErrors({})
   }
 
   const handleSave = async () => {
@@ -57,6 +60,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
       return
     }
     setSaving(true)
+    setFieldErrors({})
     try {
       const fd = new FormData()
       fd.append('name', name)
@@ -69,8 +73,9 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
       setOpen(false)
       reset()
       onCreated()
-    } catch {
-      toast.error('Erro ao criar usuário')
+    } catch (err) {
+      setFieldErrors(extractFieldErrors(err))
+      toast.error(getErrorMessage(err))
     } finally {
       setSaving(false)
     }
@@ -98,14 +103,17 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
           <div className="space-y-2">
             <Label>Nome *</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
+            {fieldErrors.name && <p className="text-sm text-red-500">{fieldErrors.name}</p>}
           </div>
           <div className="space-y-2">
             <Label>Email *</Label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            {fieldErrors.email && <p className="text-sm text-red-500">{fieldErrors.email}</p>}
           </div>
           <div className="space-y-2">
             <Label>Senha *</Label>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            {fieldErrors.password && <p className="text-sm text-red-500">{fieldErrors.password}</p>}
           </div>
           <div className="space-y-2">
             <Label>Confirmar Senha *</Label>
@@ -114,6 +122,9 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
             />
+            {fieldErrors.passwordConfirm && (
+              <p className="text-sm text-red-500">{fieldErrors.passwordConfirm}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Perfil de Acesso *</Label>
@@ -126,6 +137,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
                 <SelectItem value="Operador">Operador</SelectItem>
               </SelectContent>
             </Select>
+            {fieldErrors.role && <p className="text-sm text-red-500">{fieldErrors.role}</p>}
           </div>
         </div>
         <SheetFooter className="mt-8">

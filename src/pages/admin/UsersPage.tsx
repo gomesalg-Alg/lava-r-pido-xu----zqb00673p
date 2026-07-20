@@ -102,23 +102,32 @@ export default function UsersPage() {
     setFieldErrors({})
 
     try {
-      const fd = new FormData()
-      fd.append('name', name)
-      fd.append('email', email)
-      fd.append('role', role)
-
       if (avatarFile) {
+        const fd = new FormData()
+        fd.append('name', name)
+        fd.append('email', email)
+        fd.append('role', role)
         fd.append('avatar', avatarFile)
-      } else if (removeAvatar) {
-        fd.append('avatar', '')
+        if (newPassword) {
+          fd.append('password', newPassword)
+          fd.append('passwordConfirm', confirmPassword)
+        }
+        await updateUser(editingUser.id, fd)
+      } else {
+        const data: Record<string, string | null> = {
+          name,
+          email,
+          role,
+        }
+        if (removeAvatar) {
+          data.avatar = null
+        }
+        if (newPassword) {
+          data.password = newPassword
+          data.passwordConfirm = confirmPassword
+        }
+        await updateUser(editingUser.id, data)
       }
-
-      if (newPassword) {
-        fd.append('password', newPassword)
-        fd.append('passwordConfirm', confirmPassword)
-      }
-
-      await updateUser(editingUser.id, fd)
       toast.success('Usuário atualizado com sucesso!')
       setSheetOpen(false)
       loadData()
