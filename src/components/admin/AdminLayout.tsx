@@ -24,6 +24,7 @@ import {
   PanelLeftOpen,
   LayoutDashboard,
   Wrench,
+  SlidersHorizontal,
 } from 'lucide-react'
 
 interface MenuItem {
@@ -72,6 +73,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { label: 'Empresa', to: '/admin/empresa', icon: Building2 },
       { label: 'Usuários', to: '/admin/usuarios', icon: User },
+      { label: 'Configuração de Ambiente', to: '/admin/ambiente', icon: SlidersHorizontal },
     ],
   },
 ]

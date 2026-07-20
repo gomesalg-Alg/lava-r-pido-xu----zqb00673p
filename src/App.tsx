@@ -27,6 +27,7 @@ import ServiceOrdersPage from './pages/admin/ServiceOrdersPage'
 import NewServiceOrder from './pages/admin/NewServiceOrder'
 import EditServiceOrder from './pages/admin/EditServiceOrder'
 import PrintServiceOrderPage from './pages/admin/PrintServiceOrderPage'
+import EnvironmentConfigPage from './pages/admin/EnvironmentConfigPage'
 import PublicServiceOrder from './pages/PublicServiceOrder'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="ordem-servico/novo" element={<NewServiceOrder />} />
             <Route path="ordem-servico/:id/editar" element={<EditServiceOrder />} />
             <Route path="ordem-servico/:id/imprimir" element={<PrintServiceOrderPage />} />
+            <Route path="ambiente" element={<EnvironmentConfigPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

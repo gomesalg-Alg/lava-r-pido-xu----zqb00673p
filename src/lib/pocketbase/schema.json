@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-20T00:57:50.353Z",
+  "generatedAt": "2026-07-20T14:48:28.503Z",
   "collections": [
     {
       "name": "users",
@@ -435,6 +435,12 @@
           "type": "file",
           "required": false,
           "system": false
+        },
+        {
+          "name": "popup_enabled",
+          "type": "bool",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -790,6 +796,58 @@
       "indexes": [
         "CREATE INDEX idx_audit_logs_resource_id_created ON audit_logs (resource_id, created DESC)"
       ]
+    },
+    {
+      "name": "promotions",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != '' && @request.auth.role = 'Administrador'",
+        "update": "@request.auth.id != '' && @request.auth.role = 'Administrador'",
+        "delete": "@request.auth.id != '' && @request.auth.role = 'Administrador'"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "image",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }
