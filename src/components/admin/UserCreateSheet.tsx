@@ -107,12 +107,22 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
           </div>
           <div className="space-y-2">
             <Label>Email *</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="off"
+            />
             {fieldErrors.email && <p className="text-sm text-red-500">{fieldErrors.email}</p>}
           </div>
           <div className="space-y-2">
             <Label>Senha *</Label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+            />
             {fieldErrors.password && <p className="text-sm text-red-500">{fieldErrors.password}</p>}
           </div>
           <div className="space-y-2">
@@ -121,6 +131,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
               type="password"
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
+              autoComplete="new-password"
             />
             {fieldErrors.passwordConfirm && (
               <p className="text-sm text-red-500">{fieldErrors.passwordConfirm}</p>

@@ -102,32 +102,23 @@ export default function UsersPage() {
     setFieldErrors({})
 
     try {
+      const fd = new FormData()
+      fd.append('name', name)
+      fd.append('email', email)
+      fd.append('role', role)
+
       if (avatarFile) {
-        const fd = new FormData()
-        fd.append('name', name)
-        fd.append('email', email)
-        fd.append('role', role)
         fd.append('avatar', avatarFile)
-        if (newPassword) {
-          fd.append('password', newPassword)
-          fd.append('passwordConfirm', confirmPassword)
-        }
-        await updateUser(editingUser.id, fd)
-      } else {
-        const data: Record<string, string | null> = {
-          name,
-          email,
-          role,
-        }
-        if (removeAvatar) {
-          data.avatar = null
-        }
-        if (newPassword) {
-          data.password = newPassword
-          data.passwordConfirm = confirmPassword
-        }
-        await updateUser(editingUser.id, data)
+      } else if (removeAvatar) {
+        fd.append('avatar', '')
       }
+
+      if (newPassword) {
+        fd.append('password', newPassword)
+        fd.append('passwordConfirm', confirmPassword)
+      }
+
+      await updateUser(editingUser.id, fd)
       toast.success('Usuário atualizado com sucesso!')
       setSheetOpen(false)
       loadData()
@@ -273,7 +264,7 @@ export default function UsersPage() {
                       }}
                       className="text-red-600 hover:bg-red-50 hover:text-red-700"
                     >
-                      <X className="w-4 h-4 mr-1" /> Remover Foto
+                      <X className="w-4 h-4 mr-1" /> Excluir Imagem
                     </Button>
                   )}
                 </div>
@@ -299,7 +290,12 @@ export default function UsersPage() {
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="off"
+              />
               {fieldErrors.email && <p className="text-sm text-red-500">{fieldErrors.email}</p>}
             </div>
             <div className="space-y-2">
@@ -325,6 +321,7 @@ export default function UsersPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete="new-password"
                 />
                 {fieldErrors.password && (
                   <p className="text-sm text-red-500">{fieldErrors.password}</p>
@@ -337,6 +334,7 @@ export default function UsersPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete="new-password"
                 />
                 {fieldErrors.passwordConfirm && (
                   <p className="text-sm text-red-500">{fieldErrors.passwordConfirm}</p>

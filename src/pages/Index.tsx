@@ -10,6 +10,7 @@ import { HowItWorks } from '@/components/sections/HowItWorks'
 import { BusinessHours } from '@/components/sections/BusinessHours'
 import { Location } from '@/components/sections/Location'
 import { FAQ } from '@/components/sections/FAQ'
+import { PromoModal } from '@/components/PromoModal'
 import { trackPageView } from '@/lib/analytics'
 import { logPageView } from '@/services/analytics'
 
@@ -66,6 +67,7 @@ const Index = () => {
       <BusinessHours />
       <Location />
       <FAQ />
+      <PromoModal />
     </div>
   )
 }
