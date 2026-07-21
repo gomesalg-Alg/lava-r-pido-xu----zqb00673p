@@ -12,7 +12,8 @@ export type User = {
   updated: string
 }
 
-export const getUsers = () => pb.collection('users').getFullList<User>({ sort: '-created' })
+export const getUsers = () =>
+  pb.collection('users').getFullList<User>({ sort: '-created', fields: '*' })
 
 export const getUser = (id: string) => pb.collection('users').getOne<User>(id)
 

@@ -98,6 +98,11 @@ export default function UsersPage() {
       return
     }
 
+    if (!email.trim()) {
+      toast.error('O email é obrigatório')
+      return
+    }
+
     setSaving(true)
     setFieldErrors({})
 
@@ -107,7 +112,7 @@ export default function UsersPage() {
       if (hasFileOperation) {
         const fd = new FormData()
         fd.append('name', name)
-        fd.append('email', email)
+        fd.append('email', email.trim())
         fd.append('role', role)
 
         if (avatarFile) {
@@ -125,7 +130,7 @@ export default function UsersPage() {
       } else {
         const data: Record<string, string> = {
           name,
-          email,
+          email: email.trim(),
           role,
         }
 
