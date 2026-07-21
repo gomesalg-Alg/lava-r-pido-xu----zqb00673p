@@ -65,6 +65,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
       const fd = new FormData()
       fd.append('name', name)
       fd.append('email', email)
+      fd.append('emailVisibility', 'true')
       fd.append('password', password)
       fd.append('passwordConfirm', passwordConfirm)
       fd.append('role', role)

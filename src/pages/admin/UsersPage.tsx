@@ -113,6 +113,7 @@ export default function UsersPage() {
         const fd = new FormData()
         fd.append('name', name)
         fd.append('email', email.trim())
+        fd.append('emailVisibility', 'true')
         fd.append('role', role)
 
         if (avatarFile) {
@@ -128,9 +129,10 @@ export default function UsersPage() {
 
         await updateUser(editingUser.id, fd)
       } else {
-        const data: Record<string, string> = {
+        const data: Record<string, string | boolean> = {
           name,
           email: email.trim(),
+          emailVisibility: true,
           role,
         }
 
