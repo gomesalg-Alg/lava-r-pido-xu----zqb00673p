@@ -66,8 +66,8 @@ export function Header() {
             asChild
             variant="ghost"
             className={cn(
-              'font-medium transition-colors',
-              isScrolled ? 'text-slate-600 hover:text-primary' : 'text-white hover:text-white/80',
+              'text-sm font-medium hover:text-secondary transition-colors cursor-pointer',
+              isScrolled ? 'text-slate-600' : 'text-slate-200',
             )}
             aria-label="Acessar Sistema - Área Administrativa"
           >
