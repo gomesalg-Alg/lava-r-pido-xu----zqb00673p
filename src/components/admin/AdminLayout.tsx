@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   Wrench,
   SlidersHorizontal,
+  Wallet,
 } from 'lucide-react'
 
 interface MenuItem {
@@ -65,7 +66,10 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'RELATÓRIO',
     icon: BarChart3,
-    items: [{ label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity }],
+    items: [
+      { label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity },
+      { label: 'Plano de Contas', to: '/admin/plano-contas', icon: Wallet },
+    ],
   },
   {
     label: 'CONFIGURAÇÕES',
