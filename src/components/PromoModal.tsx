@@ -35,25 +35,20 @@ export function PromoModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-0 overflow-hidden max-w-4xl w-[90vw] sm:w-[80vw] border-0 gap-0 mx-auto bg-background">
-        <DialogClose className="absolute right-3 top-3 z-10 rounded-full bg-black/50 hover:bg-black/70 p-1.5 text-white transition-colors">
-          <X size={20} />
+      <DialogContent className="p-0 overflow-hidden max-w-4xl w-[90vw] sm:w-[80vw] border-0 gap-0 mx-auto bg-background rounded-2xl">
+        <DialogClose className="absolute right-3 top-3 z-20 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-sm p-2 text-white shadow-lg ring-1 ring-white/20 transition-all duration-200 hover:scale-105">
+          <X size={22} strokeWidth={2.5} />
           <span className="sr-only">Fechar</span>
         </DialogClose>
         {imageUrl && (
-          <div className="relative">
+          <div className="relative w-full h-full flex items-center justify-center">
             <img
               src={imageUrl}
               alt={promotion?.name}
-              className="w-full h-auto block object-contain max-h-[80vh]"
+              className="w-full h-auto block object-cover max-h-[85vh] sm:max-h-[90vh] rounded-2xl"
             />
           </div>
         )}
-        <div className="px-6 pb-6 pt-4 flex justify-center">
-          <Button variant="outline" className="w-full max-w-xs" onClick={() => setOpen(false)}>
-            Fechar
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   )
