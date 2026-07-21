@@ -11,6 +11,7 @@ import type { Company } from '@/services/company'
 import { calculateOrderTotals } from '@/lib/order-calculations'
 import { formatCurrency, formatDuration, toDateInput } from '@/lib/format'
 import { sanitizePhone, buildOrderShareMessage, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
+import { MetaTags } from '@/components/MetaTags'
 import '@/styles/print.css'
 
 export default function PublicServiceOrder() {
@@ -72,6 +73,12 @@ export default function PublicServiceOrder() {
 
   return (
     <div className="min-h-screen bg-slate-100">
+      <MetaTags
+        title={`Ordem de Serviço Nº ${order.ticket_number} - ${companyName}`}
+        description={`Confira os detalhes da sua Ordem de Serviço. Status: ${order.status || 'Em Andamento'}. Cliente: ${order.expand?.customer_id?.name || '--'}`}
+        image={logoUrl || 'https://img.usecurling.com/p/800/418?q=car%20wash&color=blue'}
+        url={window.location.href}
+      />
       <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
         <Button variant="outline" onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Hero } from '@/components/sections/Hero'
 import { SocialProof } from '@/components/sections/SocialProof'
 import { Services } from '@/components/sections/Services'
@@ -13,9 +13,15 @@ import { FAQ } from '@/components/sections/FAQ'
 import { PromoModal } from '@/components/PromoModal'
 import { trackPageView } from '@/lib/analytics'
 import { logPageView } from '@/services/analytics'
+import { MetaTags } from '@/components/MetaTags'
+import { getCompany, type Company } from '@/services/company'
 
 const Index = () => {
+  const [company, setCompany] = useState<Company | null>(null)
+
   useEffect(() => {
+    getCompany().then(setCompany).catch(console.error)
+
     trackPageView('/')
     logPageView('/', window.navigator.userAgent)
 
@@ -56,6 +62,24 @@ const Index = () => {
           pointer-events: none !important;
         }
       `}</style>
+      <MetaTags
+        title={
+          company?.trading_name
+            ? `${company.trading_name} - Seu veículo em boas mãos`
+            : 'Lava Rápido XUÁ - Seu veículo em boas mãos'
+        }
+        description={
+          company?.name
+            ? `Lavagens simples, completas, polimento, cristalização e muito mais na ${company.trading_name || company.name}.`
+            : 'Lavagens simples, completas, polimento, cristalização e muito mais. Buscamos e entregamos seu veículo em um raio de 2km.'
+        }
+        image={
+          company?.logo
+            ? `${import.meta.env.VITE_POCKETBASE_URL}/api/files/company/${company.id}/${company.logo}`
+            : 'https://img.usecurling.com/p/800/418?q=car%20wash&color=blue'
+        }
+        url={window.location.href}
+      />
       <Hero />
       <SocialProof />
       <Services />
