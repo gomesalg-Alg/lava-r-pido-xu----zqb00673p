@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Menu, Droplets } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Menu, Droplets, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
@@ -60,7 +61,21 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex items-center gap-3">
+          <Button
+            asChild
+            variant="ghost"
+            className={cn(
+              'font-medium transition-colors',
+              isScrolled ? 'text-slate-600 hover:text-primary' : 'text-white hover:text-white/80',
+            )}
+            aria-label="Acessar Sistema - Área Administrativa"
+          >
+            <Link to="/login">
+              <LogIn className="mr-2 h-4 w-4" />
+              Acessar Sistema
+            </Link>
+          </Button>
           <Button
             asChild
             variant="secondary"
@@ -98,6 +113,17 @@ export function Header() {
                   </a>
                 ))}
                 <div className="mt-4 pt-4 border-t">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full text-lg h-12 mb-2"
+                    aria-label="Acessar Sistema - Área Administrativa"
+                  >
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Acessar Sistema
+                    </Link>
+                  </Button>
                   <Button asChild variant="secondary" className="w-full text-lg h-12">
                     <a href="https://wa.me/5511953275624" target="_blank" rel="noreferrer">
                       Agendar Agora
