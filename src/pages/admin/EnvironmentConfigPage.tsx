@@ -116,9 +116,9 @@ export default function EnvironmentConfigPage() {
       <Card className="mb-6">
         <CardContent className="flex items-center justify-between p-4">
           <div>
-            <p className="font-semibold text-slate-800">Exibir Pop-up na Página Inicial</p>
+            <p className="font-semibold text-slate-800">Ativar Pop-up Global</p>
             <p className="text-sm text-slate-500">
-              Ative ou desative globalmente os pop-ups promocionais.
+              Ative ou desative globalmente os pop-ups promocionais na página inicial.
             </p>
           </div>
           <Switch checked={popupEnabled} onCheckedChange={handleTogglePopup} />

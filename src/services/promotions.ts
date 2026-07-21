@@ -16,9 +16,9 @@ export const getPromotions = () =>
 
 export const getActivePromotion = async (): Promise<Promotion | null> => {
   try {
-    const now = new Date().toISOString().replace('T', ' ').split('.')[0]
+    const today = new Date().toISOString().split('T')[0]
     const promotions = await pb.collection('promotions').getFullList<Promotion>({
-      filter: `is_active = true && (expires_at = null || expires_at > "${now}")`,
+      filter: `is_active = true && (expires_at = null || expires_at >= "${today}")`,
       sort: '-created',
     })
     return promotions.length > 0 ? promotions[0] : null
