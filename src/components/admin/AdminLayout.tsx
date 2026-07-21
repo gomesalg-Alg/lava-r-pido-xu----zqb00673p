@@ -53,6 +53,7 @@ const menuGroups: MenuGroup[] = [
       { label: 'Clientes', to: '/admin/clientes', icon: Users },
       { label: 'Fornecedores', to: '/admin/fornecedores', icon: Truck },
       { label: 'Veículos', to: '/admin/veiculos', icon: Car },
+      { label: 'Plano de Contas', to: '/admin/plano-contas', icon: Wallet },
     ],
   },
   {
@@ -66,10 +67,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: 'RELATÓRIO',
     icon: BarChart3,
-    items: [
-      { label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity },
-      { label: 'Plano de Contas', to: '/admin/plano-contas', icon: Wallet },
-    ],
+    items: [{ label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity }],
   },
   {
     label: 'CONFIGURAÇÕES',
