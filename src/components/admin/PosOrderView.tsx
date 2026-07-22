@@ -189,7 +189,7 @@ export function PosOrderView({ order, onBack }: Props) {
                     <TableHead className="px-2 text-right">Preço</TableHead>
                     <TableHead className="px-2 text-right">Desc.</TableHead>
                     <TableHead className="px-2 text-right">Acréc.</TableHead>
-                    <TableHead className="px-2 text-right pr-4">Total</TableHead>
+                    <TableHead className="px-2 text-right pr-4 tabular-nums">Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -276,7 +276,7 @@ export function PosOrderView({ order, onBack }: Props) {
                           <TableCell className="px-2 py-3 text-right text-green-600 whitespace-nowrap">
                             {formatCurrency(item.surcharge_amount || 0)}
                           </TableCell>
-                          <TableCell className="px-2 py-3 text-right font-medium whitespace-nowrap pr-4">
+                          <TableCell className="px-2 py-3 text-right font-medium whitespace-nowrap pr-4 tabular-nums">
                             {formatCurrency(item.total_price || 0)}
                           </TableCell>
                         </TableRow>
@@ -289,25 +289,25 @@ export function PosOrderView({ order, onBack }: Props) {
             <div className="flex flex-col items-end gap-1 mt-4 text-sm">
               <div className="flex gap-8">
                 <span className="text-slate-500">Subtotal:</span>
-                <span className="font-medium w-28 text-right">
+                <span className="font-medium w-28 text-right tabular-nums">
                   {formatCurrency(totals.subtotal)}
                 </span>
               </div>
               <div className="flex gap-8">
                 <span className="text-slate-500">Total Descontos:</span>
-                <span className="font-medium w-28 text-right text-red-500">
+                <span className="font-medium w-28 text-right text-red-500 tabular-nums">
                   {formatCurrency(totals.totalDiscount)}
                 </span>
               </div>
               <div className="flex gap-8">
                 <span className="text-slate-500">Total Acréscimos:</span>
-                <span className="font-medium w-28 text-right text-green-600">
+                <span className="font-medium w-28 text-right text-green-600 tabular-nums">
                   {formatCurrency(totals.totalSurcharge)}
                 </span>
               </div>
               <div className="flex gap-8 text-base">
                 <span className="font-bold">Total Geral:</span>
-                <span className="font-bold w-28 text-right">
+                <span className="font-bold w-28 text-right tabular-nums">
                   {formatCurrency(totals.grandTotal)}
                 </span>
               </div>
