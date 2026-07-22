@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T20:44:26.292Z",
+  "generatedAt": "2026-07-21T21:59:44.659Z",
   "collections": [
     {
       "name": "users",
@@ -599,7 +599,14 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": ["Pix", "Dinheiro", "Cartão de Crédito", "Cartão de Débito"]
+          "selectValues": [
+            "Dinheiro",
+            "Cartão de Crédito",
+            "Cartão de Débito",
+            "Pix",
+            "Cortesia",
+            "Outros"
+          ]
         },
         {
           "name": "status",
@@ -641,6 +648,24 @@
           "required": false,
           "system": false,
           "collectionRef": "users"
+        },
+        {
+          "name": "total_discount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "total_surcharge",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "amount_paid",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -666,14 +691,14 @@
         {
           "name": "service_id",
           "type": "relation",
-          "required": true,
+          "required": false,
           "system": false,
           "collectionRef": "services"
         },
         {
           "name": "operator_id",
           "type": "relation",
-          "required": true,
+          "required": false,
           "system": false,
           "collectionRef": "users"
         },
@@ -732,6 +757,13 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "product_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "products"
         }
       ],
       "indexes": []
@@ -915,6 +947,64 @@
         }
       ],
       "indexes": ["CREATE INDEX idx_account_categories_code ON account_categories (code)"]
+    },
+    {
+      "name": "products",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sku",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "stock_quantity",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }

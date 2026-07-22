@@ -36,7 +36,7 @@ import { toast } from 'sonner'
 import { Save, Camera, Upload } from 'lucide-react'
 
 const STATUSES = ['Orçamento', 'Em Andamento', 'Finalizado']
-const PAYMENTS = ['Pix', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito']
+const PAYMENTS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Cortesia', 'Outros']
 
 interface Props {
   orderId?: string

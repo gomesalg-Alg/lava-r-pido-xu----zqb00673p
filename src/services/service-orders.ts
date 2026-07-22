@@ -4,7 +4,13 @@ import type { Vehicle } from './vehicles'
 import type { Company } from './company'
 
 export type ServiceOrderStatus = 'Em Andamento' | 'Finalizado' | 'Orçamento'
-export type PaymentMethod = 'Pix' | 'Dinheiro' | 'Cartão de Crédito' | 'Cartão de Débito'
+export type PaymentMethod =
+  | 'Dinheiro'
+  | 'Cartão de Crédito'
+  | 'Cartão de Débito'
+  | 'Pix'
+  | 'Cortesia'
+  | 'Outros'
 
 export type ServiceOrder = {
   id: string
@@ -23,6 +29,9 @@ export type ServiceOrder = {
   updated: string
   created_by: string
   updated_by: string
+  total_discount: number
+  total_surcharge: number
+  amount_paid: number
   expand?: {
     customer_id?: Customer
     vehicle_id?: Vehicle
@@ -43,8 +52,10 @@ export type ServiceOrderItem = {
   surcharge_amount: number
   surcharge_reason: string
   total_price: number
+  product_id: string
   expand?: {
     service_id?: { id: string; name: string; price: number }
+    product_id?: { id: string; name: string; price: number }
     operator_id?: { id: string; name: string; email: string }
   }
 }
@@ -83,7 +94,7 @@ export const deleteServiceOrder = (id: string) => pb.collection('service_orders'
 export const getServiceOrderItems = (orderId: string) =>
   pb.collection('service_order_items').getFullList<ServiceOrderItem>({
     filter: `order_id = "${orderId}"`,
-    expand: 'service_id,operator_id',
+    expand: 'service_id,product_id,operator_id',
   })
 
 export const createServiceOrderItem = (data: Record<string, unknown>) =>
@@ -149,6 +160,58 @@ export const searchByPlacaOrCpf = async (query: string): Promise<CustomerVehicle
     } catch {
       /* ignore */
     }
+  }
+
+  return results
+}
+
+export const searchServiceOrdersByPlacaOrTicket = async (
+  query: string,
+): Promise<ServiceOrder[]> => {
+  const q = query.trim()
+  if (!q) return []
+  const results: ServiceOrder[] = []
+  const seen = new Set<string>()
+
+  const digits = q.replace(/\D/g, '')
+  if (digits) {
+    try {
+      const ticketNum = parseInt(digits, 10)
+      const ticketResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
+        filter: `ticket_number = ${ticketNum}`,
+        expand: 'customer_id,vehicle_id',
+      })
+      for (const o of ticketResults) {
+        if (!seen.has(o.id)) {
+          seen.add(o.id)
+          results.push(o)
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  try {
+    const upperQ = q.toUpperCase()
+    const vehicles = await pb.collection('vehicles').getFullList({
+      filter: `placa ~ "${upperQ}"`,
+    })
+    for (const v of vehicles) {
+      const orders = await pb.collection('service_orders').getFullList<ServiceOrder>({
+        filter: `vehicle_id = "${v.id}" && status != 'Finalizado'`,
+        expand: 'customer_id,vehicle_id',
+        sort: '-created',
+      })
+      for (const o of orders) {
+        if (!seen.has(o.id)) {
+          seen.add(o.id)
+          results.push(o)
+        }
+      }
+    }
+  } catch {
+    /* ignore */
   }
 
   return results

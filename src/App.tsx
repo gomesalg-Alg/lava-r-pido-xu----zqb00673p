@@ -30,6 +30,8 @@ import PrintServiceOrderPage from './pages/admin/PrintServiceOrderPage'
 import EnvironmentConfigPage from './pages/admin/EnvironmentConfigPage'
 import PublicServiceOrder from './pages/PublicServiceOrder'
 import AccountCategoriesPage from './pages/admin/AccountCategoriesPage'
+import ProductsPage from './pages/admin/ProductsPage'
+import PosPage from './pages/admin/PosPage'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -79,6 +81,8 @@ const App = () => (
             <Route path="ordem-servico/:id/imprimir" element={<PrintServiceOrderPage />} />
             <Route path="ambiente" element={<EnvironmentConfigPage />} />
             <Route path="plano-contas" element={<AccountCategoriesPage />} />
+            <Route path="produtos" element={<ProductsPage />} />
+            <Route path="frente-caixa" element={<PosPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

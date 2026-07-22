@@ -26,6 +26,8 @@ import {
   Wrench,
   SlidersHorizontal,
   Wallet,
+  Package,
+  ShoppingCart,
 } from 'lucide-react'
 
 interface MenuItem {
@@ -50,18 +52,20 @@ const menuGroups: MenuGroup[] = [
     label: 'CADASTRO',
     icon: ClipboardList,
     items: [
+      { label: 'Serviços', to: '/admin/servicos', icon: Tag },
+      { label: 'Produtos', to: '/admin/produtos', icon: Package },
       { label: 'Clientes', to: '/admin/clientes', icon: Users },
-      { label: 'Fornecedores', to: '/admin/fornecedores', icon: Truck },
       { label: 'Veículos', to: '/admin/veiculos', icon: Car },
+      { label: 'Fornecedores', to: '/admin/fornecedores', icon: Truck },
       { label: 'Plano de Contas', to: '/admin/plano-contas', icon: Wallet },
     ],
   },
   {
     label: 'OPERAÇÕES',
-    icon: Tag,
+    icon: ShoppingCart,
     items: [
-      { label: 'Serviços', to: '/admin/servicos', icon: Tag },
-      { label: 'Ordem de Serviço', to: '/admin/ordem-servico', icon: Wrench },
+      { label: 'Frente de Caixa', to: '/admin/frente-caixa', icon: ShoppingCart },
+      { label: 'Ordens de Serviço', to: '/admin/ordem-servico', icon: Wrench },
     ],
   },
   {
