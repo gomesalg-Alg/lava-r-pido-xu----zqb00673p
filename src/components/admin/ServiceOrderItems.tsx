@@ -15,6 +15,7 @@ import { getServices, type Service } from '@/services/services'
 import { getUsers, type User } from '@/services/users'
 import { getProducts, type Product } from '@/services/products'
 import { formatCurrency } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 const parseLocalFloat = (val: string) => {
   const clean = val.replace(/[^0-9.,-]/g, '')
@@ -168,7 +169,13 @@ export function ServiceOrderItems({ items, onChange }: Props) {
               </tr>
             ) : (
               items.map((row, i) => (
-                <tr key={i} className={i % 2 === 1 ? 'bg-slate-50' : 'bg-white'}>
+                <tr
+                  key={i}
+                  className={cn(
+                    'hover:bg-slate-100/50 transition-colors',
+                    i % 2 === 1 ? 'bg-slate-50' : 'bg-white',
+                  )}
+                >
                   <td className="px-3 py-2">
                     <Select value={getItemValue(row)} onValueChange={(v) => handleItemSelect(i, v)}>
                       <SelectTrigger className="h-8 text-xs">

@@ -180,100 +180,112 @@ export function PosOrderView({ order, onBack }: Props) {
         <Card>
           <CardContent className="p-4">
             <h2 className="font-semibold mb-2">Itens da Ordem</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="text-center">Qtd</TableHead>
-                  <TableHead className="text-right">Preço</TableHead>
-                  <TableHead className="text-right">Desc.</TableHead>
-                  <TableHead className="text-right">Acréc.</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loadingItems ? (
+            <div className="w-full">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-slate-400">
-                      Carregando...
-                    </TableCell>
+                    <TableHead className="px-2">Item</TableHead>
+                    <TableHead className="px-2 text-center">Qtd</TableHead>
+                    <TableHead className="px-2 text-right">Preço</TableHead>
+                    <TableHead className="px-2 text-right">Desc.</TableHead>
+                    <TableHead className="px-2 text-right">Acréc.</TableHead>
+                    <TableHead className="px-2 text-right pr-4">Total</TableHead>
                   </TableRow>
-                ) : items.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-slate-400">
-                      Nenhum item adicionado.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  items.map((item, idx) => {
-                    const locked = isLocked(item)
-                    return (
-                      <TableRow key={item.id} className={cn(idx % 2 === 1 && 'bg-slate-50')}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {locked && <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                            <span className={cn(locked && 'text-slate-500')}>
-                              {item.expand?.service_id?.name ||
-                                item.expand?.product_id?.name ||
-                                '-'}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {locked ? (
-                            <span className="inline-block min-w-[2rem] text-slate-500">
-                              {item.quantity}
-                            </span>
-                          ) : (
-                            <div className="flex items-center justify-center gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={() => handleQtyChange(item, -1)}
+                </TableHeader>
+                <TableBody>
+                  {loadingItems ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-slate-400">
+                        Carregando...
+                      </TableCell>
+                    </TableRow>
+                  ) : items.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-slate-400">
+                        Nenhum item adicionado.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    items.map((item, idx) => {
+                      const locked = isLocked(item)
+                      return (
+                        <TableRow
+                          key={item.id}
+                          className={cn('hover:bg-slate-100/50', idx % 2 === 1 && 'bg-slate-50')}
+                        >
+                          <TableCell className="px-2 py-3">
+                            <div className="flex items-start gap-1.5">
+                              {locked && (
+                                <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                              )}
+                              <span
+                                className={cn(
+                                  'line-clamp-2 leading-tight',
+                                  locked && 'text-slate-500',
+                                )}
                               >
-                                <Minus className="w-3 h-3" />
-                              </Button>
-                              <span className="inline-block min-w-[2rem] text-center font-medium">
+                                {item.expand?.service_id?.name ||
+                                  item.expand?.product_id?.name ||
+                                  '-'}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-2 py-3 text-center whitespace-nowrap">
+                            {locked ? (
+                              <span className="inline-block min-w-[2rem] text-slate-500">
                                 {item.quantity}
                               </span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={() => handleQtyChange(item, 1)}
-                              >
-                                <Plus className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-red-600 hover:bg-red-50"
-                                onClick={() => handleRemoveItem(item)}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(item.unit_price || 0)}
-                        </TableCell>
-                        <TableCell className="text-right text-red-500">
-                          {formatCurrency(item.discount_amount || 0)}
-                        </TableCell>
-                        <TableCell className="text-right text-green-600">
-                          {formatCurrency(item.surcharge_amount || 0)}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(item.total_price || 0)}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
+                            ) : (
+                              <div className="flex items-center justify-center gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => handleQtyChange(item, -1)}
+                                >
+                                  <Minus className="w-3 h-3" />
+                                </Button>
+                                <span className="inline-block min-w-[1.5rem] text-center font-medium">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => handleQtyChange(item, 1)}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 text-red-600 hover:bg-red-50 ml-1"
+                                  onClick={() => handleRemoveItem(item)}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="px-2 py-3 text-right whitespace-nowrap">
+                            {formatCurrency(item.unit_price || 0)}
+                          </TableCell>
+                          <TableCell className="px-2 py-3 text-right text-red-500 whitespace-nowrap">
+                            {formatCurrency(item.discount_amount || 0)}
+                          </TableCell>
+                          <TableCell className="px-2 py-3 text-right text-green-600 whitespace-nowrap">
+                            {formatCurrency(item.surcharge_amount || 0)}
+                          </TableCell>
+                          <TableCell className="px-2 py-3 text-right font-medium whitespace-nowrap pr-4">
+                            {formatCurrency(item.total_price || 0)}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
             <div className="flex flex-col items-end gap-1 mt-4 text-sm">
               <div className="flex gap-8">
                 <span className="text-slate-500">Subtotal:</span>
