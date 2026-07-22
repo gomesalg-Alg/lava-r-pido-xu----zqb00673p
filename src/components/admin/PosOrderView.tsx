@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { ArrowLeft, CheckCircle, Package, Wallet } from 'lucide-react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { ArrowLeft, CheckCircle, Package, Wallet, Lock, Minus, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -19,6 +19,8 @@ import {
   getServiceOrderItems,
   updateServiceOrder,
   createServiceOrderItem,
+  updateServiceOrderItem,
+  deleteServiceOrderItem,
   type ServiceOrder,
   type ServiceOrderItem,
 } from '@/services/service-orders'
@@ -41,10 +43,17 @@ export function PosOrderView({ order, onBack }: Props) {
   const [loadingItems, setLoadingItems] = useState(true)
   const [finalizing, setFinalizing] = useState(false)
   const [addingProduct, setAddingProduct] = useState(false)
+  const originalItemIds = useRef<Set<string>>(new Set())
+  const isFirstLoad = useRef(true)
 
   const loadItems = useCallback(async () => {
     try {
-      setItems(await getServiceOrderItems(order.id))
+      const fetched = await getServiceOrderItems(order.id)
+      if (isFirstLoad.current) {
+        fetched.forEach((item) => originalItemIds.current.add(item.id))
+        isFirstLoad.current = false
+      }
+      setItems(fetched)
     } catch {
       /* ignore */
     } finally {
@@ -72,6 +81,35 @@ export function PosOrderView({ order, onBack }: Props) {
     .reduce((s, l) => s + l.amount, 0)
   const remaining = totals.grandTotal - totalPaid
   const canFinalize = remaining <= 0.01 && paymentLines.length > 0
+
+  const isLocked = (item: ServiceOrderItem) => originalItemIds.current.has(item.id)
+
+  const handleQtyChange = async (item: ServiceOrderItem, delta: number) => {
+    const newQty = Math.max(1, (item.quantity || 1) + delta)
+    const newTotal = newQty * (item.unit_price || 0)
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, quantity: newQty, total_price: newTotal } : i)),
+    )
+    try {
+      await updateServiceOrderItem(item.id, {
+        quantity: newQty,
+        total_price: newTotal,
+      })
+    } catch {
+      toast.error('Erro ao atualizar quantidade')
+      await loadItems()
+    }
+  }
+
+  const handleRemoveItem = async (item: ServiceOrderItem) => {
+    try {
+      await deleteServiceOrderItem(item.id)
+      setItems((prev) => prev.filter((i) => i.id !== item.id))
+      toast.success('Item removido')
+    } catch {
+      toast.error('Erro ao remover item')
+    }
+  }
 
   const addProduct = async (product: Product) => {
     setAddingProduct(true)
@@ -167,26 +205,72 @@ export function PosOrderView({ order, onBack }: Props) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  items.map((item, idx) => (
-                    <TableRow key={item.id} className={cn(idx % 2 === 1 && 'bg-slate-50')}>
-                      <TableCell>
-                        {item.expand?.service_id?.name || item.expand?.product_id?.name || '-'}
-                      </TableCell>
-                      <TableCell className="text-center">{item.quantity}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(item.unit_price || 0)}
-                      </TableCell>
-                      <TableCell className="text-right text-red-500">
-                        {formatCurrency(item.discount_amount || 0)}
-                      </TableCell>
-                      <TableCell className="text-right text-green-600">
-                        {formatCurrency(item.surcharge_amount || 0)}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(item.total_price || 0)}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  items.map((item, idx) => {
+                    const locked = isLocked(item)
+                    return (
+                      <TableRow key={item.id} className={cn(idx % 2 === 1 && 'bg-slate-50')}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {locked && <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
+                            <span className={cn(locked && 'text-slate-500')}>
+                              {item.expand?.service_id?.name ||
+                                item.expand?.product_id?.name ||
+                                '-'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {locked ? (
+                            <span className="inline-block min-w-[2rem] text-slate-500">
+                              {item.quantity}
+                            </span>
+                          ) : (
+                            <div className="flex items-center justify-center gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() => handleQtyChange(item, -1)}
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <span className="inline-block min-w-[2rem] text-center font-medium">
+                                {item.quantity}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={() => handleQtyChange(item, 1)}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 text-red-600 hover:bg-red-50"
+                                onClick={() => handleRemoveItem(item)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(item.unit_price || 0)}
+                        </TableCell>
+                        <TableCell className="text-right text-red-500">
+                          {formatCurrency(item.discount_amount || 0)}
+                        </TableCell>
+                        <TableCell className="text-right text-green-600">
+                          {formatCurrency(item.surcharge_amount || 0)}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(item.total_price || 0)}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
