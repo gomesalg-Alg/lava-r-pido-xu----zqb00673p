@@ -102,6 +102,7 @@ export function ServiceOrderForm({ orderId }: Props) {
             existingItems.map((i) => ({
               id: i.id,
               service_id: i.service_id,
+              product_id: i.product_id || '',
               operator_id: i.operator_id,
               quantity: i.quantity || 1,
               unit_price: i.unit_price || 0,
@@ -157,8 +158,8 @@ export function ServiceOrderForm({ orderId }: Props) {
     if (form.exit_at && form.entry_at && new Date(form.exit_at) < new Date(form.entry_at))
       e.exit_at = 'Saída não pode ser anterior à entrada'
     if (items.length === 0) e.items = 'Adicione pelo menos um item'
-    if (items.some((i) => !i.service_id || !i.operator_id))
-      e.items = 'Preencha serviço e operador em todos os itens'
+    if (items.some((i) => (!i.service_id && !i.product_id) || !i.operator_id))
+      e.items = 'Preencha item e operador em todos os itens'
     setErrors(e)
     return !Object.keys(e).length
   }
@@ -201,7 +202,8 @@ export function ServiceOrderForm({ orderId }: Props) {
       for (const item of items) {
         const itemData: Record<string, unknown> = {
           order_id: savedOrderId,
-          service_id: item.service_id,
+          service_id: item.service_id || null,
+          product_id: item.product_id || null,
           operator_id: item.operator_id,
           quantity: item.quantity,
           unit_price: item.unit_price,
