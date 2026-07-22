@@ -25,6 +25,7 @@ export type ServiceOrder = {
   payment_method: PaymentMethod | ''
   status: ServiceOrderStatus | ''
   observation: string
+  placa: string
   created: string
   updated: string
   created_by: string

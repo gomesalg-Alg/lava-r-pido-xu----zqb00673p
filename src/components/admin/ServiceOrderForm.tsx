@@ -60,6 +60,7 @@ export function ServiceOrderForm({ orderId }: Props) {
     payment_method: '',
     status: 'Orçamento',
     observation: '',
+    placa: '',
   })
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
@@ -89,6 +90,7 @@ export function ServiceOrderForm({ orderId }: Props) {
             payment_method: order.payment_method || '',
             status: order.status || 'Orçamento',
             observation: order.observation || '',
+            placa: order.placa || '',
           })
           setExistingPhoto(order.photo || '')
           if (order.expand?.customer_id) setCustomer(order.expand.customer_id)
@@ -136,7 +138,7 @@ export function ServiceOrderForm({ orderId }: Props) {
   const handleSelect = (c: Customer, v: Vehicle) => {
     setCustomer(c)
     setVehicle(v)
-    setForm((p) => ({ ...p, customer_id: c.id, vehicle_id: v.id }))
+    setForm((p) => ({ ...p, customer_id: c.id, vehicle_id: v.id, placa: v.placa || '' }))
     setErrors((p) => {
       const n = { ...p }
       delete n.customer_id
@@ -183,6 +185,7 @@ export function ServiceOrderForm({ orderId }: Props) {
         payment_method: form.payment_method || null,
         status: form.status,
         observation: form.observation,
+        placa: form.placa || null,
       }
       if (photo) payload.photo = photo
 
@@ -319,12 +322,21 @@ export function ServiceOrderForm({ orderId }: Props) {
             </Select>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label>Nº Prisma</Label>
             <Input
               value={form.prisma_number}
               onChange={(e) => set('prisma_number', e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Placa do Veículo</Label>
+            <Input
+              value={form.placa}
+              readOnly
+              placeholder="Selecione um veículo"
+              className="bg-slate-50 font-medium uppercase"
             />
           </div>
           <div className="space-y-1.5">

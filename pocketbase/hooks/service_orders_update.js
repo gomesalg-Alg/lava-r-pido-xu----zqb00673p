@@ -6,5 +6,12 @@ onRecordUpdateRequest((e) => {
       e.record.set('created_by', originalCreatedBy)
     }
   }
+  var vehicleId = e.record.getString('vehicle_id')
+  if (vehicleId) {
+    try {
+      var vehicle = $app.findRecordById('vehicles', vehicleId)
+      e.record.set('placa', vehicle.getString('placa'))
+    } catch (_) {}
+  }
   e.next()
 }, 'service_orders')

@@ -61,9 +61,15 @@ export default function ServiceOrdersPage() {
   const filtered = orders.filter((o) => {
     const cName = o.expand?.customer_id?.name?.toLowerCase() || ''
     const v = o.expand?.vehicle_id
-    const vStr = v ? `${v.brand} ${v.model} ${v.placa || ''}`.toLowerCase() : ''
+    const vStr = v ? `${v.brand} ${v.model}`.toLowerCase() : ''
+    const oPlaca = (o.placa || '').toLowerCase()
     const q = search.toLowerCase()
-    return cName.includes(q) || vStr.includes(q) || String(o.ticket_number).includes(search)
+    return (
+      cName.includes(q) ||
+      vStr.includes(q) ||
+      oPlaca.includes(q) ||
+      String(o.ticket_number).includes(search)
+    )
   })
 
   const badgeVariant = (s: string): 'default' | 'secondary' | 'outline' =>
@@ -107,6 +113,7 @@ export default function ServiceOrdersPage() {
               <TableHead>Emissão</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Veículo</TableHead>
+              <TableHead>Placa</TableHead>
               <TableHead>Nº Prisma</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -115,13 +122,13 @@ export default function ServiceOrdersPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Nenhuma ordem de serviço encontrada.
                 </TableCell>
               </TableRow>
@@ -150,17 +157,13 @@ export default function ServiceOrdersPage() {
                   </TableCell>
                   <TableCell>
                     {o.expand?.vehicle_id ? (
-                      <div className="flex flex-col">
-                        <span>{`${o.expand.vehicle_id.brand} ${o.expand.vehicle_id.model}`}</span>
-                        {o.expand.vehicle_id.placa && (
-                          <span className="text-slate-500 text-sm uppercase">
-                            {o.expand.vehicle_id.placa}
-                          </span>
-                        )}
-                      </div>
+                      <span>{`${o.expand.vehicle_id.brand} ${o.expand.vehicle_id.model}`}</span>
                     ) : (
                       '-'
                     )}
+                  </TableCell>
+                  <TableCell className="uppercase font-medium">
+                    {o.placa || o.expand?.vehicle_id?.placa || '-'}
                   </TableCell>
                   <TableCell>
                     {o.prisma_number || <span className="text-slate-400">-</span>}

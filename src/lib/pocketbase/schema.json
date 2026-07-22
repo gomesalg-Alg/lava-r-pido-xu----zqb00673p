@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T00:46:16.492Z",
+  "generatedAt": "2026-07-22T13:17:29.913Z",
   "collections": [
     {
       "name": "users",
@@ -665,6 +665,12 @@
         {
           "name": "amount_paid",
           "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "placa",
+          "type": "text",
           "required": false,
           "system": false
         }
