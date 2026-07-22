@@ -20,6 +20,7 @@ import {
   Settings,
   Building2,
   User,
+  CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
   LayoutDashboard,
@@ -79,6 +80,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { label: 'Empresa', to: '/admin/empresa', icon: Building2 },
       { label: 'Usuários', to: '/admin/usuarios', icon: User },
+      { label: 'Bandeiras', to: '/admin/bandeiras', icon: CreditCard },
       { label: 'Configuração de Ambiente', to: '/admin/ambiente', icon: SlidersHorizontal },
     ],
   },

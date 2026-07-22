@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T21:59:44.659Z",
+  "generatedAt": "2026-07-22T00:27:47.432Z",
   "collections": [
     {
       "name": "users",
@@ -605,7 +605,8 @@
             "Cartão de Débito",
             "Pix",
             "Cortesia",
-            "Outros"
+            "Outros",
+            "Múltiplo"
           ]
         },
         {
@@ -1005,6 +1006,145 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "card_rates",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != '' && @request.auth.role = 'Administrador'",
+        "update": "@request.auth.id != '' && @request.auth.role = 'Administrador'",
+        "delete": "@request.auth.id != '' && @request.auth.role = 'Administrador'"
+      },
+      "fields": [
+        {
+          "name": "flag",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["Visa", "Mastercard", "Elo"]
+        },
+        {
+          "name": "debit_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "credit_1x_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "credit_2x_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "credit_3x_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "credit_4x_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE UNIQUE INDEX idx_card_rates_flag ON card_rates (flag)"]
+    },
+    {
+      "name": "order_payments",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "method",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "Dinheiro",
+            "Cartão de Crédito",
+            "Cartão de Débito",
+            "Pix",
+            "Cortesia",
+            "Outros"
+          ]
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "card_flag",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Visa", "Mastercard", "Elo"]
+        },
+        {
+          "name": "installments",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
     }
   ]
 }
