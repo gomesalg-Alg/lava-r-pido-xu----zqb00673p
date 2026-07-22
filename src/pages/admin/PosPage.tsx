@@ -46,7 +46,7 @@ export default function PosPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-slate-800">Frente de Caixa</h1>
+      <h1 className="text-3xl font-bold text-slate-800 text-center py-2">Frente de Caixa</h1>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <Input

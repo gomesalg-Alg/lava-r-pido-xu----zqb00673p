@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/format'
+import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { Trash2, CheckCircle } from 'lucide-react'
 
 export type CartItem = {
@@ -92,20 +92,20 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className="text-xs">Desconto (R$)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            value={discount || ''}
-            onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+          <CurrencyInput
+            value={discount}
+            onChange={(v) => setDiscount(v)}
+            className="text-right"
+            placeholder="0,00"
           />
         </div>
         <div className="space-y-1">
           <Label className="text-xs">Acréscimo (R$)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            value={surcharge || ''}
-            onChange={(e) => setSurcharge(parseFloat(e.target.value) || 0)}
+          <CurrencyInput
+            value={surcharge}
+            onChange={(v) => setSurcharge(v)}
+            className="text-right"
+            placeholder="0,00"
           />
         </div>
       </div>
@@ -147,13 +147,12 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
         </div>
         <div className="space-y-1">
           <Label className="text-xs">Valor Pago (R$)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            value={isCortesia ? '' : amountPaid || ''}
-            onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+          <CurrencyInput
+            value={amountPaid}
+            onChange={(v) => setAmountPaid(v)}
             disabled={isCortesia}
-            placeholder={isCortesia ? 'Cortesia' : ''}
+            placeholder={isCortesia ? 'Cortesia' : '0,00'}
+            className="text-right"
           />
         </div>
       </div>

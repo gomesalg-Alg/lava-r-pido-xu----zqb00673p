@@ -1,6 +1,5 @@
 import { Trash2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -9,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/format'
+import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import type { PaymentLine } from '@/services/order-payments'
 import type { CardRate } from '@/services/card-rates'
 import { getRateForPayment } from '@/services/card-rates'
@@ -88,14 +88,11 @@ export function PaymentLines({
                   ))}
                 </SelectContent>
               </Select>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Valor"
-                value={line.amount || ''}
-                className="w-32"
-                onChange={(e) => updateLine(line.id, { amount: parseFloat(e.target.value) || 0 })}
+              <CurrencyInput
+                value={line.amount}
+                onChange={(v) => updateLine(line.id, { amount: v })}
+                className="w-32 text-right"
+                placeholder="0,00"
               />
               {isCardMethod(line.method) && (
                 <Select
