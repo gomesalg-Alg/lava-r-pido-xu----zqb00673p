@@ -25,6 +25,7 @@ import {
   type ServiceOrderItem,
 } from '@/services/service-orders'
 import { calculateOrderTotals } from '@/lib/order-calculations'
+import { createAccountsReceivable } from '@/services/accounts-receivable'
 import { formatCurrency } from '@/lib/format'
 import { useRealtime } from '@/hooks/use-realtime'
 import { toast } from 'sonner'
@@ -145,12 +146,24 @@ export function PosOrderView({ order, onBack }: Props) {
           })
         }
       }
+      const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
       await updateServiceOrder(order.id, {
-        status: 'Finalizado',
+        status: 'Pago',
         amount_paid: totals.grandTotal,
         total_discount: totals.totalDiscount,
         total_surcharge: totals.totalSurcharge,
         exit_at: new Date().toISOString(),
+      })
+      const paymentMethods = validLines.map((l) => l.method).join(', ')
+      await createAccountsReceivable({
+        customer_id: order.customer_id,
+        order_id: order.id,
+        description: `Venda PDV - OS #${order.ticket_number}`,
+        amount: totals.grandTotal,
+        due_date: new Date().toISOString().split('T')[0],
+        status: 'Recebido',
+        payment_method: paymentMethods,
+        received_at: new Date().toISOString(),
       })
       toast.success('Venda finalizada com sucesso!')
       onBack()

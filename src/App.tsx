@@ -32,6 +32,7 @@ import PublicServiceOrder from './pages/PublicServiceOrder'
 import AccountCategoriesPage from './pages/admin/AccountCategoriesPage'
 import ProductsPage from './pages/admin/ProductsPage'
 import PosPage from './pages/admin/PosPage'
+import AccountsReceivablePage from './pages/admin/AccountsReceivablePage'
 import CardRatesPage from './pages/admin/CardRatesPage'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="produtos" element={<ProductsPage />} />
             <Route path="bandeiras" element={<CardRatesPage />} />
             <Route path="frente-caixa" element={<PosPage />} />
+            <Route path="contas-receber" element={<AccountsReceivablePage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

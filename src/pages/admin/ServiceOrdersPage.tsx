@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getServiceOrders, deleteServiceOrder, type ServiceOrder } from '@/services/service-orders'
+import {
+  getServiceOrders,
+  deleteServiceOrder,
+  updateServiceOrder,
+  type ServiceOrder,
+} from '@/services/service-orders'
+import {
+  getAccountsReceivableByOrder,
+  updateAccountsReceivable,
+} from '@/services/accounts-receivable'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +25,7 @@ import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { WhatsAppShareButton } from '@/components/admin/WhatsAppShareButton'
 import { getCompany, type Company } from '@/services/company'
-import { Plus, Edit, Trash2, Search, Printer } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Printer, Ban } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateServiceOrderPdf } from '@/lib/service-order-pdf'
 
@@ -72,8 +81,32 @@ export default function ServiceOrdersPage() {
     )
   })
 
-  const badgeVariant = (s: string): 'default' | 'secondary' | 'outline' =>
-    s === 'Finalizado' ? 'default' : s === 'Em Andamento' ? 'secondary' : 'outline'
+  const badgeVariant = (s: string): 'default' | 'secondary' | 'outline' | 'destructive' =>
+    s === 'Cancelado'
+      ? 'destructive'
+      : s === 'Finalizado' || s === 'Pago'
+        ? 'default'
+        : s === 'Em Andamento'
+          ? 'secondary'
+          : 'outline'
+
+  const handleCancelSale = async (order: ServiceOrder) => {
+    try {
+      await updateServiceOrder(order.id, { status: 'Cancelado' })
+      try {
+        const ar = await getAccountsReceivableByOrder(order.id)
+        if (ar) {
+          await updateAccountsReceivable(ar.id, { status: 'Cancelado' })
+        }
+      } catch {
+        /* ignore AR update errors */
+      }
+      toast.success('Venda cancelada com sucesso!')
+      loadData()
+    } catch {
+      toast.error('Erro ao cancelar venda')
+    }
+  }
 
   const handlePrint = async (orderId: string) => {
     try {
@@ -173,11 +206,13 @@ export default function ServiceOrdersPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/admin/ordem-servico/${o.id}/editar`}>
-                          <Edit className="w-4 h-4 mr-1" /> Editar
-                        </Link>
-                      </Button>
+                      {o.status !== 'Pago' && (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/admin/ordem-servico/${o.id}/editar`}>
+                            <Edit className="w-4 h-4 mr-1" /> Editar
+                          </Link>
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -193,14 +228,26 @@ export default function ServiceOrdersPage() {
                         companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
                         orderId={o.id}
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteTarget(o)}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" /> Excluir
-                      </Button>
+                      {o.status === 'Pago' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelSale(o)}
+                          className="text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                        >
+                          <Ban className="w-4 h-4 mr-1" /> Cancelar Venda
+                        </Button>
+                      )}
+                      {o.status !== 'Pago' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDeleteTarget(o)}
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" /> Excluir
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

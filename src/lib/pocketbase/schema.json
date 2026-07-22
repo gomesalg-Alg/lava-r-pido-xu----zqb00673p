@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T14:59:03.130Z",
+  "generatedAt": "2026-07-22T15:13:28.613Z",
   "collections": [
     {
       "name": "users",
@@ -599,7 +599,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": ["Em Andamento", "Finalizado", "Orçamento"]
+          "selectValues": ["Em Andamento", "Finalizado", "Orçamento", "Pago", "Cancelado"]
         },
         {
           "name": "observation",
@@ -1141,6 +1141,88 @@
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
+    },
+    {
+      "name": "accounts_receivable",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "customer_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "customers"
+        },
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Pendente", "Recebido", "Cancelado"]
+        },
+        {
+          "name": "payment_method",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "received_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_accounts_receivable_order_id ON accounts_receivable (order_id)",
+        "CREATE INDEX idx_accounts_receivable_status ON accounts_receivable (status)"
+      ]
     }
   ]
 }

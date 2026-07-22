@@ -35,7 +35,7 @@ import type { Vehicle } from '@/services/vehicles'
 import { toast } from 'sonner'
 import { Save, Camera, Upload } from 'lucide-react'
 
-const STATUSES = ['Orçamento', 'Em Andamento', 'Finalizado']
+const STATUSES = ['Orçamento', 'Em Andamento', 'Finalizado', 'Cancelado']
 
 interface Props {
   orderId?: string
@@ -291,7 +291,11 @@ export function ServiceOrderForm({ orderId }: Props) {
           </div>
           <div className="space-y-1.5">
             <Label>Status</Label>
-            <Select value={form.status} onValueChange={(v) => set('status', v)}>
+            <Select
+              value={form.status}
+              onValueChange={(v) => set('status', v)}
+              disabled={form.status === 'Pago'}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -301,6 +305,11 @@ export function ServiceOrderForm({ orderId }: Props) {
                     {s}
                   </SelectItem>
                 ))}
+                {form.status === 'Pago' && (
+                  <SelectItem value="Pago" disabled>
+                    Pago
+                  </SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -404,7 +413,19 @@ export function ServiceOrderForm({ orderId }: Props) {
         </div>
       )}
 
-      <Button type="submit" disabled={saving} className="w-full" size="lg">
+      {form.status === 'Pago' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+          Esta ordem de serviço está com status &quot;Pago&quot; e não pode ser editada. Cancele a
+          venda na lista de ordens para liberar o registro.
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        disabled={saving || form.status === 'Pago'}
+        className="w-full"
+        size="lg"
+      >
         <Save className="w-4 h-4 mr-2" />
         {saving ? 'Salvando...' : isEdit ? 'Salvar Alterações' : 'Criar Ordem de Serviço'}
       </Button>

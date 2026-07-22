@@ -29,6 +29,7 @@ import {
   Wallet,
   Package,
   ShoppingCart,
+  Receipt,
 } from 'lucide-react'
 
 interface MenuItem {
@@ -67,6 +68,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { label: 'Frente de Caixa', to: '/admin/frente-caixa', icon: ShoppingCart },
       { label: 'Ordens de Serviço', to: '/admin/ordem-servico', icon: Wrench },
+      { label: 'Contas a Receber', to: '/admin/contas-receber', icon: Receipt },
     ],
   },
   {

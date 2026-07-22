@@ -3,7 +3,7 @@ import type { Customer } from './customers'
 import type { Vehicle } from './vehicles'
 import type { Company } from './company'
 
-export type ServiceOrderStatus = 'Em Andamento' | 'Finalizado' | 'Orçamento'
+export type ServiceOrderStatus = 'Em Andamento' | 'Finalizado' | 'Orçamento' | 'Pago' | 'Cancelado'
 export type PaymentMethod =
   | 'Dinheiro'
   | 'Cartão de Crédito'
@@ -178,7 +178,7 @@ export const searchServiceOrdersByPlacaOrTicket = async (
     try {
       const ticketNum = parseInt(digits, 10)
       const ticketResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
-        filter: `ticket_number = ${ticketNum} && status != 'Finalizado'`,
+        filter: `ticket_number = ${ticketNum} && status != 'Finalizado' && status != 'Pago' && status != 'Cancelado'`,
         expand: 'customer_id,vehicle_id',
         sort: '-created',
       })
@@ -201,7 +201,7 @@ export const searchServiceOrdersByPlacaOrTicket = async (
       parts.push(`placa ~ "${digitsOnly}"`)
     }
     const plateResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
-      filter: `(${parts.join(' || ')}) && status != 'Finalizado'`,
+      filter: `(${parts.join(' || ')}) && status != 'Finalizado' && status != 'Pago' && status != 'Cancelado'`,
       expand: 'customer_id,vehicle_id',
       sort: '-created',
     })
