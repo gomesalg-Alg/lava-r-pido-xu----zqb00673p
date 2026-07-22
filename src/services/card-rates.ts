@@ -1,15 +1,16 @@
 import pb from '@/lib/pocketbase/client'
 
-export type CardFlag = 'Visa' | 'Mastercard' | 'Elo'
+export type CardFlag = string
 
 export type CardRate = {
   id: string
-  flag: CardFlag
+  flag: string
   debit_rate: number
   credit_1x_rate: number
   credit_2x_rate: number
   credit_3x_rate: number
   credit_4x_rate: number
+  max_installments: number
   is_active: boolean
   created: string
   updated: string
@@ -20,12 +21,17 @@ export const getCardRates = () =>
 
 export const getCardRate = (id: string) => pb.collection('card_rates').getOne<CardRate>(id)
 
+export const createCardRate = (data: Record<string, unknown>) =>
+  pb.collection('card_rates').create<CardRate>(data)
+
 export const updateCardRate = (id: string, data: Record<string, unknown>) =>
   pb.collection('card_rates').update<CardRate>(id, data)
 
+export const deleteCardRate = (id: string) => pb.collection('card_rates').delete(id)
+
 export const getRateForPayment = (
   rates: CardRate[],
-  flag: CardFlag,
+  flag: string,
   method: string,
   installments: number,
 ): number => {

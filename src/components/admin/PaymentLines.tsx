@@ -21,7 +21,6 @@ const PAYMENT_METHODS = [
   'Cortesia',
   'Outros',
 ] as const
-const CARD_FLAGS = ['Visa', 'Mastercard', 'Elo'] as const
 const isCardMethod = (m: string) => m === 'Cartão de Crédito' || m === 'Cartão de Débito'
 
 export function PaymentLines({
@@ -35,6 +34,8 @@ export function PaymentLines({
   onLinesChange: (lines: PaymentLine[]) => void
   cardRates: CardRate[]
 }) {
+  const activeFlags = cardRates.filter((r) => r.is_active)
+
   const updateLine = (id: string, patch: Partial<PaymentLine>) =>
     onLinesChange(lines.map((l) => (l.id === id ? { ...l, ...patch } : l)))
 
@@ -50,6 +51,9 @@ export function PaymentLines({
   const remaining = total - totalPaid
   const troco = remaining < 0 ? Math.abs(remaining) : 0
 
+  const getMaxInstallments = (flag: string) =>
+    activeFlags.find((r) => r.flag === flag)?.max_installments ?? 4
+
   return (
     <div className="space-y-3">
       {lines.map((line) => {
@@ -58,6 +62,7 @@ export function PaymentLines({
             ? getRateForPayment(cardRates, line.card_flag, line.method, line.installments)
             : 0
         const fee = line.amount > 0 ? (line.amount * rate) / 100 : 0
+        const maxInst = getMaxInstallments(line.card_flag)
         return (
           <div key={line.id} className="flex flex-col gap-2 p-3 rounded-lg border bg-slate-50">
             <div className="flex flex-wrap items-center gap-2">
@@ -95,17 +100,24 @@ export function PaymentLines({
               {isCardMethod(line.method) && (
                 <Select
                   value={line.card_flag || undefined}
-                  onValueChange={(v) =>
-                    updateLine(line.id, { card_flag: v as PaymentLine['card_flag'] })
-                  }
+                  onValueChange={(v) => {
+                    const newMax = getMaxInstallments(v)
+                    const patch: Partial<PaymentLine> = {
+                      card_flag: v as PaymentLine['card_flag'],
+                    }
+                    if (line.installments > newMax) {
+                      patch.installments = newMax
+                    }
+                    updateLine(line.id, patch)
+                  }}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Bandeira" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CARD_FLAGS.map((f) => (
-                      <SelectItem key={f} value={f}>
-                        {f}
+                    {activeFlags.map((r) => (
+                      <SelectItem key={r.flag} value={r.flag}>
+                        {r.flag}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -120,7 +132,7 @@ export function PaymentLines({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[1, 2, 3, 4].map((n) => (
+                    {Array.from({ length: maxInst }, (_, i) => i + 1).map((n) => (
                       <SelectItem key={n} value={String(n)}>
                         {n}x
                       </SelectItem>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T00:27:47.432Z",
+  "generatedAt": "2026-07-22T00:46:16.492Z",
   "collections": [
     {
       "name": "users",
@@ -1019,13 +1019,6 @@
       },
       "fields": [
         {
-          "name": "flag",
-          "type": "select",
-          "required": true,
-          "system": false,
-          "selectValues": ["Visa", "Mastercard", "Elo"]
-        },
-        {
           "name": "debit_rate",
           "type": "number",
           "required": false,
@@ -1074,9 +1067,21 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "flag",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "max_installments",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
-      "indexes": ["CREATE UNIQUE INDEX idx_card_rates_flag ON card_rates (flag)"]
+      "indexes": ["CREATE UNIQUE INDEX `idx_card_rates_flag` ON `card_rates` (flag)"]
     },
     {
       "name": "order_payments",
