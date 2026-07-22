@@ -178,8 +178,9 @@ export const searchServiceOrdersByPlacaOrTicket = async (
     try {
       const ticketNum = parseInt(digits, 10)
       const ticketResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
-        filter: `ticket_number = ${ticketNum}`,
+        filter: `ticket_number = ${ticketNum} && status != 'Finalizado'`,
         expand: 'customer_id,vehicle_id',
+        sort: '-created',
       })
       for (const o of ticketResults) {
         if (!seen.has(o.id)) {
@@ -194,20 +195,20 @@ export const searchServiceOrdersByPlacaOrTicket = async (
 
   try {
     const upperQ = q.toUpperCase()
-    const vehicles = await pb.collection('vehicles').getFullList({
-      filter: `placa ~ "${upperQ}"`,
+    const parts = [`placa ~ "${upperQ}"`]
+    const digitsOnly = q.replace(/\D/g, '')
+    if (digitsOnly && digitsOnly !== upperQ) {
+      parts.push(`placa ~ "${digitsOnly}"`)
+    }
+    const plateResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
+      filter: `(${parts.join(' || ')}) && status != 'Finalizado'`,
+      expand: 'customer_id,vehicle_id',
+      sort: '-created',
     })
-    for (const v of vehicles) {
-      const orders = await pb.collection('service_orders').getFullList<ServiceOrder>({
-        filter: `vehicle_id = "${v.id}" && status != 'Finalizado'`,
-        expand: 'customer_id,vehicle_id',
-        sort: '-created',
-      })
-      for (const o of orders) {
-        if (!seen.has(o.id)) {
-          seen.add(o.id)
-          results.push(o)
-        }
+    for (const o of plateResults) {
+      if (!seen.has(o.id)) {
+        seen.add(o.id)
+        results.push(o)
       }
     }
   } catch {

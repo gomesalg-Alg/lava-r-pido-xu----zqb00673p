@@ -134,7 +134,10 @@ export function ServiceOrderItems({ items, onChange }: Props) {
   return (
     <div className="space-y-3">
       {items.map((row, i) => (
-        <div key={i} className="p-4 border rounded-lg space-y-3 bg-slate-50/50">
+        <div
+          key={i}
+          className={`p-4 border rounded-lg space-y-3 ${i % 2 === 1 ? 'bg-slate-100/70' : 'bg-slate-50/50'}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-slate-600">Item {i + 1}</span>
             <Button

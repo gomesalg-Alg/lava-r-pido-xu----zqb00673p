@@ -26,6 +26,7 @@ import { calculateOrderTotals } from '@/lib/order-calculations'
 import { formatCurrency } from '@/lib/format'
 import { useRealtime } from '@/hooks/use-realtime'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import type { Product } from '@/services/products'
 
 interface Props {
@@ -166,8 +167,8 @@ export function PosOrderView({ order, onBack }: Props) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  items.map((item) => (
-                    <TableRow key={item.id}>
+                  items.map((item, idx) => (
+                    <TableRow key={item.id} className={cn(idx % 2 === 1 && 'bg-slate-50')}>
                       <TableCell>
                         {item.expand?.service_id?.name || item.expand?.product_id?.name || '-'}
                       </TableCell>
