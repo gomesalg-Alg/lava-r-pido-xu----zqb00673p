@@ -34,6 +34,7 @@ import type { Customer } from '@/services/customers'
 import type { Vehicle } from '@/services/vehicles'
 import { toast } from 'sonner'
 import { Save, Camera, Upload } from 'lucide-react'
+import { PaymentSummary } from '@/components/admin/PaymentSummary'
 
 const STATUSES = ['Orçamento', 'Em Andamento', 'Finalizado', 'Cancelado']
 
@@ -414,9 +415,12 @@ export function ServiceOrderForm({ orderId }: Props) {
       )}
 
       {form.status === 'Pago' && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
-          Esta ordem de serviço está com status &quot;Pago&quot; e não pode ser editada. Cancele a
-          venda na lista de ordens para liberar o registro.
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+          <p className="text-sm text-amber-800">
+            Esta ordem de serviço está com status &quot;Pago&quot; e não pode ser editada. Cancele a
+            venda na lista de ordens para liberar o registro.
+          </p>
+          {orderId && <PaymentSummary orderId={orderId} />}
         </div>
       )}
 

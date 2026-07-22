@@ -9,6 +9,7 @@ import {
   type ServiceOrderItem,
 } from '@/services/service-orders'
 import { getCompany, type Company } from '@/services/company'
+import { getOrderPayments, type OrderPayment } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
 import { formatCurrency, formatDuration, toDateInput } from '@/lib/format'
 import pb from '@/lib/pocketbase/client'
@@ -18,6 +19,7 @@ export default function PrintServiceOrderPage() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<ServiceOrder | null>(null)
   const [items, setItems] = useState<ServiceOrderItem[]>([])
+  const [payments, setPayments] = useState<OrderPayment[]>([])
   const [company, setCompany] = useState<Company | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -25,14 +27,16 @@ export default function PrintServiceOrderPage() {
     const loadData = async () => {
       if (!id) return
       try {
-        const [ord, itms, comp] = await Promise.all([
+        const [ord, itms, comp, pays] = await Promise.all([
           getServiceOrder(id),
           getServiceOrderItems(id),
           getCompany(),
+          getOrderPayments(id),
         ])
         setOrder(ord)
         setItems(itms)
         setCompany(comp)
+        setPayments(pays)
       } catch (err) {
         console.error('Failed to load print data:', err)
       } finally {
@@ -64,6 +68,8 @@ export default function PrintServiceOrderPage() {
     )
   }
 
+  const serviceItems = items.filter((i) => i.service_id)
+  const productItems = items.filter((i) => i.product_id)
   const totals = calculateOrderTotals(items)
   const companyName = company?.trading_name || company?.name || 'Lava Rápido XUÁ'
   const currentYear = new Date().getFullYear()
@@ -73,6 +79,7 @@ export default function PrintServiceOrderPage() {
   const photoUrl = order.photo
     ? pb.files.getURL({ id: order.id, collectionName: 'service_orders' } as never, order.photo)
     : null
+  const totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0)
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -145,42 +152,73 @@ export default function PrintServiceOrderPage() {
           </div>
         </div>
 
-        <div className="mt-8">
-          <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
-            Serviços Realizados
-          </h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
-                <th className="text-left py-2 px-3 uppercase text-xs">Serviço</th>
-                <th className="text-left py-2 px-3 uppercase text-xs">Operador</th>
-                <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
-                <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
-                <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className="border-b border-gray-200 even:bg-slate-50">
-                  <td className="py-2 px-3">{item.expand?.service_id?.name || '--'}</td>
-                  <td className="py-2 px-3">{item.expand?.operator_id?.name || '--'}</td>
-                  <td className="text-center py-2 px-3">{item.quantity}</td>
-                  <td className="text-right py-2 px-3">{formatCurrency(item.unit_price)}</td>
-                  <td className="text-right py-2 px-3 font-semibold text-gray-900">
-                    {formatCurrency((item.quantity || 1) * (item.unit_price || 0))}
-                  </td>
+        {serviceItems.length > 0 && (
+          <div className="mt-8">
+            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
+              Grupo Serviços
+            </h3>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
+                  <th className="text-left py-2 px-3 uppercase text-xs">Serviço</th>
+                  <th className="text-left py-2 px-3 uppercase text-xs">Operador</th>
+                  <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
+                  <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
+                  <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
                 </tr>
-              ))}
-              {items.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-400">
-                    Nenhum serviço registrado
-                  </td>
+              </thead>
+              <tbody>
+                {serviceItems.map((item) => (
+                  <tr key={item.id} className="border-b border-gray-200 even:bg-slate-50">
+                    <td className="py-2 px-3">{item.expand?.service_id?.name || '--'}</td>
+                    <td className="py-2 px-3">{item.expand?.operator_id?.name || '--'}</td>
+                    <td className="text-center py-2 px-3">{item.quantity}</td>
+                    <td className="text-right py-2 px-3">{formatCurrency(item.unit_price)}</td>
+                    <td className="text-right py-2 px-3 font-semibold text-gray-900">
+                      {formatCurrency((item.quantity || 1) * (item.unit_price || 0))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {productItems.length > 0 && (
+          <div className="mt-6">
+            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
+              Grupo Produtos
+            </h3>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
+                  <th className="text-left py-2 px-3 uppercase text-xs">Produto</th>
+                  <th className="text-center py-2 px-3 uppercase text-xs">Quantidade</th>
+                  <th className="text-right py-2 px-3 uppercase text-xs">Valor Unitário</th>
+                  <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {productItems.map((item) => (
+                  <tr key={item.id} className="border-b border-gray-200 even:bg-slate-50">
+                    <td className="py-2 px-3">{item.expand?.product_id?.name || '--'}</td>
+                    <td className="text-center py-2 px-3">{item.quantity}</td>
+                    <td className="text-right py-2 px-3">{formatCurrency(item.unit_price)}</td>
+                    <td className="text-right py-2 px-3 font-semibold text-gray-900">
+                      {formatCurrency((item.quantity || 1) * (item.unit_price || 0))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {items.length === 0 && (
+          <div className="mt-8 text-center py-4 text-gray-400 text-sm">
+            Nenhum serviço ou produto registrado
+          </div>
+        )}
 
         <div className="flex justify-end mt-4">
           <div className="w-64 space-y-1">
@@ -207,8 +245,34 @@ export default function PrintServiceOrderPage() {
           </div>
         </div>
 
-        {(order.entry_at || order.exit_at || order.payment_method) && (
-          <div className="grid grid-cols-3 gap-4 mt-6 text-sm">
+        {payments.length > 0 && (
+          <div className="mt-6">
+            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
+              Forma de Pagamento
+            </h3>
+            <div className="space-y-1">
+              {payments.map((p) => (
+                <div key={p.id} className="flex justify-between text-sm">
+                  <span>
+                    {p.method}
+                    {p.card_flag && ` · ${p.card_flag}`}
+                    {p.method === 'Cartão de Crédito' && p.installments > 1
+                      ? ` (${p.installments}x)`
+                      : ''}
+                  </span>
+                  <span className="font-medium">{formatCurrency(p.amount)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
+                <span>Total Pago:</span>
+                <span>{formatCurrency(totalPaid)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(order.entry_at || order.exit_at) && (
+          <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             {order.entry_at && (
               <div>
                 <strong>Entrada:</strong> {toDateInput(order.entry_at)}
@@ -217,11 +281,6 @@ export default function PrintServiceOrderPage() {
             {order.exit_at && (
               <div>
                 <strong>Saída:</strong> {toDateInput(order.exit_at)}
-              </div>
-            )}
-            {order.payment_method && (
-              <div>
-                <strong>Pagamento:</strong> {order.payment_method}
               </div>
             )}
           </div>
