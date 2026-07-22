@@ -106,10 +106,8 @@ export function PosOrderView({ order, onBack }: Props) {
           })
         }
       }
-      const method = paymentLines.length === 1 ? paymentLines[0].method : 'Múltiplo'
       await updateServiceOrder(order.id, {
         status: 'Finalizado',
-        payment_method: method,
         amount_paid: totals.grandTotal,
         total_discount: totals.totalDiscount,
         total_surcharge: totals.totalSurcharge,

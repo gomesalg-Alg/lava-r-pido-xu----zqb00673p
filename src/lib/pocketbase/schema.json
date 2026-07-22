@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T13:17:29.913Z",
+  "generatedAt": "2026-07-22T13:31:31.839Z",
   "collections": [
     {
       "name": "users",
@@ -595,21 +595,6 @@
           "system": false
         },
         {
-          "name": "payment_method",
-          "type": "select",
-          "required": false,
-          "system": false,
-          "selectValues": [
-            "Dinheiro",
-            "Cartão de Crédito",
-            "Cartão de Débito",
-            "Pix",
-            "Cortesia",
-            "Outros",
-            "Múltiplo"
-          ]
-        },
-        {
           "name": "status",
           "type": "select",
           "required": false,
@@ -675,7 +660,7 @@
           "system": false
         }
       ],
-      "indexes": []
+      "indexes": ["CREATE INDEX `idx_service_orders_placa` ON `service_orders` (placa)"]
     },
     {
       "name": "service_order_items",

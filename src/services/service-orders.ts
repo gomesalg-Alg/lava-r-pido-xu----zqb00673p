@@ -22,7 +22,6 @@ export type ServiceOrder = {
   entry_at: string
   exit_at: string
   photo: string
-  payment_method: PaymentMethod | ''
   status: ServiceOrderStatus | ''
   observation: string
   placa: string

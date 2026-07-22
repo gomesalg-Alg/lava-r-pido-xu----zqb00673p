@@ -36,7 +36,6 @@ import { toast } from 'sonner'
 import { Save, Camera, Upload } from 'lucide-react'
 
 const STATUSES = ['Orçamento', 'Em Andamento', 'Finalizado']
-const PAYMENTS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Cortesia', 'Outros']
 
 interface Props {
   orderId?: string
@@ -57,7 +56,6 @@ export function ServiceOrderForm({ orderId }: Props) {
     emission_date: new Date().toISOString().split('T')[0],
     entry_at: '',
     exit_at: '',
-    payment_method: '',
     status: 'Orçamento',
     observation: '',
     placa: '',
@@ -87,7 +85,6 @@ export function ServiceOrderForm({ orderId }: Props) {
             emission_date: toDateInput(order.emission_date),
             entry_at: toDatetimeLocal(order.entry_at),
             exit_at: toDatetimeLocal(order.exit_at),
-            payment_method: order.payment_method || '',
             status: order.status || 'Orçamento',
             observation: order.observation || '',
             placa: order.placa || '',
@@ -182,7 +179,6 @@ export function ServiceOrderForm({ orderId }: Props) {
         emission_date: form.emission_date || null,
         entry_at: fromDatetimeLocal(form.entry_at),
         exit_at: fromDatetimeLocal(form.exit_at),
-        payment_method: form.payment_method || null,
         status: form.status,
         observation: form.observation,
         placa: form.placa || null,
@@ -306,23 +302,8 @@ export function ServiceOrderForm({ orderId }: Props) {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label>Forma de Pagamento</Label>
-            <Select value={form.payment_method} onValueChange={(v) => set('payment_method', v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENTS.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Nº Prisma</Label>
             <Input
@@ -334,9 +315,9 @@ export function ServiceOrderForm({ orderId }: Props) {
             <Label>Placa do Veículo</Label>
             <Input
               value={form.placa}
-              readOnly
-              placeholder="Selecione um veículo"
-              className="bg-slate-50 font-medium uppercase"
+              onChange={(e) => set('placa', e.target.value.toUpperCase())}
+              placeholder="Selecione um veículo ou digite a placa"
+              className="font-medium uppercase"
             />
           </div>
           <div className="space-y-1.5">
