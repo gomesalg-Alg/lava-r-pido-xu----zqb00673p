@@ -84,6 +84,9 @@ export default function ReceiptPage() {
   const productItems = orderItems.filter((i) => i.product_id)
   const totals = orderItems.length > 0 ? calculateOrderTotals(orderItems) : null
   const totalPaid = payments.reduce((s: number, p: any) => s + (p.amount || 0), 0)
+  const orderTotal = totals ? totals.grandTotal : record.amount
+  const trocoFromPayments = payments.length > 0 ? totalPaid - orderTotal : 0
+  const troco = trocoFromPayments > 0 ? trocoFromPayments : changeAmount
   const currentYear = new Date().getFullYear()
   const paymentMethodLabel = record.payment_method || record.expand?.venda_avulsa_id?.payment_method
 
@@ -247,16 +250,16 @@ export default function ReceiptPage() {
                   <span className="font-medium">{formatCurrency(record.amount)}</span>
                 </div>
               ) : null}
+              {troco > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>Troco:</span>
+                  <span className="font-medium">{formatCurrency(troco)}</span>
+                </div>
+              )}
               {payments.length > 0 && (
                 <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
                   <span>Total Pago:</span>
                   <span>{formatCurrency(totalPaid)}</span>
-                </div>
-              )}
-              {changeAmount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Troco:</span>
-                  <span className="font-medium">{formatCurrency(changeAmount)}</span>
                 </div>
               )}
             </div>
