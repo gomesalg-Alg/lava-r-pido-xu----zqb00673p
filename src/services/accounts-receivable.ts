@@ -7,7 +7,8 @@ export type AccountsReceivableStatus = 'Pendente' | 'Recebido' | 'Cancelado'
 export interface AccountsReceivable {
   id: string
   customer_id: string
-  order_id: string
+  order_id: string | null
+  venda_avulsa_id: string
   description: string
   amount: number
   due_date: string
@@ -25,7 +26,7 @@ export interface AccountsReceivable {
 export const getAccountsReceivable = () =>
   pb.collection('accounts_receivable').getFullList<AccountsReceivable>({
     sort: '-created',
-    expand: 'customer_id,order_id',
+    expand: 'customer_id,order_id,venda_avulsa_id',
   })
 
 export const createAccountsReceivable = (data: Record<string, unknown>) =>
@@ -40,6 +41,13 @@ export const deleteAccountsReceivable = (id: string) =>
 export const getAccountsReceivableByOrder = async (orderId: string) => {
   const list = await pb.collection('accounts_receivable').getFullList<AccountsReceivable>({
     filter: `order_id = "${orderId}"`,
+  })
+  return list[0] || null
+}
+
+export const getAccountsReceivableByVendaAvulsa = async (vendaAvulsaId: string) => {
+  const list = await pb.collection('accounts_receivable').getFullList<AccountsReceivable>({
+    filter: `venda_avulsa_id = "${vendaAvulsaId}"`,
   })
   return list[0] || null
 }

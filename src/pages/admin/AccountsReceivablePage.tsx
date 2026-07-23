@@ -24,8 +24,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/format'
-import { Search, CheckCircle, XCircle } from 'lucide-react'
+import { Search, CheckCircle, XCircle, Printer } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { deleteVendaAvulsa } from '@/services/vendas-avulsas'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
@@ -91,9 +93,12 @@ export default function AccountsReceivablePage() {
     }
   }
 
-  const handleCancel = async (id: string) => {
+  const handleCancel = async (r: AccountsReceivable) => {
     try {
-      await updateAccountsReceivable(id, { status: 'Cancelado' })
+      await updateAccountsReceivable(r.id, { status: 'Cancelado' })
+      if (r.venda_avulsa_id) {
+        await deleteVendaAvulsa(r.venda_avulsa_id)
+      }
       toast.success('Conta cancelada!')
     } catch {
       toast.error('Erro ao cancelar conta')
@@ -207,6 +212,11 @@ export default function AccountsReceivablePage() {
                   <TableCell>{statusBadge(r.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/admin/recibo/${r.id}`}>
+                          <Printer className="w-4 h-4" />
+                        </Link>
+                      </Button>
                       {r.status === 'Pendente' && (
                         <Button
                           variant="outline"
@@ -221,7 +231,7 @@ export default function AccountsReceivablePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleCancel(r.id)}
+                          onClick={() => handleCancel(r)}
                           className="text-red-600 hover:bg-red-50 hover:text-red-700"
                         >
                           <XCircle className="w-4 h-4 mr-1" /> Cancelar

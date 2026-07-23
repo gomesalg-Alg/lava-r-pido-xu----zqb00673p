@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T16:06:11.864Z",
+  "generatedAt": "2026-07-22T21:58:39.872Z",
   "collections": [
     {
       "name": "users",
@@ -1088,7 +1088,7 @@
         {
           "name": "order_id",
           "type": "relation",
-          "required": true,
+          "required": false,
           "system": false,
           "collectionRef": "service_orders"
         },
@@ -1163,7 +1163,7 @@
         {
           "name": "order_id",
           "type": "relation",
-          "required": true,
+          "required": false,
           "system": false,
           "collectionRef": "service_orders"
         },
@@ -1217,12 +1217,78 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
         }
       ],
       "indexes": [
         "CREATE INDEX idx_accounts_receivable_order_id ON accounts_receivable (order_id)",
         "CREATE INDEX idx_accounts_receivable_status ON accounts_receivable (status)"
       ]
+    },
+    {
+      "name": "vendas_avulsas",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "customer_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "customers"
+        },
+        {
+          "name": "items",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "total_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "payment_method",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "change_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }

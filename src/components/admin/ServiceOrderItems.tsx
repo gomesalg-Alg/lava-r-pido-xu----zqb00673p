@@ -13,7 +13,7 @@ import {
 import { Plus, Trash2 } from 'lucide-react'
 import { getServices, type Service } from '@/services/services'
 import { getUsers, type User } from '@/services/users'
-import { getProducts, type Product } from '@/services/products'
+
 import { formatCurrency } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -107,15 +107,11 @@ interface Props {
 
 export function ServiceOrderItems({ items, onChange }: Props) {
   const [services, setServices] = useState<Service[]>([])
-  const [products, setProducts] = useState<Product[]>([])
   const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
     getServices()
       .then(setServices)
-      .catch(() => {})
-    getProducts()
-      .then(setProducts)
       .catch(() => {})
     getUsers()
       .then(setUsers)
@@ -125,18 +121,13 @@ export function ServiceOrderItems({ items, onChange }: Props) {
   const updateRow = (i: number, patch: Partial<ItemRow>) =>
     onChange(items.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
 
-  const getItemValue = (row: ItemRow) =>
-    row.service_id ? `svc-${row.service_id}` : row.product_id ? `prod-${row.product_id}` : ''
+  const getItemValue = (row: ItemRow) => (row.service_id ? `svc-${row.service_id}` : '')
 
   const handleItemSelect = (i: number, val: string) => {
     if (val.startsWith('svc-')) {
       const id = val.slice(4)
       const svc = services.find((s) => s.id === id)
       updateRow(i, { service_id: id, product_id: '', unit_price: svc?.price || 0 })
-    } else {
-      const id = val.slice(5)
-      const prod = products.find((p) => p.id === id)
-      updateRow(i, { service_id: '', product_id: id, unit_price: prod?.price || 0 })
     }
   }
 
@@ -190,16 +181,6 @@ export function ServiceOrderItems({ items, onChange }: Props) {
                             </SelectItem>
                           ))}
                         </SelectGroup>
-                        {products.length > 0 && (
-                          <SelectGroup>
-                            <SelectLabel className="text-xs">Produtos</SelectLabel>
-                            {products.map((p) => (
-                              <SelectItem key={p.id} value={`prod-${p.id}`} className="text-xs">
-                                {p.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        )}
                       </SelectContent>
                     </Select>
                   </td>

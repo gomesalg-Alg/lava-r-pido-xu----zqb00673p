@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Search, QrCode } from 'lucide-react'
+import { Search, QrCode, Package } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { PosOrderView } from '@/components/admin/PosOrderView'
+import { VendaAvulsaForm } from '@/components/admin/VendaAvulsaForm'
 import { searchServiceOrdersByPlacaOrTicket, type ServiceOrder } from '@/services/service-orders'
 import { toast } from 'sonner'
 
 export default function PosPage() {
+  const [mode, setMode] = useState<'os' | 'avulsa'>('os')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<ServiceOrder[]>([])
   const [searching, setSearching] = useState(false)
@@ -31,6 +34,10 @@ export default function PosPage() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
+  if (mode === 'avulsa') {
+    return <VendaAvulsaForm onBack={() => setMode('os')} />
+  }
+
   if (selectedOrder) {
     return (
       <PosOrderView
@@ -47,6 +54,24 @@ export default function PosPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold text-slate-800 text-center py-2">Frente de Caixa</h1>
+
+      <div className="flex gap-2 justify-center">
+        <Button
+          variant={mode === 'os' ? 'default' : 'outline'}
+          onClick={() => setMode('os')}
+          className="flex items-center gap-2"
+        >
+          <Search className="w-4 h-4" /> Venda com OS
+        </Button>
+        <Button
+          variant={mode === 'avulsa' ? 'default' : 'outline'}
+          onClick={() => setMode('avulsa')}
+          className="flex items-center gap-2"
+        >
+          <Package className="w-4 h-4" /> Venda Avulsa
+        </Button>
+      </div>
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <Input

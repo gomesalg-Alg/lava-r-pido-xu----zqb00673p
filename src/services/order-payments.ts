@@ -4,7 +4,7 @@ import type { CardFlag } from './card-rates'
 
 export type OrderPayment = {
   id: string
-  order_id: string
+  order_id: string | null
   method: PaymentMethod | ''
   amount: number
   card_flag: CardFlag | ''
