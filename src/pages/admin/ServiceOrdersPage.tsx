@@ -23,8 +23,6 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
-import { WhatsAppShareButton } from '@/components/admin/WhatsAppShareButton'
-import { getCompany, type Company } from '@/services/company'
 import { Plus, Edit, Trash2, Search, Printer, Ban } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateServiceOrderPdf } from '@/lib/service-order-pdf'
@@ -34,13 +32,11 @@ export default function ServiceOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<ServiceOrder | null>(null)
-  const [company, setCompany] = useState<Company | null>(null)
 
   const loadData = async () => {
     try {
-      const [data, comp] = await Promise.all([getServiceOrders(), getCompany()])
+      const data = await getServiceOrders()
       setOrders(data)
-      setCompany(comp)
     } catch {
       toast.error('Erro ao carregar ordens de serviço')
     } finally {
@@ -221,13 +217,6 @@ export default function ServiceOrdersPage() {
                       >
                         <Printer className="w-4 h-4 mr-1" /> PDF
                       </Button>
-                      <WhatsAppShareButton
-                        customerName={o.expand?.customer_id?.name || 'Cliente'}
-                        customerPhone={o.expand?.customer_id?.phone || ''}
-                        ticketNumber={o.ticket_number}
-                        companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
-                        orderId={o.id}
-                      />
                       {o.status === 'Pago' && (
                         <Button
                           variant="outline"

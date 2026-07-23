@@ -28,6 +28,8 @@ import { Search, CheckCircle, XCircle, Printer } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { deleteVendaAvulsa } from '@/services/vendas-avulsas'
+import { getCompany, type Company } from '@/services/company'
+import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
@@ -41,10 +43,13 @@ export default function AccountsReceivablePage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [company, setCompany] = useState<Company | null>(null)
 
   const loadData = async () => {
     try {
-      setRecords(await getAccountsReceivable())
+      const [recs, comp] = await Promise.all([getAccountsReceivable(), getCompany()])
+      setRecords(recs)
+      setCompany(comp)
     } catch {
       toast.error('Erro ao carregar contas a receber')
     } finally {
@@ -217,6 +222,19 @@ export default function AccountsReceivablePage() {
                           <Printer className="w-4 h-4" />
                         </Link>
                       </Button>
+                      <WhatsAppReceiptButton
+                        customerName={r.expand?.customer_id?.name || 'Cliente'}
+                        customerPhone={r.expand?.customer_id?.phone || ''}
+                        ticketNumber={r.expand?.order_id?.ticket_number ?? null}
+                        totalAmount={r.amount}
+                        amountPaid={r.expand?.order_id?.amount_paid || 0}
+                        paymentMethod={
+                          r.payment_method || r.expand?.venda_avulsa_id?.payment_method || ''
+                        }
+                        emissionDate={r.created}
+                        companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
+                        orderId={r.order_id}
+                      />
                       {r.status === 'Pendente' && (
                         <Button
                           variant="outline"
