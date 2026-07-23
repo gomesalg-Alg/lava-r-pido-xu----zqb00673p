@@ -2,60 +2,62 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getCompany, type Company } from '@/services/company'
+import { getServiceOrderItems } from '@/services/service-orders'
+import { getOrderPayments } from '@/services/order-payments'
+import { calculateOrderTotals } from '@/lib/order-calculations'
+import { formatCurrency, toDateInput } from '@/lib/format'
 import pb from '@/lib/pocketbase/client'
-import { formatCurrency } from '@/lib/format'
 import '@/styles/print.css'
 
-type ReceiptData = {
-  company: {
-    name: string
-    trading_name: string
-    cnpj: string
-    phone: string
-    address: string
-    number: string
-    city: string
-    state: string
-  } | null
-  customer: { name: string; phone: string; cpf: string } | null
-  type: 'os' | 'venda_avulsa'
-  services: { description: string; quantity: number; unit_price: number; total: number }[]
-  products: { description: string; quantity: number; unit_price: number; total: number }[]
-  payments: { method: string; amount: number; card_flag: string; installments: number }[]
-  total_paid: number
-  change_amount: number
-  grand_total: number
-  description: string
-  created: string
-  status: string
+interface VendaItem {
+  name?: string
+  quantity?: number
+  unit_price?: number
+  total_price?: number
 }
 
 export default function ReceiptPage() {
   const { id } = useParams<{ id: string }>()
-  const [data, setData] = useState<ReceiptData | null>(null)
+  const [record, setRecord] = useState<any>(null)
+  const [company, setCompany] = useState<Company | null>(null)
+  const [orderItems, setOrderItems] = useState<any[]>([])
+  const [payments, setPayments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const load = async () => {
+    const loadData = async () => {
       if (!id) return
       try {
-        const result = await pb.send(`/backend/v1/recibo/${id}`, { method: 'GET' })
-        setData(result as ReceiptData)
+        const rec = await pb.collection('accounts_receivable').getOne(id, {
+          expand: 'customer_id,order_id,venda_avulsa_id',
+        })
+        const comp = await getCompany()
+        setRecord(rec)
+        setCompany(comp)
+        if (rec.order_id) {
+          const [items, pays] = await Promise.all([
+            getServiceOrderItems(rec.order_id),
+            getOrderPayments(rec.order_id),
+          ])
+          setOrderItems(items)
+          setPayments(pays)
+        }
       } catch (err) {
         console.error('Failed to load receipt:', err)
       } finally {
         setLoading(false)
       }
     }
-    load()
+    loadData()
   }, [id])
 
   useEffect(() => {
-    if (!loading && data) {
+    if (!loading && record) {
       const timer = setTimeout(() => window.print(), 500)
       return () => clearTimeout(timer)
     }
-  }, [loading, data])
+  }, [loading, record])
 
   if (loading) {
     return (
@@ -64,26 +66,64 @@ export default function ReceiptPage() {
       </div>
     )
   }
-  if (!data) {
+  if (!record) {
     return (
       <div className="flex items-center justify-center min-h-screen text-gray-500">
-        Recibo não encontrado
+        Registro não encontrado
       </div>
     )
   }
 
-  const companyName = data.company?.trading_name || data.company?.name || 'Lava Rápido XUÁ'
-  const createdDate = data.created ? new Date(data.created).toLocaleString('pt-BR') : '--'
+  const companyName = company?.trading_name || company?.name || 'Lava Rápido XUÁ'
+  const logoUrl = company?.logo
+    ? pb.files.getURL({ id: company.id, collectionName: 'company' } as never, company.logo)
+    : null
+  const vendaItems: VendaItem[] = record.expand?.venda_avulsa_id?.items || []
+  const changeAmount = record.expand?.venda_avulsa_id?.change_amount || 0
+  const serviceItems = orderItems.filter((i) => i.service_id)
+  const productItems = orderItems.filter((i) => i.product_id)
+  const totals = orderItems.length > 0 ? calculateOrderTotals(orderItems) : null
+  const totalPaid = payments.reduce((s: number, p: any) => s + (p.amount || 0), 0)
+  const currentYear = new Date().getFullYear()
+  const paymentMethodLabel = record.payment_method || record.expand?.venda_avulsa_id?.payment_method
 
-  const formatPayment = (p: ReceiptData['payments'][0]) => {
-    let str = p.method
-    if (p.card_flag) str += ` – ${p.card_flag}`
-    if (p.method === 'Cartão de Crédito' && p.installments > 1) str += ` – ${p.installments}x`
-    return str
+  const renderItemsTable = (title: string, items: any[], nameField: string) => {
+    if (items.length === 0) return null
+    return (
+      <div className="mt-6">
+        <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
+          {title}
+        </h3>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
+              <th className="text-left py-2 px-3 uppercase text-xs">Item</th>
+              <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
+              <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
+              <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={item.id || idx} className="border-b border-gray-200 even:bg-slate-50">
+                <td className="py-2 px-3">{item.name || item.expand?.[nameField]?.name || '--'}</td>
+                <td className="text-center py-2 px-3">{item.quantity || 1}</td>
+                <td className="text-right py-2 px-3">{formatCurrency(item.unit_price || 0)}</td>
+                <td className="text-right py-2 px-3 font-semibold text-gray-900">
+                  {formatCurrency(
+                    item.total_price || (item.quantity || 1) * (item.unit_price || 0),
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 print:min-h-0">
       <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
         <Button variant="outline" asChild>
           <Link to="/admin/contas-receber">
@@ -95,135 +135,157 @@ export default function ReceiptPage() {
         </Button>
       </div>
 
-      <div className="print-container max-w-[600px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
-        <div className="text-center border-b-2 border-gray-800 pb-4">
-          <h1 className="text-xl font-bold">{companyName}</h1>
-          {data.company?.phone && (
-            <p className="text-sm text-gray-600">Tel: {data.company.phone}</p>
-          )}
-          {data.company?.address && (
-            <p className="text-sm text-gray-600">
-              {data.company.address}
-              {data.company.number ? `, ${data.company.number}` : ''}
+      <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
+        <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4">
+          <div className="flex items-start gap-4">
+            {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 object-contain" />}
+            <div>
+              <h1 className="text-xl font-bold">{companyName}</h1>
+              {company?.phone && <p className="text-sm text-gray-600">Tel: {company.phone}</p>}
+              {company?.address && (
+                <p className="text-sm text-gray-600">
+                  {company.address}
+                  {company?.number ? `, ${company.number}` : ''}
+                </p>
+              )}
+              {company?.city && (
+                <p className="text-sm text-gray-600">
+                  {company.city} - {company.state}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="text-right">
+            <h2 className="text-lg font-bold">Recibo</h2>
+            {record.expand?.order_id && (
+              <p className="text-sm">
+                OS Nº: <strong>{record.expand.order_id.ticket_number}</strong>
+              </p>
+            )}
+            {record.due_date && (
+              <p className="text-sm">Vencimento: {toDateInput(record.due_date)}</p>
+            )}
+            <p className="text-sm">
+              Status: <strong>{record.status || '--'}</strong>
             </p>
-          )}
-          {data.company?.city && (
-            <p className="text-sm text-gray-600">
-              {data.company.city} - {data.company.state}
-            </p>
-          )}
-          {data.company?.cnpj && <p className="text-sm text-gray-600">CNPJ: {data.company.cnpj}</p>}
+          </div>
         </div>
 
-        <div className="text-center my-4">
-          <h2 className="text-lg font-bold">RECIBO</h2>
-          <p className="text-sm text-gray-500">{data.description}</p>
+        <div className="mt-4">
+          <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Cliente</h3>
+          <p className="text-sm font-medium">{record.expand?.customer_id?.name || '--'}</p>
+          {record.expand?.customer_id?.phone && (
+            <p className="text-sm">Tel: {record.expand.customer_id.phone}</p>
+          )}
+          {record.expand?.customer_id?.cpf && (
+            <p className="text-sm">CPF: {record.expand.customer_id.cpf}</p>
+          )}
         </div>
 
-        {data.customer && (
-          <div className="mb-4">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Cliente</h3>
-            <p className="text-sm font-medium">{data.customer.name}</p>
-            {data.customer.phone && <p className="text-sm">Tel: {data.customer.phone}</p>}
-            {data.customer.cpf && <p className="text-sm">CPF: {data.customer.cpf}</p>}
-          </div>
-        )}
+        {vendaItems.length > 0 && renderItemsTable('Itens', vendaItems, '')}
+        {serviceItems.length > 0 && renderItemsTable('Serviços', serviceItems, 'service_id')}
+        {productItems.length > 0 && renderItemsTable('Produtos', productItems, 'product_id')}
 
-        {data.services.length > 0 && (
-          <div className="mb-4">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-300 pb-1">
-              Serviços
-            </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-300">
-                  <th className="text-left py-1">Descrição</th>
-                  <th className="text-center py-1">Qtd</th>
-                  <th className="text-right py-1">Valor Unit.</th>
-                  <th className="text-right py-1">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.services.map((s, i) => (
-                  <tr key={i} className="border-b border-gray-100">
-                    <td className="py-1">{s.description}</td>
-                    <td className="text-center py-1">{s.quantity}</td>
-                    <td className="text-right py-1">{formatCurrency(s.unit_price)}</td>
-                    <td className="text-right py-1 font-medium">{formatCurrency(s.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {data.products.length > 0 && (
-          <div className="mb-4">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-300 pb-1">
-              Produtos
-            </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-300">
-                  <th className="text-left py-1">Descrição</th>
-                  <th className="text-center py-1">Qtd</th>
-                  <th className="text-right py-1">Valor Unit.</th>
-                  <th className="text-right py-1">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.products.map((p, i) => (
-                  <tr key={i} className="border-b border-gray-100">
-                    <td className="py-1">{p.description}</td>
-                    <td className="text-center py-1">{p.quantity}</td>
-                    <td className="text-right py-1">{formatCurrency(p.unit_price)}</td>
-                    <td className="text-right py-1 font-medium">{formatCurrency(p.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <div className="flex justify-end mb-4">
-          <div className="w-56">
-            <div className="flex justify-between text-sm font-bold border-t-2 border-gray-800 pt-1">
-              <span>Total Geral:</span>
-              <span>{formatCurrency(data.grand_total)}</span>
+        <div className="flex justify-end mt-4">
+          <div className="w-64 space-y-1">
+            {totals && (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal:</span>
+                  <span>{formatCurrency(totals.subtotal)}</span>
+                </div>
+                {totals.totalDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Desconto:</span>
+                    <span>- {formatCurrency(totals.totalDiscount)}</span>
+                  </div>
+                )}
+                {totals.totalSurcharge > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Acréscimo:</span>
+                    <span>+ {formatCurrency(totals.totalSurcharge)}</span>
+                  </div>
+                )}
+              </>
+            )}
+            <div className="flex justify-between text-base font-bold border-t-2 border-gray-800 pt-1">
+              <span>Total:</span>
+              <span>{formatCurrency(record.amount)}</span>
             </div>
           </div>
         </div>
 
-        {data.payments.length > 0 && (
-          <div className="mb-4">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-300 pb-1">
+        {(payments.length > 0 || paymentMethodLabel) && (
+          <div className="mt-6">
+            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
               Forma de Pagamento
             </h3>
             <div className="space-y-1">
-              {data.payments.map((p, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <span>{formatPayment(p)}</span>
-                  <span className="font-medium">{formatCurrency(p.amount)}</span>
+              {payments.length > 0 ? (
+                payments.map((p) => (
+                  <div key={p.id} className="flex justify-between text-sm">
+                    <span>
+                      {p.method}
+                      {p.card_flag ? ` · ${p.card_flag}` : ''}
+                      {p.method === 'Cartão de Crédito' && p.installments > 1
+                        ? ` (${p.installments}x)`
+                        : ''}
+                    </span>
+                    <span className="font-medium">{formatCurrency(p.amount)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-between text-sm">
+                  <span>{paymentMethodLabel}</span>
+                  <span className="font-medium">{formatCurrency(record.amount)}</span>
                 </div>
-              ))}
-              <div className="flex justify-between text-sm font-bold border-t pt-1">
-                <span>Total Recebido:</span>
-                <span>{formatCurrency(data.total_paid)}</span>
-              </div>
-              {data.change_amount > 0 && (
-                <div className="flex justify-between text-sm font-bold text-green-700">
+              )}
+              {payments.length > 0 && (
+                <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
+                  <span>Total Pago:</span>
+                  <span>{formatCurrency(totalPaid)}</span>
+                </div>
+              )}
+              {changeAmount > 0 && (
+                <div className="flex justify-between text-sm">
                   <span>Troco:</span>
-                  <span>{formatCurrency(data.change_amount)}</span>
+                  <span className="font-medium">{formatCurrency(changeAmount)}</span>
                 </div>
               )}
             </div>
           </div>
         )}
 
+        {record.status === 'Recebido' && (
+          <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded">
+            <p className="text-sm font-bold text-green-700">✓ PAGO</p>
+            {record.received_at && (
+              <p className="text-sm text-green-600">
+                Recebido em: {toDateInput(record.received_at)}
+              </p>
+            )}
+          </div>
+        )}
+
+        {record.description && (
+          <div className="mt-6">
+            <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Descrição</h3>
+            <p className="text-sm">{record.description}</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-8 mt-12">
+          <div className="text-center">
+            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Cliente</div>
+          </div>
+          <div className="text-center">
+            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Responsável</div>
+          </div>
+        </div>
+
         <div className="text-center mt-8 pt-4 border-t border-gray-200">
-          <p className="text-xs text-gray-500">Data/Hora: {createdDate}</p>
-          <p className="text-xs text-gray-400 mt-2">
-            Copyright © {new Date().getFullYear()} {companyName} - Todos os direitos reservados.
+          <p className="text-xs text-gray-400">
+            Copyright &copy; {currentYear} {companyName} - Todos os direitos reservados.
           </p>
         </div>
       </div>

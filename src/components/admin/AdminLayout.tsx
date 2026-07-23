@@ -264,7 +264,7 @@ export default function AdminLayout() {
     <div className="flex min-h-screen bg-slate-50">
       <aside
         className={cn(
-          'hidden md:flex flex-col bg-slate-900 shrink-0 transition-all duration-300',
+          'no-print hidden md:flex flex-col bg-slate-900 shrink-0 transition-all duration-300',
           isMini ? 'w-16' : 'w-64',
         )}
       >
