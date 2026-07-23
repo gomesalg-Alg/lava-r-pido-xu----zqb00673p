@@ -6,7 +6,7 @@ import { getCompany, type Company } from '@/services/company'
 import { getServiceOrderItems } from '@/services/service-orders'
 import { getOrderPayments } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
-import { formatCurrency, toDateInput } from '@/lib/format'
+import { formatCurrency, formatDateBR } from '@/lib/format'
 import pb from '@/lib/pocketbase/client'
 import '@/styles/print.css'
 
@@ -136,6 +136,9 @@ export default function ReceiptPage() {
       </div>
 
       <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
+        <h1 className="text-3xl font-bold text-center py-2 mb-4 border-b-2 border-gray-800">
+          RECIBO
+        </h1>
         <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4">
           <div className="flex items-start gap-4">
             {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 object-contain" />}
@@ -156,15 +159,12 @@ export default function ReceiptPage() {
             </div>
           </div>
           <div className="text-right">
-            <h2 className="text-lg font-bold">Recibo</h2>
             {record.expand?.order_id && (
               <p className="text-sm">
                 OS Nº: <strong>{record.expand.order_id.ticket_number}</strong>
               </p>
             )}
-            {record.due_date && (
-              <p className="text-sm">Vencimento: {toDateInput(record.due_date)}</p>
-            )}
+            {record.created && <p className="text-sm">Emissão: {formatDateBR(record.created)}</p>}
             <p className="text-sm">
               Status: <strong>{record.status || '--'}</strong>
             </p>
@@ -215,7 +215,7 @@ export default function ReceiptPage() {
           </div>
         </div>
 
-        {(payments.length > 0 || paymentMethodLabel) && (
+        {(payments.length > 0 || paymentMethodLabel || changeAmount > 0) && (
           <div className="mt-6">
             <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
               Forma de Pagamento
@@ -223,23 +223,30 @@ export default function ReceiptPage() {
             <div className="space-y-1">
               {payments.length > 0 ? (
                 payments.map((p) => (
-                  <div key={p.id} className="flex justify-between text-sm">
-                    <span>
-                      {p.method}
-                      {p.card_flag ? ` · ${p.card_flag}` : ''}
-                      {p.method === 'Cartão de Crédito' && p.installments > 1
-                        ? ` (${p.installments}x)`
-                        : ''}
-                    </span>
-                    <span className="font-medium">{formatCurrency(p.amount)}</span>
+                  <div key={p.id} className="space-y-0.5">
+                    <div className="flex justify-between text-sm">
+                      <span>
+                        {p.method}
+                        {p.method === 'Cartão de Crédito' && p.installments > 1
+                          ? ` (${p.installments}x)`
+                          : ''}
+                      </span>
+                      <span className="font-medium">{formatCurrency(p.amount)}</span>
+                    </div>
+                    {(p.method === 'Cartão de Crédito' || p.method === 'Cartão de Débito') &&
+                      p.card_flag && (
+                        <div className="flex justify-between text-sm text-slate-500 pl-2">
+                          <span>Bandeira: {p.card_flag}</span>
+                        </div>
+                      )}
                   </div>
                 ))
-              ) : (
+              ) : paymentMethodLabel ? (
                 <div className="flex justify-between text-sm">
                   <span>{paymentMethodLabel}</span>
                   <span className="font-medium">{formatCurrency(record.amount)}</span>
                 </div>
-              )}
+              ) : null}
               {payments.length > 0 && (
                 <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
                   <span>Total Pago:</span>
@@ -261,7 +268,7 @@ export default function ReceiptPage() {
             <p className="text-sm font-bold text-green-700">✓ PAGO</p>
             {record.received_at && (
               <p className="text-sm text-green-600">
-                Recebido em: {toDateInput(record.received_at)}
+                Recebido em: {formatDateBR(record.received_at)}
               </p>
             )}
           </div>
@@ -285,7 +292,7 @@ export default function ReceiptPage() {
 
         <div className="text-center mt-8 pt-4 border-t border-gray-200">
           <p className="text-xs text-gray-400">
-            Copyright &copy; {currentYear} {companyName} - Todos os direitos reservados.
+            Copyright &copy; {currentYear} {companyName} · www.lavarapidoxua.com.br
           </p>
         </div>
       </div>

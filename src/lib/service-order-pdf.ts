@@ -16,7 +16,10 @@ function formatDate(dateStr: string): string {
   if (!dateStr) return '--'
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return '--'
-  return d.toLocaleDateString('pt-BR')
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}/${month}/${year}`
 }
 
 function buildItemsRows(items: ServiceOrderItem[]): string {
@@ -212,7 +215,7 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
       <div class="obs-box">${order.observation || 'Sem observações.'}</div>
     </div>
     <div class="footer">
-      Copyright &copy; ${new Date().getFullYear()} ${company.trading_name || company.name} - Todos os direitos reservados.
+      Copyright &copy; ${new Date().getFullYear()} ${company.trading_name || company.name} · www.lavarapidoxua.com.br
     </div>
   </div>
   <script>

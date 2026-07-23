@@ -11,7 +11,7 @@ import {
 import { getCompany, type Company } from '@/services/company'
 import { getOrderPayments, type OrderPayment } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
-import { formatCurrency, formatDuration, toDateInput } from '@/lib/format'
+import { formatCurrency, formatDuration, formatDateBR } from '@/lib/format'
 import pb from '@/lib/pocketbase/client'
 import '@/styles/print.css'
 
@@ -119,7 +119,7 @@ export default function PrintServiceOrderPage() {
             </p>
             {order.prisma_number && <p className="text-sm">Prisma: {order.prisma_number}</p>}
             {order.emission_date && (
-              <p className="text-sm">Emissão: {toDateInput(order.emission_date)}</p>
+              <p className="text-sm">Emissão: {formatDateBR(order.emission_date)}</p>
             )}
             <p className="text-sm">
               Status: <strong>{order.status || '--'}</strong>
@@ -275,12 +275,12 @@ export default function PrintServiceOrderPage() {
           <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             {order.entry_at && (
               <div>
-                <strong>Entrada:</strong> {toDateInput(order.entry_at)}
+                <strong>Entrada:</strong> {formatDateBR(order.entry_at)}
               </div>
             )}
             {order.exit_at && (
               <div>
-                <strong>Saída:</strong> {toDateInput(order.exit_at)}
+                <strong>Saída:</strong> {formatDateBR(order.exit_at)}
               </div>
             )}
           </div>
@@ -316,7 +316,7 @@ export default function PrintServiceOrderPage() {
 
         <div className="text-center mt-8 pt-4 border-t border-gray-200">
           <p className="text-xs text-gray-400">
-            Copyright &copy; {currentYear} {companyName} - Todos os direitos reservados.
+            Copyright &copy; {currentYear} {companyName} · www.lavarapidoxua.com.br
           </p>
         </div>
       </div>
