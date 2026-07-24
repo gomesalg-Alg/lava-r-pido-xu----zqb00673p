@@ -162,7 +162,7 @@ export function ServiceOrderForm({ orderId }: Props) {
     if (items.some((i) => (!i.service_id && !i.product_id) || !i.operator_id))
       e.items = 'Preencha item e operador em todos os itens'
     if (items.some((i) => (i.service_id || i.product_id) && calcItemTotal(i) <= 0))
-      e.items = 'O valor do item deve ser maior que zero'
+      e.items = 'Itens com preço ou total zero não são permitidos'
     setErrors(e)
     return !Object.keys(e).length
   }

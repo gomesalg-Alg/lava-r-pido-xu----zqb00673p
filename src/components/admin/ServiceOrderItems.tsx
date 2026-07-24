@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, AlertCircle } from 'lucide-react'
 import { getServices, type Service } from '@/services/services'
 import { getUsers, type User } from '@/services/users'
 
@@ -98,6 +98,15 @@ export const emptyItemRow = (): ItemRow => ({
   surcharge_reason: '',
 })
 
+function isNewItemInvalid(row: ItemRow): boolean {
+  if (row.id) return false
+  if (!row.service_id && !row.product_id) return false
+  if ((row.unit_price || 0) === 0) return true
+  const total = (row.quantity || 0) * (row.unit_price || 0)
+  if (total === 0) return true
+  return false
+}
+
 interface Props {
   items: ItemRow[]
   onChange: (items: ItemRow[]) => void
@@ -129,10 +138,19 @@ export function ServiceOrderItems({ items, onChange }: Props) {
     }
   }
 
+  const invalidNewItem = useMemo(() => items.find((row) => isNewItemInvalid(row)), [items])
+
+  const canAddItem = !invalidNewItem
+
+  const handleAddItem = () => {
+    if (!canAddItem) return
+    onChange([...items, emptyItemRow()])
+  }
+
   return (
     <div className="space-y-3">
       <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full min-w-[900px] text-sm">
+        <table className="w-full min-w-[600px] text-sm">
           <thead>
             <tr className="border-b bg-slate-100">
               <th className="text-left px-3 py-2 font-semibold text-slate-600 min-w-[200px]">
@@ -143,8 +161,6 @@ export function ServiceOrderItems({ items, onChange }: Props) {
               </th>
               <th className="text-left px-3 py-2 font-semibold text-slate-600 w-20">Qtd</th>
               <th className="text-left px-3 py-2 font-semibold text-slate-600 w-24">Preço Unit.</th>
-              <th className="text-left px-3 py-2 font-semibold text-slate-600 w-28">Desconto</th>
-              <th className="text-left px-3 py-2 font-semibold text-slate-600 w-28">Acréscimo</th>
               <th className="text-right px-3 py-2 font-semibold text-slate-600 w-24">Total</th>
               <th className="px-2 py-2 w-10"></th>
             </tr>
@@ -152,8 +168,8 @@ export function ServiceOrderItems({ items, onChange }: Props) {
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-8 text-slate-400">
-                  Nenhum item adicionado. Clique em "Adicionar Item" para começar.
+                <td colSpan={6} className="text-center py-8 text-slate-400">
+                  Nenhum item adicionado. Clique em &quot;Adicionar Item&quot; para começar.
                 </td>
               </tr>
             ) : (
@@ -210,36 +226,6 @@ export function ServiceOrderItems({ items, onChange }: Props) {
                       prefix="R$"
                     />
                   </td>
-                  <td className="px-3 py-2">
-                    <NumCell
-                      value={row.discount_amount}
-                      onChange={(v) => updateRow(i, { discount_amount: v })}
-                      prefix="R$"
-                    />
-                    {row.discount_amount > 0 && (
-                      <Input
-                        value={row.discount_reason}
-                        onChange={(e) => updateRow(i, { discount_reason: e.target.value })}
-                        className="h-7 text-[10px] mt-1"
-                        placeholder="Motivo"
-                      />
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    <NumCell
-                      value={row.surcharge_amount}
-                      onChange={(v) => updateRow(i, { surcharge_amount: v })}
-                      prefix="R$"
-                    />
-                    {row.surcharge_amount > 0 && (
-                      <Input
-                        value={row.surcharge_reason}
-                        onChange={(e) => updateRow(i, { surcharge_reason: e.target.value })}
-                        className="h-7 text-[10px] mt-1"
-                        placeholder="Motivo"
-                      />
-                    )}
-                  </td>
                   <td className="px-3 py-2 text-right whitespace-nowrap">
                     <div
                       className={cn(
@@ -274,11 +260,23 @@ export function ServiceOrderItems({ items, onChange }: Props) {
           </tbody>
         </table>
       </div>
+
+      {!canAddItem && (
+        <div className="flex items-center gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <p className="text-xs text-amber-800">
+            Não é possível adicionar um novo item enquanto existir um item com preço ou total igual
+            a zero. Ajuste o preço unitário e a quantidade antes de continuar.
+          </p>
+        </div>
+      )}
+
       <Button
         variant="outline"
         size="sm"
         type="button"
-        onClick={() => onChange([...items, emptyItemRow()])}
+        onClick={handleAddItem}
+        disabled={!canAddItem}
       >
         <Plus className="w-4 h-4 mr-2" /> Adicionar Item
       </Button>
