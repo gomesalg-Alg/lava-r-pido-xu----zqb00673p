@@ -170,50 +170,31 @@ export const searchServiceOrdersByPlacaOrTicket = async (
 ): Promise<ServiceOrder[]> => {
   const q = query.trim()
   if (!q) return []
-  const results: ServiceOrder[] = []
-  const seen = new Set<string>()
 
   const digits = q.replace(/\D/g, '')
+  const parts: string[] = [`placa ~ "${q}"`]
   if (digits) {
-    try {
-      const ticketNum = parseInt(digits, 10)
-      const ticketResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
-        filter: `ticket_number = ${ticketNum} && status != 'Finalizado' && status != 'Pago' && status != 'Cancelado'`,
-        expand: 'customer_id,vehicle_id',
-        sort: '-created',
-      })
-      for (const o of ticketResults) {
-        if (!seen.has(o.id)) {
-          seen.add(o.id)
-          results.push(o)
-        }
-      }
-    } catch {
-      /* ignore */
-    }
+    parts.push(`ticket_number ~ "${digits}"`)
   }
 
+  const statusFilter = `status != 'Finalizado' && status != 'Pago' && status != 'Cancelado'`
+  const filter = `(${parts.join(' || ')}) && ${statusFilter}`
+
   try {
-    const upperQ = q.toUpperCase()
-    const parts = [`placa ~ "${upperQ}"`]
-    const digitsOnly = q.replace(/\D/g, '')
-    if (digitsOnly && digitsOnly !== upperQ) {
-      parts.push(`placa ~ "${digitsOnly}"`)
-    }
-    const plateResults = await pb.collection('service_orders').getFullList<ServiceOrder>({
-      filter: `(${parts.join(' || ')}) && status != 'Finalizado' && status != 'Pago' && status != 'Cancelado'`,
+    return await pb.collection('service_orders').getFullList<ServiceOrder>({
+      filter,
       expand: 'customer_id,vehicle_id',
       sort: '-created',
     })
-    for (const o of plateResults) {
-      if (!seen.has(o.id)) {
-        seen.add(o.id)
-        results.push(o)
-      }
-    }
   } catch {
-    /* ignore */
+    try {
+      return await pb.collection('service_orders').getFullList<ServiceOrder>({
+        filter: `placa ~ "${q}" && ${statusFilter}`,
+        expand: 'customer_id,vehicle_id',
+        sort: '-created',
+      })
+    } catch {
+      return []
+    }
   }
-
-  return results
 }

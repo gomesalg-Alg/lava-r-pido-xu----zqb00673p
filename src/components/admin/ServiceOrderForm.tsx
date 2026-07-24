@@ -13,13 +13,7 @@ import {
 } from '@/components/ui/select'
 import { CustomerVehicleSearch } from './CustomerVehicleSearch'
 import { ServiceOrderItems, type ItemRow, calcItemTotal } from './ServiceOrderItems'
-import {
-  formatCurrency,
-  formatDuration,
-  toDatetimeLocal,
-  fromDatetimeLocal,
-  toDateInput,
-} from '@/lib/format'
+import { formatDuration, toDatetimeLocal, fromDatetimeLocal, toDateInput } from '@/lib/format'
 import {
   getServiceOrder,
   getServiceOrderItems,
@@ -232,8 +226,6 @@ export function ServiceOrderForm({ orderId }: Props) {
     }
   }
 
-  const itemsTotal = items.reduce((s, i) => s + calcItemTotal(i), 0)
-
   const photoUrl = photo
     ? URL.createObjectURL(photo)
     : existingPhoto && orderId
@@ -394,22 +386,6 @@ export function ServiceOrderForm({ orderId }: Props) {
         <h2 className="font-bold text-lg">Itens do Serviço</h2>
         {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
         <ServiceOrderItems items={items} onChange={setItems} />
-      </div>
-
-      <div className="bg-white rounded-lg border p-6 space-y-4">
-        <h2 className="font-bold text-lg">Resumo</h2>
-        <div className="flex justify-end">
-          <div className="w-64 space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Subtotal dos Itens:</span>
-              <span className="tabular-nums">{formatCurrency(itemsTotal)}</span>
-            </div>
-            <div className="flex justify-between text-base font-bold border-t pt-1">
-              <span>Total Geral:</span>
-              <span className="tabular-nums">{formatCurrency(itemsTotal)}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {isEdit && (createdBy || updatedBy) && (
