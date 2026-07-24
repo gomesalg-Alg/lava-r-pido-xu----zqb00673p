@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/format'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
+import { cn } from '@/lib/utils'
 import type { PaymentLine } from '@/services/order-payments'
 import type { CardRate } from '@/services/card-rates'
 import { getRateForPayment } from '@/services/card-rates'
@@ -44,7 +45,7 @@ export function PaymentLines({
   const addLine = () =>
     onLinesChange([
       ...lines,
-      { id: crypto.randomUUID(), method: '', amount: 0, card_flag: '', installments: 1 },
+      { id: crypto.randomUUID(), method: '', amount: 0, card_flag: '', installments: 0 },
     ])
 
   const totalPaid = lines.filter((l) => l.method && l.amount > 0).reduce((s, l) => s + l.amount, 0)
@@ -52,7 +53,7 @@ export function PaymentLines({
   const troco = remaining < 0 ? Math.abs(remaining) : 0
 
   const getMaxInstallments = (flag: string) =>
-    activeFlags.find((r) => r.flag === flag)?.max_installments ?? 4
+    activeFlags.find((r) => r.flag === flag)?.max_installments || 4
 
   return (
     <div className="space-y-3">
@@ -72,7 +73,7 @@ export function PaymentLines({
                   const patch: Partial<PaymentLine> = { method: v as PaymentLine['method'] }
                   if (!isCardMethod(v)) {
                     patch.card_flag = ''
-                    patch.installments = 1
+                    patch.installments = 0
                   }
                   updateLine(line.id, patch)
                 }}
@@ -122,11 +123,13 @@ export function PaymentLines({
               )}
               {line.method === 'Cartão de Crédito' && (
                 <Select
-                  value={String(line.installments)}
+                  value={line.installments > 0 ? String(line.installments) : undefined}
                   onValueChange={(v) => updateLine(line.id, { installments: parseInt(v) })}
                 >
-                  <SelectTrigger className="w-20">
-                    <SelectValue />
+                  <SelectTrigger
+                    className={cn('w-24', line.installments === 0 && 'border-red-400')}
+                  >
+                    <SelectValue placeholder="Parcelas" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({ length: maxInst }, (_, i) => i + 1).map((n) => (
@@ -146,6 +149,9 @@ export function PaymentLines({
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
+            {line.method === 'Cartão de Crédito' && line.installments === 0 && (
+              <p className="text-xs text-red-500">Selecione o número de parcelas</p>
+            )}
             {isCardMethod(line.method) && line.card_flag && line.amount > 0 && (
               <p className="text-xs text-slate-500">
                 Taxa: {rate.toFixed(2)}% · Desconto da bandeira: {formatCurrency(fee)}

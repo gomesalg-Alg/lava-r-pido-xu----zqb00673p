@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,6 +11,7 @@ import {
 import { formatCurrency } from '@/lib/format'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { Trash2, CheckCircle } from 'lucide-react'
+import { getCardRates, type CardRate } from '@/services/card-rates'
 
 export type CartItem = {
   id?: string
@@ -32,6 +33,8 @@ interface Props {
     total_discount: number
     total_surcharge: number
     amount_paid: number
+    card_flag?: string
+    installments?: number
   }) => void
   finalizing: boolean
 }
@@ -41,11 +44,44 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
   const [surcharge, setSurcharge] = useState(0)
   const [amountPaid, setAmountPaid] = useState(0)
   const [paymentMethod, setPaymentMethod] = useState('')
+  const [cardFlag, setCardFlag] = useState('')
+  const [installments, setInstallments] = useState(0)
+  const [cardRates, setCardRates] = useState<CardRate[]>([])
+
+  useEffect(() => {
+    getCardRates()
+      .then((rates) => setCardRates(rates))
+      .catch(() => {})
+  }, [])
+
+  const activeFlags = cardRates.filter((r) => r.is_active)
+  const isCreditCard = paymentMethod === 'Cartão de Crédito'
+  const isCortesia = paymentMethod === 'Cortesia'
+
+  const maxInstallments = activeFlags.find((r) => r.flag === cardFlag)?.max_installments || 4
 
   const subtotal = items.reduce((s, i) => s + i.unit_price * i.quantity, 0)
   const grandTotal = subtotal - discount + surcharge
   const change = amountPaid - grandTotal
-  const isCortesia = paymentMethod === 'Cortesia'
+
+  const handleMethodChange = (v: string) => {
+    setPaymentMethod(v)
+    if (v !== 'Cartão de Crédito') {
+      setCardFlag('')
+      setInstallments(0)
+    }
+  }
+
+  const handleFlagChange = (v: string) => {
+    setCardFlag(v)
+    const newMax = activeFlags.find((r) => r.flag === v)?.max_installments || 4
+    if (installments > newMax) {
+      setInstallments(newMax)
+    }
+  }
+
+  const canFinalize =
+    !!paymentMethod && items.length > 0 && (!isCreditCard || (cardFlag !== '' && installments > 0))
 
   const handleFinalize = () => {
     onFinalize({
@@ -53,6 +89,8 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
       total_discount: discount,
       total_surcharge: surcharge,
       amount_paid: isCortesia ? 0 : amountPaid,
+      card_flag: isCreditCard ? cardFlag : undefined,
+      installments: isCreditCard ? installments : undefined,
     })
   }
 
@@ -132,7 +170,7 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className="text-xs">Forma de Pagamento *</Label>
-          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+          <Select value={paymentMethod} onValueChange={handleMethodChange}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
@@ -157,6 +195,48 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
         </div>
       </div>
 
+      {isCreditCard && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs">Bandeira *</Label>
+            <Select value={cardFlag || undefined} onValueChange={handleFlagChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {activeFlags.map((r) => (
+                  <SelectItem key={r.flag} value={r.flag}>
+                    {r.flag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Parcelas *</Label>
+            <Select
+              value={installments > 0 ? String(installments) : undefined}
+              onValueChange={(v) => setInstallments(parseInt(v))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: maxInstallments }, (_, i) => i + 1).map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n}x
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
+
+      {isCreditCard && installments === 0 && (
+        <p className="text-xs text-red-500">Selecione o número de parcelas para finalizar.</p>
+      )}
+
       {!isCortesia && amountPaid > 0 && (
         <div className="flex justify-between text-base font-bold p-3 bg-green-50 rounded-md">
           <span>Troco</span>
@@ -166,7 +246,7 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
 
       <Button
         onClick={handleFinalize}
-        disabled={finalizing || !paymentMethod || items.length === 0}
+        disabled={finalizing || !canFinalize}
         className="w-full h-12 text-base"
         size="lg"
       >
