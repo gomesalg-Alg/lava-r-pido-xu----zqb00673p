@@ -78,14 +78,12 @@ export type ItemRow = {
 }
 
 export function calcItemTotal(row: ItemRow): number {
-  return (row.quantity || 0) * (row.unit_price || 0)
+  const subtotal = (row.quantity || 0) * (row.unit_price || 0)
+  return subtotal - (row.discount_amount || 0) + (row.surcharge_amount || 0)
 }
 
 export function calcGrandTotal(rows: ItemRow[]): number {
-  const subtotal = rows.reduce((s, r) => s + calcItemTotal(r), 0)
-  const discounts = rows.reduce((s, r) => s + (r.discount_amount || 0), 0)
-  const surcharges = rows.reduce((s, r) => s + (r.surcharge_amount || 0), 0)
-  return subtotal - discounts + surcharges
+  return rows.reduce((s, r) => s + calcItemTotal(r), 0)
 }
 
 export const emptyItemRow = (): ItemRow => ({
@@ -165,6 +163,7 @@ export function ServiceOrderItems({ items, onChange }: Props) {
                   className={cn(
                     'hover:bg-slate-100/50 transition-colors',
                     i % 2 === 1 ? 'bg-slate-50' : 'bg-white',
+                    row.service_id && calcItemTotal(row) <= 0 && 'bg-red-50',
                   )}
                 >
                   <td className="px-3 py-2">
@@ -241,8 +240,22 @@ export function ServiceOrderItems({ items, onChange }: Props) {
                       />
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right font-bold text-slate-700 whitespace-nowrap">
-                    {formatCurrency(calcItemTotal(row))}
+                  <td className="px-3 py-2 text-right whitespace-nowrap">
+                    <div
+                      className={cn(
+                        'font-bold',
+                        calcItemTotal(row) <= 0 && row.service_id
+                          ? 'text-red-600'
+                          : 'text-slate-700',
+                      )}
+                    >
+                      {formatCurrency(calcItemTotal(row))}
+                    </div>
+                    {row.service_id && calcItemTotal(row) <= 0 && (
+                      <p className="text-[10px] text-red-500 mt-0.5">
+                        O valor do item deve ser maior que zero
+                      </p>
+                    )}
                   </td>
                   <td className="px-2 py-2 text-center">
                     <Button

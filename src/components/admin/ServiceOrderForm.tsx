@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CustomerVehicleSearch } from './CustomerVehicleSearch'
-import { ServiceOrderItems, type ItemRow } from './ServiceOrderItems'
+import { ServiceOrderItems, type ItemRow, calcItemTotal } from './ServiceOrderItems'
 import {
   formatCurrency,
   formatDuration,
@@ -165,6 +165,8 @@ export function ServiceOrderForm({ orderId }: Props) {
     if (items.length === 0) e.items = 'Adicione pelo menos um item'
     if (items.some((i) => (!i.service_id && !i.product_id) || !i.operator_id))
       e.items = 'Preencha item e operador em todos os itens'
+    if (items.some((i) => (i.service_id || i.product_id) && calcItemTotal(i) <= 0))
+      e.items = 'O valor do item deve ser maior que zero'
     if (Number(form.total_discount) < 0) e.total_discount = 'Desconto não pode ser negativo'
     if (Number(form.total_surcharge) < 0) e.total_surcharge = 'Acréscimo não pode ser negativo'
     setErrors(e)
@@ -238,14 +240,7 @@ export function ServiceOrderForm({ orderId }: Props) {
     }
   }
 
-  const itemsTotal = items.reduce(
-    (s, i) =>
-      s +
-      (i.quantity || 0) * (i.unit_price || 0) -
-      (i.discount_amount || 0) +
-      (i.surcharge_amount || 0),
-    0,
-  )
+  const itemsTotal = items.reduce((s, i) => s + calcItemTotal(i), 0)
   const orderTotal =
     itemsTotal - (Number(form.total_discount) || 0) + (Number(form.total_surcharge) || 0)
 
