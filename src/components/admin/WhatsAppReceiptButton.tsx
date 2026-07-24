@@ -17,6 +17,8 @@ interface Props {
   companyName: string
   orderId?: string | null
   className?: string
+  discount?: number
+  surcharge?: number
 }
 
 export function WhatsAppReceiptButton({
@@ -30,6 +32,8 @@ export function WhatsAppReceiptButton({
   companyName,
   orderId,
   className,
+  discount,
+  surcharge,
 }: Props) {
   const [loading, setLoading] = useState(false)
 
@@ -81,6 +85,8 @@ export function WhatsAppReceiptButton({
         cardFlag: cardFlag || undefined,
         emissionDate,
         companyName,
+        discount,
+        surcharge,
       })
 
       const waUrl = buildWhatsAppShareUrl(customerPhone, message)

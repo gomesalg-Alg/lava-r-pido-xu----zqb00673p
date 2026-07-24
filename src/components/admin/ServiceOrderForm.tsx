@@ -60,8 +60,6 @@ export function ServiceOrderForm({ orderId }: Props) {
     status: 'Orçamento',
     observation: '',
     placa: '',
-    total_discount: 0,
-    total_surcharge: 0,
   })
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
@@ -91,8 +89,6 @@ export function ServiceOrderForm({ orderId }: Props) {
             status: order.status || 'Orçamento',
             observation: order.observation || '',
             placa: order.placa || '',
-            total_discount: order.total_discount || 0,
-            total_surcharge: order.total_surcharge || 0,
           })
           setExistingPhoto(order.photo || '')
           if (order.expand?.customer_id) setCustomer(order.expand.customer_id)
@@ -167,8 +163,6 @@ export function ServiceOrderForm({ orderId }: Props) {
       e.items = 'Preencha item e operador em todos os itens'
     if (items.some((i) => (i.service_id || i.product_id) && calcItemTotal(i) <= 0))
       e.items = 'O valor do item deve ser maior que zero'
-    if (Number(form.total_discount) < 0) e.total_discount = 'Desconto não pode ser negativo'
-    if (Number(form.total_surcharge) < 0) e.total_surcharge = 'Acréscimo não pode ser negativo'
     setErrors(e)
     return !Object.keys(e).length
   }
@@ -192,8 +186,6 @@ export function ServiceOrderForm({ orderId }: Props) {
         status: form.status,
         observation: form.observation,
         placa: form.placa || null,
-        total_discount: Number(form.total_discount) || 0,
-        total_surcharge: Number(form.total_surcharge) || 0,
       }
       if (photo) payload.photo = photo
 
@@ -241,8 +233,6 @@ export function ServiceOrderForm({ orderId }: Props) {
   }
 
   const itemsTotal = items.reduce((s, i) => s + calcItemTotal(i), 0)
-  const orderTotal =
-    itemsTotal - (Number(form.total_discount) || 0) + (Number(form.total_surcharge) || 0)
 
   const photoUrl = photo
     ? URL.createObjectURL(photo)
@@ -407,58 +397,16 @@ export function ServiceOrderForm({ orderId }: Props) {
       </div>
 
       <div className="bg-white rounded-lg border p-6 space-y-4">
-        <h2 className="font-bold text-lg">Resumo Financeiro</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Desconto (R$)</Label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.total_discount || ''}
-              onChange={(e) => set('total_discount', e.target.value)}
-              disabled={form.status === 'Pago'}
-            />
-            {errors.total_discount && (
-              <p className="text-xs text-red-500">{errors.total_discount}</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label>Acréscimo (R$)</Label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.total_surcharge || ''}
-              onChange={(e) => set('total_surcharge', e.target.value)}
-              disabled={form.status === 'Pago'}
-            />
-            {errors.total_surcharge && (
-              <p className="text-xs text-red-500">{errors.total_surcharge}</p>
-            )}
-          </div>
-        </div>
+        <h2 className="font-bold text-lg">Resumo</h2>
         <div className="flex justify-end">
           <div className="w-64 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-slate-600">Subtotal dos Itens:</span>
               <span className="tabular-nums">{formatCurrency(itemsTotal)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Desconto:</span>
-              <span className="tabular-nums">
-                - {formatCurrency(Number(form.total_discount) || 0)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Acréscimo:</span>
-              <span className="tabular-nums">
-                + {formatCurrency(Number(form.total_surcharge) || 0)}
-              </span>
-            </div>
             <div className="flex justify-between text-base font-bold border-t pt-1">
               <span>Total Geral:</span>
-              <span className="tabular-nums">{formatCurrency(orderTotal)}</span>
+              <span className="tabular-nums">{formatCurrency(itemsTotal)}</span>
             </div>
           </div>
         </div>

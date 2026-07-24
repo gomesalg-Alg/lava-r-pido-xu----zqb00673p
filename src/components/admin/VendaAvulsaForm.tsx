@@ -35,6 +35,8 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
   const [custResults, setCustResults] = useState<Customer[]>([])
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [finalizing, setFinalizing] = useState(false)
+  const [discount, setDiscount] = useState(0)
+  const [surcharge, setSurcharge] = useState(0)
 
   useEffect(() => {
     if (!custSearch.trim()) return setCustResults([])
@@ -66,7 +68,8 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
     })
   }
 
-  const total = cart.reduce((s, i) => s + i.unit_price * i.quantity, 0)
+  const subtotal = cart.reduce((s, i) => s + i.unit_price * i.quantity, 0)
+  const total = subtotal - discount + surcharge
   const change = amountPaid - total
   const isCortesia = method === 'Cortesia'
 
@@ -250,6 +253,32 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
                 </div>
               ))}
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Desconto (R$)</Label>
+                <CurrencyInput
+                  value={discount}
+                  onChange={setDiscount}
+                  className="text-right"
+                  placeholder="0,00"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Acréscimo (R$)</Label>
+                <CurrencyInput
+                  value={surcharge}
+                  onChange={setSurcharge}
+                  className="text-right"
+                  placeholder="0,00"
+                />
+              </div>
+            </div>
+            {(discount > 0 || surcharge > 0) && (
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Subtotal</span>
+                <span className="font-medium">{formatCurrency(subtotal)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-lg font-bold border-t pt-2">
               <span>Total</span>
               <span className="text-blue-600">{formatCurrency(total)}</span>

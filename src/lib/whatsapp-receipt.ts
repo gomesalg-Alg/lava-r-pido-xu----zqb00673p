@@ -13,6 +13,8 @@ export interface ReceiptMessageParams {
   cardFlag?: string
   emissionDate: string
   companyName: string
+  discount?: number
+  surcharge?: number
 }
 
 export function buildReceiptMessage(params: ReceiptMessageParams): string {
@@ -26,6 +28,8 @@ export function buildReceiptMessage(params: ReceiptMessageParams): string {
     cardFlag,
     emissionDate,
     companyName,
+    discount,
+    surcharge,
   } = params
 
   const lines: string[] = []
@@ -39,6 +43,12 @@ export function buildReceiptMessage(params: ReceiptMessageParams): string {
   lines.push(`Data de Emissão: ${formatDateBR(emissionDate)}`)
   lines.push('')
   lines.push('*Resumo Financeiro:*')
+  if (discount && discount > 0) {
+    lines.push(`Desconto: - ${formatCurrency(discount)}`)
+  }
+  if (surcharge && surcharge > 0) {
+    lines.push(`Acréscimo: + ${formatCurrency(surcharge)}`)
+  }
   lines.push(`Total: ${formatCurrency(totalAmount)}`)
   let paymentLabel = paymentMethod || 'Não informado'
   if (cardFlag) paymentLabel += ` - ${cardFlag}`

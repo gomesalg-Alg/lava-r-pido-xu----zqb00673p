@@ -92,9 +92,11 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
   const customer = order.expand?.customer_id
   const vehicle = order.expand?.vehicle_id
   const subtotal = calcSubtotal(items)
-  const totalDiscount = calcTotalDiscount(items)
-  const totalSurcharge = calcTotalSurcharge(items)
-  const grandTotal = calcGrandTotal(items)
+  const itemDiscount = calcTotalDiscount(items)
+  const itemSurcharge = calcTotalSurcharge(items)
+  const totalDiscount = itemDiscount + (order.total_discount || 0)
+  const totalSurcharge = itemSurcharge + (order.total_surcharge || 0)
+  const grandTotal = subtotal - totalDiscount + totalSurcharge
   const logo = buildLogoHtml(company)
   const address = buildAddressHtml(company)
 

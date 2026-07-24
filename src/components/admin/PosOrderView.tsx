@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/table'
 import { PaymentLines } from '@/components/admin/PaymentLines'
 import { PosProductGrid } from '@/components/admin/PosProductGrid'
+import { CurrencyInput } from '@/components/admin/CurrencyInput'
+import { Label } from '@/components/ui/label'
 import { getCardRates, type CardRate } from '@/services/card-rates'
 import { createOrderPayment, type PaymentLine } from '@/services/order-payments'
 import {
@@ -44,6 +46,8 @@ export function PosOrderView({ order, onBack }: Props) {
   const [loadingItems, setLoadingItems] = useState(true)
   const [finalizing, setFinalizing] = useState(false)
   const [addingProduct, setAddingProduct] = useState(false)
+  const [discount, setDiscount] = useState(0)
+  const [surcharge, setSurcharge] = useState(0)
   const originalItemIds = useRef<Set<string>>(new Set())
   const isFirstLoad = useRef(true)
 
@@ -77,10 +81,11 @@ export function PosOrderView({ order, onBack }: Props) {
   })
 
   const totals = useMemo(() => calculateOrderTotals(items), [items])
+  const finalTotal = totals.grandTotal - discount + surcharge
   const totalPaid = paymentLines
     .filter((l) => l.method && l.amount > 0)
     .reduce((s, l) => s + l.amount, 0)
-  const remaining = totals.grandTotal - totalPaid
+  const remaining = finalTotal - totalPaid
   const canFinalize = remaining <= 0.01 && paymentLines.length > 0
 
   const isLocked = (item: ServiceOrderItem) => originalItemIds.current.has(item.id)
@@ -149,9 +154,9 @@ export function PosOrderView({ order, onBack }: Props) {
       const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
       await updateServiceOrder(order.id, {
         status: 'Pago',
-        amount_paid: totals.grandTotal,
-        total_discount: totals.totalDiscount,
-        total_surcharge: totals.totalSurcharge,
+        amount_paid: finalTotal,
+        total_discount: discount,
+        total_surcharge: surcharge,
         exit_at: new Date().toISOString(),
       })
       const paymentMethods = validLines.map((l) => l.method).join(', ')
@@ -159,7 +164,7 @@ export function PosOrderView({ order, onBack }: Props) {
         customer_id: order.customer_id,
         order_id: order.id,
         description: `Venda PDV - OS #${order.ticket_number}`,
-        amount: totals.grandTotal,
+        amount: finalTotal,
         due_date: new Date().toISOString().split('T')[0],
         status: 'Recebido',
         payment_method: paymentMethods,
@@ -318,10 +323,26 @@ export function PosOrderView({ order, onBack }: Props) {
                   {formatCurrency(totals.totalSurcharge)}
                 </span>
               </div>
+              {discount > 0 && (
+                <div className="flex gap-8">
+                  <span className="text-slate-500">Desconto:</span>
+                  <span className="font-medium w-28 text-right text-red-500 tabular-nums">
+                    - {formatCurrency(discount)}
+                  </span>
+                </div>
+              )}
+              {surcharge > 0 && (
+                <div className="flex gap-8">
+                  <span className="text-slate-500">Acréscimo:</span>
+                  <span className="font-medium w-28 text-right text-green-600 tabular-nums">
+                    + {formatCurrency(surcharge)}
+                  </span>
+                </div>
+              )}
               <div className="flex gap-8 text-base">
                 <span className="font-bold">Total Geral:</span>
                 <span className="font-bold w-28 text-right tabular-nums">
-                  {formatCurrency(totals.grandTotal)}
+                  {formatCurrency(finalTotal)}
                 </span>
               </div>
             </div>
@@ -347,11 +368,31 @@ export function PosOrderView({ order, onBack }: Props) {
               </TabsContent>
               <TabsContent value="payment" className="mt-3 space-y-3">
                 <PaymentLines
-                  total={totals.grandTotal}
+                  total={finalTotal}
                   lines={paymentLines}
                   onLinesChange={setPaymentLines}
                   cardRates={cardRates}
                 />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Desconto (R$)</Label>
+                    <CurrencyInput
+                      value={discount}
+                      onChange={setDiscount}
+                      className="text-right"
+                      placeholder="0,00"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Acréscimo (R$)</Label>
+                    <CurrencyInput
+                      value={surcharge}
+                      onChange={setSurcharge}
+                      className="text-right"
+                      placeholder="0,00"
+                    />
+                  </div>
+                </div>
                 <Button
                   className="w-full"
                   size="lg"
