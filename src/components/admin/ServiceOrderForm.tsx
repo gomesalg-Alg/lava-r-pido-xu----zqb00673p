@@ -30,7 +30,8 @@ import { toast } from 'sonner'
 import { Save, Camera, Upload } from 'lucide-react'
 import { PaymentSummary } from '@/components/admin/PaymentSummary'
 
-const STATUSES = ['Orçamento', 'Em Andamento', 'Finalizado', 'Cancelado']
+const STATUSES = ['Orçamento', 'Em Andamento']
+const LOCKED_STATUSES = ['Pago', 'Finalizado', 'Cancelado']
 
 interface Props {
   orderId?: string
@@ -157,12 +158,21 @@ export function ServiceOrderForm({ orderId }: Props) {
       e.items = 'Preencha item e operador em todos os itens'
     if (items.some((i) => (i.service_id || i.product_id) && calcItemTotal(i) <= 0))
       e.items = 'Itens com preço ou total zero não são permitidos'
+    if (form.status === 'Finalizado' || form.status === 'Cancelado')
+      e.status =
+        'O status Finalizado e Cancelado são gerados automaticamente pelo fluxo de venda e não podem ser alterados manualmente.'
     setErrors(e)
     return !Object.keys(e).length
   }
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault()
+    if (form.status === 'Finalizado' || form.status === 'Cancelado') {
+      toast.error(
+        'O status Finalizado e Cancelado são gerados automaticamente pelo fluxo de venda e não podem ser alterados manualmente.',
+      )
+      return
+    }
     if (!validate()) {
       toast.error('Verifique os campos do formulário')
       return
@@ -291,7 +301,7 @@ export function ServiceOrderForm({ orderId }: Props) {
             <Select
               value={form.status}
               onValueChange={(v) => set('status', v)}
-              disabled={form.status === 'Pago'}
+              disabled={LOCKED_STATUSES.includes(form.status)}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -302,13 +312,14 @@ export function ServiceOrderForm({ orderId }: Props) {
                     {s}
                   </SelectItem>
                 ))}
-                {form.status === 'Pago' && (
-                  <SelectItem value="Pago" disabled>
-                    Pago
+                {LOCKED_STATUSES.includes(form.status) && (
+                  <SelectItem value={form.status} disabled>
+                    {form.status}
                   </SelectItem>
                 )}
               </SelectContent>
             </Select>
+            {errors.status && <p className="text-xs text-red-500">{errors.status}</p>}
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -410,19 +421,20 @@ export function ServiceOrderForm({ orderId }: Props) {
         </div>
       )}
 
-      {form.status === 'Pago' && (
+      {LOCKED_STATUSES.includes(form.status) && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
           <p className="text-sm text-amber-800">
-            Esta ordem de serviço está com status &quot;Pago&quot; e não pode ser editada. Cancele a
-            venda na lista de ordens para liberar o registro.
+            Esta ordem de serviço está com status &quot;{form.status}&quot; e não pode ser editada
+            manualmente. Os status Finalizado e Cancelado são gerados automaticamente pelo fluxo de
+            venda.
           </p>
-          {orderId && <PaymentSummary orderId={orderId} />}
+          {form.status === 'Pago' && orderId && <PaymentSummary orderId={orderId} />}
         </div>
       )}
 
       <Button
         type="submit"
-        disabled={saving || form.status === 'Pago'}
+        disabled={saving || LOCKED_STATUSES.includes(form.status)}
         className="w-full"
         size="lg"
       >
