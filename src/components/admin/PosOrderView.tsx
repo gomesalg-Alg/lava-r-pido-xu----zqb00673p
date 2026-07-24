@@ -86,6 +86,7 @@ export function PosOrderView({ order, onBack }: Props) {
     .filter((l) => l.method && l.amount > 0)
     .reduce((s, l) => s + l.amount, 0)
   const remaining = finalTotal - totalPaid
+  const troco = Math.max(0, totalPaid - finalTotal)
   const canFinalize = remaining <= 0.01 && paymentLines.length > 0
 
   const isLocked = (item: ServiceOrderItem) => originalItemIds.current.has(item.id)
@@ -393,6 +394,12 @@ export function PosOrderView({ order, onBack }: Props) {
                     />
                   </div>
                 </div>
+                {troco > 0 && (
+                  <div className="flex justify-between text-base font-bold p-3 bg-green-50 rounded-md">
+                    <span>Troco</span>
+                    <span className="text-green-700">{formatCurrency(troco)}</span>
+                  </div>
+                )}
                 <Button
                   className="w-full"
                   size="lg"

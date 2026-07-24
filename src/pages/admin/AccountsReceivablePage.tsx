@@ -225,15 +225,7 @@ export default function AccountsReceivablePage() {
                       <WhatsAppReceiptButton
                         customerName={r.expand?.customer_id?.name || 'Cliente'}
                         customerPhone={r.expand?.customer_id?.phone || ''}
-                        ticketNumber={r.expand?.order_id?.ticket_number ?? null}
-                        totalAmount={r.amount}
-                        amountPaid={r.expand?.order_id?.amount_paid || 0}
-                        paymentMethod={
-                          r.payment_method || r.expand?.venda_avulsa_id?.payment_method || ''
-                        }
-                        emissionDate={r.created}
-                        companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
-                        orderId={r.order_id}
+                        receiptId={r.id}
                       />
                       {r.status === 'Pendente' && (
                         <Button

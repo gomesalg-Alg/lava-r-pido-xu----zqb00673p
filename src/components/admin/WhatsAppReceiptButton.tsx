@@ -1,42 +1,21 @@
-import { useState } from 'react'
-import { MessageCircle, Loader2 } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { sanitizePhone, buildWhatsAppShareUrl, buildReceiptMessage } from '@/lib/whatsapp-receipt'
-import { getOrderPayments } from '@/services/order-payments'
-import { toast } from 'sonner'
+import { sanitizePhone, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
 
 interface Props {
   customerName: string
   customerPhone: string
-  ticketNumber: number | string | null
-  totalAmount: number
-  amountPaid: number
-  paymentMethod: string
-  emissionDate: string
-  companyName: string
-  orderId?: string | null
+  receiptId: string
   className?: string
-  discount?: number
-  surcharge?: number
 }
 
 export function WhatsAppReceiptButton({
   customerName,
   customerPhone,
-  ticketNumber,
-  totalAmount,
-  amountPaid,
-  paymentMethod,
-  emissionDate,
-  companyName,
-  orderId,
+  receiptId,
   className,
-  discount,
-  surcharge,
 }: Props) {
-  const [loading, setLoading] = useState(false)
-
   const cleanPhone = sanitizePhone(customerPhone)
 
   const buttonClass = cn(
@@ -58,60 +37,21 @@ export function WhatsAppReceiptButton({
     )
   }
 
-  const handleClick = async () => {
-    setLoading(true)
-    try {
-      let cardFlag = ''
-      let totalPaid = amountPaid
-
-      if (orderId) {
-        const payments = await getOrderPayments(orderId)
-        if (payments.length > 0) {
-          totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0)
-          const cardPayment = payments.find((p) => p.card_flag)
-          if (cardPayment) cardFlag = cardPayment.card_flag
-        }
-      }
-
-      const troco = totalPaid - totalAmount
-
-      const message = buildReceiptMessage({
-        customerName,
-        ticketNumber,
-        totalAmount,
-        amountPaid: totalPaid,
-        troco: troco > 0 ? troco : 0,
-        paymentMethod,
-        cardFlag: cardFlag || undefined,
-        emissionDate,
-        companyName,
-        discount,
-        surcharge,
-      })
-
-      const waUrl = buildWhatsAppShareUrl(customerPhone, message)
-      window.open(waUrl, '_blank', 'noopener,noreferrer')
-    } catch {
-      toast.error('Erro ao gerar recibo para WhatsApp')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const receiptUrl = `${window.location.origin}/recibo/${receiptId}`
+  const message = `Olá ${customerName}! Sua nota de serviço está disponível aqui: ${receiptUrl}`
+  const waUrl = buildWhatsAppShareUrl(customerPhone, message)
 
   return (
     <Button
       variant="outline"
       size="sm"
-      onClick={handleClick}
-      disabled={loading}
+      asChild
       className={buttonClass}
       title="Enviar recibo por WhatsApp"
     >
-      {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : (
+      <a href={waUrl} target="_blank" rel="noreferrer">
         <MessageCircle className="w-4 h-4" />
-      )}
+      </a>
     </Button>
   )
 }

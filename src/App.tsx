@@ -35,6 +35,7 @@ import PosPage from './pages/admin/PosPage'
 import AccountsReceivablePage from './pages/admin/AccountsReceivablePage'
 import CardRatesPage from './pages/admin/CardRatesPage'
 import ReceiptPage from './pages/admin/ReceiptPage'
+import PublicReceipt from './pages/PublicReceipt'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -55,6 +56,7 @@ const App = () => (
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/os/:id" element={<PublicServiceOrder />} />
+          <Route path="/recibo/:id" element={<PublicReceipt />} />
           <Route
             path="/admin"
             element={
