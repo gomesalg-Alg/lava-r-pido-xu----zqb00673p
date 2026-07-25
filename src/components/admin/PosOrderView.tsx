@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   ArrowLeft,
   CheckCircle,
@@ -62,17 +62,11 @@ export function PosOrderView({ order, onBack }: Props) {
   const [surcharge, setSurcharge] = useState(0)
   const [editingItem, setEditingItem] = useState<ServiceOrderItem | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const originalItemIds = useRef<Set<string>>(new Set())
-  const isFirstLoad = useRef(true)
   const { user } = useAuth()
 
   const loadItems = useCallback(async () => {
     try {
       const fetched = await getServiceOrderItems(order.id)
-      if (isFirstLoad.current) {
-        fetched.forEach((item) => originalItemIds.current.add(item.id))
-        isFirstLoad.current = false
-      }
       setItems(fetched)
     } catch {
       /* ignore */
@@ -104,7 +98,7 @@ export function PosOrderView({ order, onBack }: Props) {
   const troco = Math.max(0, totalPaid - finalTotal)
   const canFinalize = remaining <= 0.01 && paymentLines.length > 0
 
-  const isLocked = (item: ServiceOrderItem) => originalItemIds.current.has(item.id)
+  const isLocked = (item: ServiceOrderItem) => !!item.service_id
 
   const handleQtyChange = async (item: ServiceOrderItem, delta: number) => {
     const newQty = Math.max(1, (item.quantity || 1) + delta)

@@ -234,7 +234,8 @@ export async function generateServiceOrderPdf(orderId: string): Promise<void> {
     getServiceOrderItems(orderId),
   ])
 
-  const html = buildHtml(company || ({} as Company), order, items)
+  const serviceItems = items.filter((i) => i.service_id)
+  const html = buildHtml(company || ({} as Company), order, serviceItems)
   const printWindow = window.open('', '_blank', 'width=900,height=700')
   if (!printWindow) {
     throw new Error(

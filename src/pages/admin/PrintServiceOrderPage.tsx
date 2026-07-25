@@ -69,8 +69,7 @@ export default function PrintServiceOrderPage() {
   }
 
   const serviceItems = items.filter((i) => i.service_id)
-  const productItems = items.filter((i) => i.product_id)
-  const totals = calculateOrderTotals(items)
+  const totals = calculateOrderTotals(serviceItems)
   const companyName = company?.trading_name || company?.name || 'Lava Rápido XUÁ'
   const currentYear = new Date().getFullYear()
   const logoUrl = company?.logo
@@ -184,37 +183,7 @@ export default function PrintServiceOrderPage() {
           </div>
         )}
 
-        {productItems.length > 0 && (
-          <div className="mt-6">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
-              Grupo Produtos
-            </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
-                  <th className="text-left py-2 px-3 uppercase text-xs">Produto</th>
-                  <th className="text-center py-2 px-3 uppercase text-xs">Quantidade</th>
-                  <th className="text-right py-2 px-3 uppercase text-xs">Valor Unitário</th>
-                  <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productItems.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-200 even:bg-slate-50">
-                    <td className="py-2 px-3">{item.expand?.product_id?.name || '--'}</td>
-                    <td className="text-center py-2 px-3">{item.quantity}</td>
-                    <td className="text-right py-2 px-3">{formatCurrency(item.unit_price)}</td>
-                    <td className="text-right py-2 px-3 font-semibold text-gray-900">
-                      {formatCurrency((item.quantity || 1) * (item.unit_price || 0))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {items.length === 0 && (
+        {serviceItems.length === 0 && (
           <div className="mt-8 text-center py-4 text-gray-400 text-sm">
             Nenhum serviço ou produto registrado
           </div>

@@ -50,7 +50,8 @@ export default function PublicServiceOrder() {
     )
   }
 
-  const totals = calculateOrderTotals(items)
+  const serviceItems = items.filter((i) => i.service_id)
+  const totals = calculateOrderTotals(serviceItems)
   const companyName = company?.trading_name || company?.name || 'Lava Rápido XUÁ'
   const currentYear = new Date().getFullYear()
   const logoUrl = company?.logo
@@ -159,7 +160,7 @@ export default function PublicServiceOrder() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {serviceItems.map((item) => (
                 <tr key={item.id} className="border-b border-gray-200 even:bg-slate-50">
                   <td className="py-2 px-3">{item.expand?.service_id?.name || '--'}</td>
                   <td className="py-2 px-3">{item.expand?.operator_id?.name || '--'}</td>
@@ -170,7 +171,7 @@ export default function PublicServiceOrder() {
                   </td>
                 </tr>
               ))}
-              {items.length === 0 && (
+              {serviceItems.length === 0 && (
                 <tr>
                   <td colSpan={5} className="text-center py-4 text-gray-400">
                     Nenhum serviço registrado
