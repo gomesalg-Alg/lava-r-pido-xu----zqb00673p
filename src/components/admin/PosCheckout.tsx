@@ -154,7 +154,7 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
           <span className="font-medium">{formatCurrency(subtotal)}</span>
         </div>
         <div className="flex justify-between text-lg font-bold pt-1 border-t">
-          <span>Total</span>
+          <span>Total Geral</span>
           <span className="text-blue-600">{formatCurrency(grandTotal)}</span>
         </div>
       </div>
