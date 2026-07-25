@@ -1,5 +1,15 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { ArrowLeft, CheckCircle, Package, Wallet, Lock, Minus, Plus, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  CheckCircle,
+  Package,
+  Wallet,
+  Lock,
+  Minus,
+  Plus,
+  Pencil,
+  Trash2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -31,6 +41,7 @@ import { createAccountsReceivable } from '@/services/accounts-receivable'
 import { formatCurrency } from '@/lib/format'
 import { useRealtime } from '@/hooks/use-realtime'
 import { toast } from 'sonner'
+import { PosItemEditDialog } from '@/components/admin/PosItemEditDialog'
 import { cn } from '@/lib/utils'
 import type { Product } from '@/services/products'
 
@@ -48,6 +59,8 @@ export function PosOrderView({ order, onBack }: Props) {
   const [addingProduct, setAddingProduct] = useState(false)
   const [discount, setDiscount] = useState(0)
   const [surcharge, setSurcharge] = useState(0)
+  const [editingItem, setEditingItem] = useState<ServiceOrderItem | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const originalItemIds = useRef<Set<string>>(new Set())
   const isFirstLoad = useRef(true)
 
@@ -115,6 +128,28 @@ export function PosOrderView({ order, onBack }: Props) {
       toast.success('Item removido')
     } catch {
       toast.error('Erro ao remover item')
+    }
+  }
+
+  const handleEditSave = async (data: {
+    quantity: number
+    unit_price: number
+    discount_amount: number
+    discount_reason: string
+    surcharge_amount: number
+    surcharge_reason: string
+    total_price: number
+  }) => {
+    if (!editingItem) return
+    try {
+      await updateServiceOrderItem(editingItem.id, data)
+      setItems((prev) => prev.map((i) => (i.id === editingItem.id ? { ...i, ...data } : i)))
+      toast.success('Item atualizado')
+    } catch {
+      toast.error('Erro ao atualizar item')
+      await loadItems()
+    } finally {
+      setEditingItem(null)
     }
   }
 
@@ -278,6 +313,17 @@ export function PosOrderView({ order, onBack }: Props) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="h-6 w-6 p-0 text-blue-600 hover:bg-blue-50 ml-1"
+                                  onClick={() => {
+                                    setEditingItem(item)
+                                    setEditDialogOpen(true)
+                                  }}
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   className="h-6 w-6 p-0 text-red-600 hover:bg-red-50 ml-1"
                                   onClick={() => handleRemoveItem(item)}
                                 >
@@ -419,6 +465,15 @@ export function PosOrderView({ order, onBack }: Props) {
           </CardContent>
         </Card>
       </div>
+      <PosItemEditDialog
+        item={editingItem}
+        open={editDialogOpen}
+        onOpenChange={(v) => {
+          setEditDialogOpen(v)
+          if (!v) setEditingItem(null)
+        }}
+        onSave={handleEditSave}
+      />
     </div>
   )
 }
