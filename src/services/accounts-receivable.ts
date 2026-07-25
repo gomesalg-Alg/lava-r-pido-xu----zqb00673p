@@ -1,6 +1,7 @@
 import pb from '@/lib/pocketbase/client'
 import type { Customer } from './customers'
 import type { ServiceOrder } from './service-orders'
+import type { VendaAvulsa } from './vendas-avulsas'
 
 export type AccountsReceivableStatus = 'Pendente' | 'Recebido' | 'Cancelado'
 
@@ -8,7 +9,7 @@ export interface AccountsReceivable {
   id: string
   customer_id: string
   order_id: string | null
-  venda_avulsa_id: string
+  venda_avulsa_id: string | null
   description: string
   amount: number
   due_date: string
@@ -20,6 +21,7 @@ export interface AccountsReceivable {
   expand?: {
     customer_id?: Customer
     order_id?: ServiceOrder
+    venda_avulsa_id?: VendaAvulsa
   }
 }
 

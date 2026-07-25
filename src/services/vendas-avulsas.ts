@@ -29,3 +29,9 @@ export const getVendaAvulsa = (id: string) =>
   pb.collection('vendas_avulsas').getOne<VendaAvulsa>(id)
 
 export const deleteVendaAvulsa = (id: string) => pb.collection('vendas_avulsas').delete(id)
+
+export const getVendasAvulsas = () =>
+  pb.collection('vendas_avulsas').getFullList<VendaAvulsa>({
+    sort: '-created',
+    expand: 'customer_id',
+  })
