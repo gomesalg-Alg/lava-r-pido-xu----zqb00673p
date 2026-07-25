@@ -153,14 +153,6 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
           <span className="text-slate-500">Subtotal</span>
           <span className="font-medium">{formatCurrency(subtotal)}</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-slate-500">Desconto</span>
-          <span className="font-medium text-red-600">-{formatCurrency(discount)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-slate-500">Acréscimo</span>
-          <span className="font-medium text-green-600">+{formatCurrency(surcharge)}</span>
-        </div>
         <div className="flex justify-between text-lg font-bold pt-1 border-t">
           <span>Total</span>
           <span className="text-blue-600">{formatCurrency(grandTotal)}</span>
