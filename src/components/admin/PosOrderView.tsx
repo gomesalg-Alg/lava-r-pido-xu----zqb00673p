@@ -244,21 +244,19 @@ export function PosOrderView({ order, onBack }: Props) {
                     <TableHead className="px-2">Item</TableHead>
                     <TableHead className="px-2 text-center">Qtd</TableHead>
                     <TableHead className="px-2 text-right">Preço</TableHead>
-                    <TableHead className="px-2 text-right">Desc.</TableHead>
-                    <TableHead className="px-2 text-right">Acréc.</TableHead>
                     <TableHead className="px-2 text-right pr-4 tabular-nums">Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingItems ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-slate-400">
+                      <TableCell colSpan={4} className="text-center py-4 text-slate-400">
                         Carregando...
                       </TableCell>
                     </TableRow>
                   ) : items.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-slate-400">
+                      <TableCell colSpan={4} className="text-center py-4 text-slate-400">
                         Nenhum item adicionado.
                       </TableCell>
                     </TableRow>
@@ -337,12 +335,6 @@ export function PosOrderView({ order, onBack }: Props) {
                           </TableCell>
                           <TableCell className="px-2 py-3 text-right whitespace-nowrap">
                             {formatCurrency(item.unit_price || 0)}
-                          </TableCell>
-                          <TableCell className="px-2 py-3 text-right text-red-500 whitespace-nowrap">
-                            {formatCurrency(item.discount_amount || 0)}
-                          </TableCell>
-                          <TableCell className="px-2 py-3 text-right text-green-600 whitespace-nowrap">
-                            {formatCurrency(item.surcharge_amount || 0)}
                           </TableCell>
                           <TableCell className="px-2 py-3 text-right font-medium whitespace-nowrap pr-4 tabular-nums">
                             {formatCurrency(item.total_price || 0)}
