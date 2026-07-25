@@ -370,9 +370,15 @@ export function PosOrderView({ order, onBack }: Props) {
                   onLinesChange={setPaymentLines}
                   cardRates={cardRates}
                 />
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Desconto (R$)</Label>
+                <div className="space-y-1.5 border-t pt-3">
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 transition-opacity duration-200',
+                      discount > 0 ? 'opacity-100' : 'opacity-40 focus-within:opacity-100',
+                    )}
+                  >
+                    <span className="text-red-600 font-bold text-sm w-7 shrink-0">(-)</span>
+                    <Label className="text-xs whitespace-nowrap">Desconto</Label>
                     <CurrencyInput
                       value={discount}
                       onChange={setDiscount}
@@ -380,14 +386,32 @@ export function PosOrderView({ order, onBack }: Props) {
                       placeholder="0,00"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Acréscimo (R$)</Label>
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 transition-opacity duration-200',
+                      surcharge > 0 ? 'opacity-100' : 'opacity-40 focus-within:opacity-100',
+                    )}
+                  >
+                    <span className="text-green-600 font-bold text-sm w-7 shrink-0">(+)</span>
+                    <Label className="text-xs whitespace-nowrap">Acréscimo</Label>
                     <CurrencyInput
                       value={surcharge}
                       onChange={setSurcharge}
                       className="text-right"
                       placeholder="0,00"
                     />
+                  </div>
+                  <div className="flex justify-between items-center text-sm pt-1 border-t">
+                    <span className="text-slate-600 font-medium">
+                      <span className="text-slate-400 mr-1">(=)</span> Subtotal
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {formatCurrency(totals.subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold pt-1 border-t">
+                    <span>Total Geral</span>
+                    <span className="text-blue-600 tabular-nums">{formatCurrency(finalTotal)}</span>
                   </div>
                 </div>
                 {troco > 0 && (

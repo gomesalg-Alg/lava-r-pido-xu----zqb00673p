@@ -207,8 +207,6 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
     <div class="totals">
       <div class="box">
         <div class="row"><span>Subtotal</span><span>${formatCurrency(subtotal)}</span></div>
-        ${totalDiscount > 0 ? `<div class="row" style="color:#dc2626;"><span>Desconto</span><span>- ${formatCurrency(totalDiscount)}</span></div>` : ''}
-        ${totalSurcharge > 0 ? `<div class="row" style="color:#059669;"><span>Acréscimo</span><span>+ ${formatCurrency(totalSurcharge)}</span></div>` : ''}
         <div class="row"><span>Total Geral</span><span class="grand">${formatCurrency(grandTotal)}</span></div>
       </div>
     </div>

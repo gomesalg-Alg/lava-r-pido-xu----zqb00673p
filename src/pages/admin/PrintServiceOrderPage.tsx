@@ -195,18 +195,6 @@ export default function PrintServiceOrderPage() {
               <span className="text-gray-600">Subtotal:</span>
               <span>{formatCurrency(totals.subtotal)}</span>
             </div>
-            {totals.totalDiscount > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Desconto:</span>
-                <span>- {formatCurrency(totals.totalDiscount)}</span>
-              </div>
-            )}
-            {totals.totalSurcharge > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Acréscimo:</span>
-                <span>+ {formatCurrency(totals.totalSurcharge)}</span>
-              </div>
-            )}
             <div className="flex justify-between text-base font-bold border-t-2 border-gray-800 pt-1">
               <span>Total:</span>
               <span>{formatCurrency(totals.grandTotal)}</span>
