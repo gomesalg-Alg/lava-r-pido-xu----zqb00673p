@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicReceipt, type PublicReceiptData } from '@/services/receipts'
-import { formatCurrency, formatDateBR } from '@/lib/format'
+import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import { MetaTags } from '@/components/MetaTags'
 import '@/styles/print.css'
 
@@ -42,7 +42,11 @@ export default function PublicReceipt() {
     ? `${import.meta.env.VITE_POCKETBASE_URL}/api/files/company/${data.company.id}/${data.company.logo}`
     : null
 
-  const allItems = data.items.length > 0 ? data.items : data.venda_avulsa?.items || []
+  const hasOrderItems = data.items.length > 0
+  const serviceItems = hasOrderItems ? data.items.filter((i) => i.type === 'service') : []
+  const productItems = hasOrderItems ? data.items.filter((i) => i.type === 'product') : []
+  const vendaItems = !hasOrderItems ? data.venda_avulsa?.items || [] : []
+  const allItems = [...serviceItems, ...productItems, ...vendaItems]
   const subtotal = allItems.reduce((s, i) => s + (i.unit_price || 0) * (i.quantity || 1), 0)
   const itemDiscount = allItems.reduce((s, i) => s + (i.discount_amount || 0), 0)
   const itemSurcharge = allItems.reduce((s, i) => s + (i.surcharge_amount || 0), 0)
@@ -52,6 +56,49 @@ export default function PublicReceipt() {
   const troco =
     data.venda_avulsa?.change_amount || (totalPaid > data.amount ? totalPaid - data.amount : 0)
   const paymentMethodLabel = data.payment_method || data.venda_avulsa?.payment_method || ''
+
+  const renderItemsTable = (title: string, items: any[], subtotal?: number) => {
+    if (items.length === 0) return null
+    return (
+      <div className="mt-6">
+        <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
+          {title}
+        </h3>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
+              <th className="text-left py-2 px-3 uppercase text-xs">Item</th>
+              <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
+              <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
+              <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={idx} className="border-b border-gray-200 even:bg-slate-50">
+                <td className="py-2 px-3">{item.name || '--'}</td>
+                <td className="text-center py-2 px-3">{item.quantity || 1}</td>
+                <td className="text-right py-2 px-3">{formatCurrency(item.unit_price || 0)}</td>
+                <td className="text-right py-2 px-3 font-semibold">
+                  {formatCurrency(
+                    item.total_price || (item.quantity || 1) * (item.unit_price || 0),
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {subtotal !== undefined && (
+          <div className="flex justify-end mt-2">
+            <div className="flex justify-between w-64 text-sm font-semibold border-t border-gray-300 pt-1">
+              <span>Sub-total:</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -113,37 +160,11 @@ export default function PublicReceipt() {
           </div>
         )}
 
-        {allItems.length > 0 && (
-          <div className="mt-6">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
-              Itens
-            </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
-                  <th className="text-left py-2 px-3 uppercase text-xs">Item</th>
-                  <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
-                  <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
-                  <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allItems.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-200 even:bg-slate-50">
-                    <td className="py-2 px-3">{item.name || '--'}</td>
-                    <td className="text-center py-2 px-3">{item.quantity || 1}</td>
-                    <td className="text-right py-2 px-3">{formatCurrency(item.unit_price || 0)}</td>
-                    <td className="text-right py-2 px-3 font-semibold">
-                      {formatCurrency(
-                        item.total_price || (item.quantity || 1) * (item.unit_price || 0),
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {serviceItems.length > 0 &&
+          renderItemsTable('Serviços', serviceItems, data.service_subtotal)}
+        {productItems.length > 0 &&
+          renderItemsTable('Produtos', productItems, data.product_subtotal)}
+        {vendaItems.length > 0 && renderItemsTable('Itens', vendaItems)}
 
         <div className="flex justify-end mt-4">
           <div className="w-64 space-y-1">
@@ -152,15 +173,15 @@ export default function PublicReceipt() {
               <span>{formatCurrency(subtotal)}</span>
             </div>
             {totalDiscount > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Desconto:</span>
-                <span>- {formatCurrency(totalDiscount)}</span>
+              <div className="flex justify-between text-sm font-bold bg-red-50 px-2 py-1 rounded">
+                <span className="text-red-700">Desconto:</span>
+                <span className="text-red-700">- {formatCurrency(totalDiscount)}</span>
               </div>
             )}
             {totalSurcharge > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Acréscimo:</span>
-                <span>+ {formatCurrency(totalSurcharge)}</span>
+              <div className="flex justify-between text-sm font-bold bg-green-50 px-2 py-1 rounded">
+                <span className="text-green-700">Acréscimo:</span>
+                <span className="text-green-700">+ {formatCurrency(totalSurcharge)}</span>
               </div>
             )}
             <div className="flex justify-between text-base font-bold border-t-2 border-gray-800 pt-1">
@@ -213,12 +234,9 @@ export default function PublicReceipt() {
 
         {data.status === 'Recebido' && (
           <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded">
-            <p className="text-sm font-bold text-green-700">✓ PAGO</p>
-            {data.received_at && (
-              <p className="text-sm text-green-600">
-                Recebido em: {formatDateBR(data.received_at)}
-              </p>
-            )}
+            <p className="text-sm font-bold text-green-700">
+              ✓ PAGO{data.received_at ? ` em ${formatDateTimeBR(data.received_at)}` : ''}
+            </p>
           </div>
         )}
 

@@ -22,6 +22,8 @@ routerAdd(
         venda_avulsa: null,
         payments: [],
         items: [],
+        service_subtotal: 0,
+        product_subtotal: 0,
       }
 
       const customer = ar.expandedOne('customer_id')
@@ -70,15 +72,23 @@ routerAdd(
         for (const item of orderItems) {
           const serviceRef = item.expandedOne('service_id')
           const productRef = item.expandedOne('product_id')
+          const itemTotal = item.getDouble('total_price')
+          if (serviceRef) {
+            result.service_subtotal += itemTotal
+          }
+          if (productRef) {
+            result.product_subtotal += itemTotal
+          }
           result.items.push({
             name: serviceRef
               ? serviceRef.getString('name')
               : productRef
                 ? productRef.getString('name')
                 : '',
+            type: serviceRef ? 'service' : 'product',
             quantity: item.getInt('quantity'),
             unit_price: item.getDouble('unit_price'),
-            total_price: item.getDouble('total_price'),
+            total_price: itemTotal,
             discount_amount: item.getDouble('discount_amount'),
             surcharge_amount: item.getDouble('surcharge_amount'),
           })

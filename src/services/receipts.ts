@@ -2,6 +2,7 @@ import pb from '@/lib/pocketbase/client'
 
 export interface PublicReceiptItem {
   name: string
+  type?: 'service' | 'product'
   quantity: number
   unit_price: number
   total_price: number
@@ -17,6 +18,8 @@ export interface PublicReceiptData {
   payment_method: string
   received_at: string
   created: string
+  service_subtotal: number
+  product_subtotal: number
   customer: { name: string; phone: string; cpf: string } | null
   order: {
     ticket_number: number

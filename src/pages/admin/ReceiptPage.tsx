@@ -6,7 +6,7 @@ import { getCompany, type Company } from '@/services/company'
 import { getServiceOrderItems } from '@/services/service-orders'
 import { getOrderPayments } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
-import { formatCurrency, formatDateBR } from '@/lib/format'
+import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import pb from '@/lib/pocketbase/client'
 import '@/styles/print.css'
 
@@ -92,6 +92,10 @@ export default function ReceiptPage() {
 
   const renderItemsTable = (title: string, items: any[], nameField: string) => {
     if (items.length === 0) return null
+    const groupSubtotal = items.reduce(
+      (s, i) => s + (i.total_price || (i.quantity || 1) * (i.unit_price || 0)),
+      0,
+    )
     return (
       <div className="mt-6">
         <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
@@ -121,6 +125,12 @@ export default function ReceiptPage() {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-end mt-2">
+          <div className="flex justify-between w-64 text-sm font-semibold border-t border-gray-300 pt-1">
+            <span>Sub-total:</span>
+            <span>{formatCurrency(groupSubtotal)}</span>
+          </div>
+        </div>
       </div>
     )
   }
@@ -198,15 +208,17 @@ export default function ReceiptPage() {
                   <span>{formatCurrency(totals.subtotal)}</span>
                 </div>
                 {totals.totalDiscount > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Desconto:</span>
-                    <span>- {formatCurrency(totals.totalDiscount)}</span>
+                  <div className="flex justify-between text-sm font-bold bg-red-50 px-2 py-1 rounded">
+                    <span className="text-red-700">Desconto:</span>
+                    <span className="text-red-700">- {formatCurrency(totals.totalDiscount)}</span>
                   </div>
                 )}
                 {totals.totalSurcharge > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Acréscimo:</span>
-                    <span>+ {formatCurrency(totals.totalSurcharge)}</span>
+                  <div className="flex justify-between text-sm font-bold bg-green-50 px-2 py-1 rounded">
+                    <span className="text-green-700">Acréscimo:</span>
+                    <span className="text-green-700">
+                      + {formatCurrency(totals.totalSurcharge)}
+                    </span>
                   </div>
                 )}
               </>
@@ -268,12 +280,9 @@ export default function ReceiptPage() {
 
         {record.status === 'Recebido' && (
           <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded">
-            <p className="text-sm font-bold text-green-700">✓ PAGO</p>
-            {record.received_at && (
-              <p className="text-sm text-green-600">
-                Recebido em: {formatDateBR(record.received_at)}
-              </p>
-            )}
+            <p className="text-sm font-bold text-green-700">
+              ✓ PAGO{record.received_at ? ` em ${formatDateTimeBR(record.received_at)}` : ''}
+            </p>
           </div>
         )}
 
