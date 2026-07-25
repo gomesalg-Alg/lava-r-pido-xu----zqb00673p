@@ -336,18 +336,6 @@ export function PosOrderView({ order, onBack }: Props) {
                   {formatCurrency(totals.subtotal)}
                 </span>
               </div>
-              <div className="flex gap-8">
-                <span className="text-slate-500">Total Descontos:</span>
-                <span className="font-medium w-28 text-right text-red-500 tabular-nums">
-                  {formatCurrency(totals.totalDiscount)}
-                </span>
-              </div>
-              <div className="flex gap-8">
-                <span className="text-slate-500">Total Acréscimos:</span>
-                <span className="font-medium w-28 text-right text-green-600 tabular-nums">
-                  {formatCurrency(totals.totalSurcharge)}
-                </span>
-              </div>
               {discount > 0 && (
                 <div className="flex gap-8">
                   <span className="text-slate-500">Desconto:</span>
