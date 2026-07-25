@@ -34,84 +34,84 @@ export default function PosPage() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  if (mode === 'avulsa') {
-    return <VendaAvulsaForm onBack={() => setMode('os')} />
-  }
-
-  if (selectedOrder) {
-    return (
-      <PosOrderView
-        order={selectedOrder}
-        onBack={() => {
-          setSelectedOrder(null)
-          setSearchQuery('')
-          setSearchResults([])
-        }}
-      />
-    )
-  }
-
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold text-slate-800 text-center py-2">Frente de Caixa</h1>
-
-      <div className="flex gap-2 justify-center">
-        <Button
-          variant={mode === 'os' ? 'default' : 'outline'}
-          onClick={() => setMode('os')}
-          className="flex items-center gap-2"
-        >
-          <Search className="w-4 h-4" /> Venda com OS
-        </Button>
-        <Button
-          variant={mode === 'avulsa' ? 'default' : 'outline'}
-          onClick={() => setMode('avulsa')}
-          className="flex items-center gap-2"
-        >
-          <Package className="w-4 h-4" /> Venda Avulsa
-        </Button>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg py-4 px-6 text-center shadow-md">
+        <h1 className="text-2xl font-bold tracking-tight">Frente de Caixa</h1>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-        <Input
-          placeholder="Buscar por placa ou número da OS..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-12"
+      {mode === 'avulsa' ? (
+        <VendaAvulsaForm onBack={() => setMode('os')} />
+      ) : selectedOrder ? (
+        <PosOrderView
+          order={selectedOrder}
+          onBack={() => {
+            setSelectedOrder(null)
+            setSearchQuery('')
+            setSearchResults([])
+          }}
         />
-        <QrCode className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-      </div>
-      {searching && <p className="text-sm text-slate-400">Buscando...</p>}
-      {!searching && searchResults.length === 0 && searchQuery.trim() && (
-        <p className="text-sm text-slate-400">Nenhuma ordem encontrada.</p>
+      ) : (
+        <>
+          <div className="flex gap-2 justify-center">
+            <Button
+              variant={mode === 'os' ? 'default' : 'outline'}
+              onClick={() => setMode('os')}
+              className="flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" /> Venda com OS
+            </Button>
+            <Button
+              variant={mode === 'avulsa' ? 'default' : 'outline'}
+              onClick={() => setMode('avulsa')}
+              className="flex items-center gap-2"
+            >
+              <Package className="w-4 h-4" /> Venda Avulsa
+            </Button>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
+              placeholder="Buscar por placa ou número da OS..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-12"
+            />
+            <QrCode className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          </div>
+          {searching && <p className="text-sm text-slate-400">Buscando...</p>}
+          {!searching && searchResults.length === 0 && searchQuery.trim() && (
+            <p className="text-sm text-slate-400">Nenhuma ordem encontrada.</p>
+          )}
+          <div className="space-y-2">
+            {searchResults.map((order) => (
+              <Card
+                key={order.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => {
+                  setSelectedOrder(order)
+                  setSearchResults([])
+                  setSearchQuery('')
+                }}
+              >
+                <CardContent className="flex items-center justify-between p-4">
+                  <div>
+                    <p className="font-medium">OS #{order.ticket_number}</p>
+                    <p className="text-sm text-slate-500">
+                      {order.expand?.customer_id?.name} · {order.expand?.vehicle_id?.placa} ·{' '}
+                      {order.expand?.vehicle_id?.brand} {order.expand?.vehicle_id?.model}
+                    </p>
+                  </div>
+                  <Badge variant={order.status === 'Em Andamento' ? 'default' : 'secondary'}>
+                    {order.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
-      <div className="space-y-2">
-        {searchResults.map((order) => (
-          <Card
-            key={order.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => {
-              setSelectedOrder(order)
-              setSearchResults([])
-              setSearchQuery('')
-            }}
-          >
-            <CardContent className="flex items-center justify-between p-4">
-              <div>
-                <p className="font-medium">OS #{order.ticket_number}</p>
-                <p className="text-sm text-slate-500">
-                  {order.expand?.customer_id?.name} · {order.expand?.vehicle_id?.placa} ·{' '}
-                  {order.expand?.vehicle_id?.brand} {order.expand?.vehicle_id?.model}
-                </p>
-              </div>
-              <Badge variant={order.status === 'Em Andamento' ? 'default' : 'secondary'}>
-                {order.status}
-              </Badge>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   )
 }

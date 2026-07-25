@@ -40,6 +40,7 @@ import { calculateOrderTotals } from '@/lib/order-calculations'
 import { createAccountsReceivable } from '@/services/accounts-receivable'
 import { formatCurrency } from '@/lib/format'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useAuth } from '@/hooks/use-auth'
 import { toast } from 'sonner'
 import { PosItemEditDialog } from '@/components/admin/PosItemEditDialog'
 import { cn } from '@/lib/utils'
@@ -63,6 +64,7 @@ export function PosOrderView({ order, onBack }: Props) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const originalItemIds = useRef<Set<string>>(new Set())
   const isFirstLoad = useRef(true)
+  const { user } = useAuth()
 
   const loadItems = useCallback(async () => {
     try {
@@ -159,6 +161,7 @@ export function PosOrderView({ order, onBack }: Props) {
       await createServiceOrderItem({
         order_id: order.id,
         product_id: product.id,
+        operator_id: user?.id || '',
         quantity: 1,
         unit_price: product.price,
         total_price: product.price,
