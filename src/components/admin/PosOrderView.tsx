@@ -308,17 +308,6 @@ export function PosOrderView({ order, onBack }: Props) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 w-6 p-0 text-blue-600 hover:bg-blue-50 ml-1"
-                                  onClick={() => {
-                                    setEditingItem(item)
-                                    setEditDialogOpen(true)
-                                  }}
-                                >
-                                  <Pencil className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
                                   className="h-6 w-6 p-0 text-red-600 hover:bg-red-50 ml-1"
                                   onClick={() => handleRemoveItem(item)}
                                 >
