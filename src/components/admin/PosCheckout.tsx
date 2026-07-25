@@ -127,18 +127,17 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs">Desconto (R$)</Label>
-          <CurrencyInput
-            value={discount}
-            onChange={(v) => setDiscount(v)}
-            className="text-right"
-            placeholder="0,00"
-          />
+      <div className="space-y-2 border-t pt-3">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-slate-600 font-medium">
+            <span className="text-slate-400 mr-1">(=)</span> Total dos Itens
+          </span>
+          <span className="font-medium">{formatCurrency(subtotal)}</span>
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Acréscimo (R$)</Label>
+
+        <div className="flex items-center gap-2">
+          <span className="text-green-600 font-bold text-sm w-7 shrink-0">(+)</span>
+          <Label className="text-xs whitespace-nowrap">Acréscimo</Label>
           <CurrencyInput
             value={surcharge}
             onChange={(v) => setSurcharge(v)}
@@ -146,14 +145,19 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
             placeholder="0,00"
           />
         </div>
-      </div>
 
-      <div className="space-y-1 border-t pt-3">
-        <div className="flex justify-between text-sm">
-          <span className="text-slate-500">Subtotal</span>
-          <span className="font-medium">{formatCurrency(subtotal)}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-red-600 font-bold text-sm w-7 shrink-0">(-)</span>
+          <Label className="text-xs whitespace-nowrap">Desconto</Label>
+          <CurrencyInput
+            value={discount}
+            onChange={(v) => setDiscount(v)}
+            className="text-right"
+            placeholder="0,00"
+          />
         </div>
-        <div className="flex justify-between text-lg font-bold pt-1 border-t">
+
+        <div className="flex justify-between text-lg font-bold pt-2 border-t">
           <span>Total Geral</span>
           <span className="text-blue-600">{formatCurrency(grandTotal)}</span>
         </div>
