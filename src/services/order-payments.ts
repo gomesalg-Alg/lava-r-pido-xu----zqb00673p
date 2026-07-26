@@ -9,6 +9,8 @@ export type OrderPayment = {
   amount: number
   card_flag: CardFlag | ''
   installments: number
+  applied_rate: number | null
+  fee_amount: number | null
   created: string
   updated: string
 }
@@ -19,6 +21,8 @@ export type PaymentLine = {
   amount: number
   card_flag: CardFlag | ''
   installments: number
+  applied_rate: number
+  fee_amount: number
 }
 
 export const getOrderPayments = (orderId: string) =>

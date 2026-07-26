@@ -38,14 +38,33 @@ export function PaymentLines({
   const activeFlags = cardRates.filter((r) => r.is_active)
 
   const updateLine = (id: string, patch: Partial<PaymentLine>) =>
-    onLinesChange(lines.map((l) => (l.id === id ? { ...l, ...patch } : l)))
+    onLinesChange(
+      lines.map((l) => {
+        if (l.id !== id) return l
+        const merged = { ...l, ...patch }
+        const rate =
+          isCardMethod(merged.method) && merged.card_flag
+            ? getRateForPayment(cardRates, merged.card_flag, merged.method, merged.installments)
+            : 0
+        const fee = merged.amount > 0 ? (merged.amount * rate) / 100 : 0
+        return { ...merged, applied_rate: rate, fee_amount: fee }
+      }),
+    )
 
   const removeLine = (id: string) => onLinesChange(lines.filter((l) => l.id !== id))
 
   const addLine = () =>
     onLinesChange([
       ...lines,
-      { id: crypto.randomUUID(), method: '', amount: 0, card_flag: '', installments: 0 },
+      {
+        id: crypto.randomUUID(),
+        method: '',
+        amount: 0,
+        card_flag: '',
+        installments: 0,
+        applied_rate: 0,
+        fee_amount: 0,
+      },
     ])
 
   const totalPaid = lines.filter((l) => l.method && l.amount > 0).reduce((s, l) => s + l.amount, 0)

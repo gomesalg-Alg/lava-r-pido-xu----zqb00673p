@@ -25,7 +25,7 @@ import { PaymentLines } from '@/components/admin/PaymentLines'
 import { PosProductGrid } from '@/components/admin/PosProductGrid'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { Label } from '@/components/ui/label'
-import { getCardRates, type CardRate } from '@/services/card-rates'
+import { getCardRates, getRateForPayment, type CardRate } from '@/services/card-rates'
 import { createOrderPayment, type PaymentLine } from '@/services/order-payments'
 import {
   getServiceOrderItems,
@@ -175,12 +175,20 @@ export function PosOrderView({ order, onBack }: Props) {
     try {
       for (const line of paymentLines) {
         if (line.method && line.amount > 0) {
+          const isCard = line.method === 'Cartão de Crédito' || line.method === 'Cartão de Débito'
+          const appliedRate =
+            isCard && line.card_flag
+              ? getRateForPayment(cardRates, line.card_flag, line.method, line.installments)
+              : 0
+          const feeAmount = line.amount > 0 ? (line.amount * appliedRate) / 100 : 0
           await createOrderPayment({
             order_id: order.id,
             method: line.method,
             amount: line.amount,
             card_flag: line.card_flag || '',
             installments: line.installments || 1,
+            applied_rate: appliedRate,
+            fee_amount: feeAmount,
           })
         }
       }

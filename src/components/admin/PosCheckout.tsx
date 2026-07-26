@@ -11,7 +11,7 @@ import {
 import { formatCurrency } from '@/lib/format'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { Trash2, CheckCircle } from 'lucide-react'
-import { getCardRates, type CardRate } from '@/services/card-rates'
+import { getCardRates, getRateForPayment, type CardRate } from '@/services/card-rates'
 
 export type CartItem = {
   id?: string
@@ -35,6 +35,8 @@ interface Props {
     amount_paid: number
     card_flag?: string
     installments?: number
+    applied_rate?: number
+    fee_amount?: number
   }) => void
   finalizing: boolean
 }
@@ -84,13 +86,20 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
     !!paymentMethod && items.length > 0 && (!isCreditCard || (cardFlag !== '' && installments > 0))
 
   const handleFinalize = () => {
+    const isCard = paymentMethod === 'Cartão de Crédito' || paymentMethod === 'Cartão de Débito'
+    const appliedRate =
+      isCard && cardFlag ? getRateForPayment(cardRates, cardFlag, paymentMethod, installments) : 0
+    const paymentAmount = isCortesia ? 0 : amountPaid
+    const feeAmount = paymentAmount > 0 ? (paymentAmount * appliedRate) / 100 : 0
     onFinalize({
       payment_method: paymentMethod,
       total_discount: discount,
       total_surcharge: surcharge,
-      amount_paid: isCortesia ? 0 : amountPaid,
+      amount_paid: paymentAmount,
       card_flag: isCreditCard ? cardFlag : undefined,
       installments: isCreditCard ? installments : undefined,
+      applied_rate: appliedRate,
+      fee_amount: feeAmount,
     })
   }
 

@@ -16,6 +16,7 @@ import { getCustomers, type Customer } from '@/services/customers'
 import { createVendaAvulsa } from '@/services/vendas-avulsas'
 import { createOrderPayment } from '@/services/order-payments'
 import { createAccountsReceivable } from '@/services/accounts-receivable'
+import { getCardRates, getRateForPayment, type CardRate } from '@/services/card-rates'
 import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
 import { Trash2, CheckCircle, Search, ArrowLeft, Plus, Minus } from 'lucide-react'
@@ -37,6 +38,13 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
   const [finalizing, setFinalizing] = useState(false)
   const [discount, setDiscount] = useState(0)
   const [surcharge, setSurcharge] = useState(0)
+  const [cardRates, setCardRates] = useState<CardRate[]>([])
+
+  useEffect(() => {
+    getCardRates()
+      .then(setCardRates)
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!custSearch.trim()) return setCustResults([])
@@ -96,11 +104,20 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
         change_amount: changeAmt,
       })
 
+      const appliedRate =
+        isCard(method) && cardFlag
+          ? getRateForPayment(cardRates, cardFlag, method, installments)
+          : 0
+      const paymentAmount = isCortesia ? 0 : Math.max(total, amountPaid)
+      const feeAmount = paymentAmount > 0 ? (paymentAmount * appliedRate) / 100 : 0
+
       await createOrderPayment({
         method,
-        amount: isCortesia ? 0 : Math.max(total, amountPaid),
+        amount: paymentAmount,
         card_flag: isCard(method) ? cardFlag : '',
         installments: method === 'Cartão de Crédito' ? installments : 1,
+        applied_rate: appliedRate,
+        fee_amount: feeAmount,
       })
 
       await createAccountsReceivable({
