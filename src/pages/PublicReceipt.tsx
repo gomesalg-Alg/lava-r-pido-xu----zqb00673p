@@ -4,6 +4,7 @@ import { Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicReceipt, type PublicReceiptData } from '@/services/receipts'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
+import { maskCPF, maskPhone } from '@/lib/masks'
 import { MetaTags } from '@/components/MetaTags'
 import '@/styles/print.css'
 
@@ -152,11 +153,12 @@ export default function PublicReceipt() {
         </div>
 
         {data.customer && (
-          <div className="mt-4">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Cliente</h3>
-            <p className="text-sm font-medium">{data.customer.name}</p>
-            {data.customer.phone && <p className="text-sm">Tel: {data.customer.phone}</p>}
-            {data.customer.cpf && <p className="text-sm">CPF: {data.customer.cpf}</p>}
+          <div className="mt-3">
+            <p className="text-sm font-medium">
+              Cliente: {data.customer.name}
+              {data.customer.phone && ` - Tel: ${maskPhone(data.customer.phone)}`}
+              {data.customer.cpf && ` - CPF: ${maskCPF(data.customer.cpf)}`}
+            </p>
           </div>
         )}
 

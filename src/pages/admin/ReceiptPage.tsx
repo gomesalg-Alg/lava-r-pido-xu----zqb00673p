@@ -7,6 +7,7 @@ import { getServiceOrderItems } from '@/services/service-orders'
 import { getOrderPayments } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
+import { maskCPF, maskPhone } from '@/lib/masks'
 import pb from '@/lib/pocketbase/client'
 import '@/styles/print.css'
 
@@ -184,15 +185,13 @@ export default function ReceiptPage() {
           </div>
         </div>
 
-        <div className="mt-4">
-          <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Cliente</h3>
-          <p className="text-sm font-medium">{record.expand?.customer_id?.name || '--'}</p>
-          {record.expand?.customer_id?.phone && (
-            <p className="text-sm">Tel: {record.expand.customer_id.phone}</p>
-          )}
-          {record.expand?.customer_id?.cpf && (
-            <p className="text-sm">CPF: {record.expand.customer_id.cpf}</p>
-          )}
+        <div className="mt-3">
+          <p className="text-sm font-medium">
+            Cliente: {record.expand?.customer_id?.name || '--'}
+            {record.expand?.customer_id?.phone &&
+              ` - Tel: ${maskPhone(record.expand.customer_id.phone)}`}
+            {record.expand?.customer_id?.cpf && ` - CPF: ${maskCPF(record.expand.customer_id.cpf)}`}
+          </p>
         </div>
 
         {vendaItems.length > 0 && renderItemsTable('Itens', vendaItems, '')}
