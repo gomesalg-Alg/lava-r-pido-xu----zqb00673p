@@ -40,14 +40,14 @@ export const buildPaymentData = (params: {
   const data: Record<string, unknown> = {
     method: params.method,
     amount: Number(params.amount) || 0,
-    applied_rate: Number(params.applied_rate) || 0,
-    fee_amount: Number(params.fee_amount) || 0,
   }
   if (params.order_id) data.order_id = params.order_id
   if (params.venda_avulsa_id) data.venda_avulsa_id = params.venda_avulsa_id
   if (isCardPayment) {
     if (params.card_flag) data.card_flag = params.card_flag
     data.installments = params.installments || 1
+    data.applied_rate = Number(params.applied_rate) || 0
+    data.fee_amount = Number(params.fee_amount) || 0
   }
   return data
 }

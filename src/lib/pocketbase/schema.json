@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27T23:44:52.518Z",
+  "generatedAt": "2026-07-27T23:52:47.422Z",
   "collections": [
     {
       "name": "users",
@@ -1153,14 +1153,14 @@
           "collectionRef": "vendas_avulsas"
         },
         {
-          "name": "card_flag",
-          "type": "text",
+          "name": "installments",
+          "type": "number",
           "required": false,
           "system": false
         },
         {
-          "name": "installments",
-          "type": "number",
+          "name": "card_flag",
+          "type": "text",
           "required": false,
           "system": false
         }

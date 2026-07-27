@@ -1,117 +1,88 @@
-import { useEffect, useState } from 'react'
-import { Search, QrCode, Package } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect, useCallback } from 'react'
 import { PosOrderView } from '@/components/admin/PosOrderView'
-import { VendaAvulsaForm } from '@/components/admin/VendaAvulsaForm'
-import { searchServiceOrdersByPlacaOrTicket, type ServiceOrder } from '@/services/service-orders'
-import { toast } from 'sonner'
+import { PosVendaAvulsa } from '@/components/admin/PosVendaAvulsa'
+import { getServiceOrders, type ServiceOrder } from '@/services/service-orders'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { useRealtime } from '@/hooks/use-realtime'
+import { ArrowRight } from 'lucide-react'
 
 export default function PosPage() {
-  const [mode, setMode] = useState<'os' | 'avulsa'>('os')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<ServiceOrder[]>([])
-  const [searching, setSearching] = useState(false)
+  const [orders, setOrders] = useState<ServiceOrder[]>([])
   const [selectedOrder, setSelectedOrder] = useState<ServiceOrder | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const loadOrders = useCallback(async () => {
+    try {
+      const all = await getServiceOrders()
+      const unpaid = all.filter(
+        (o: ServiceOrder) =>
+          o.status === 'Em Andamento' || o.status === 'Orçamento' || o.status === 'Finalizado',
+      )
+      setOrders(unpaid)
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([])
-      return
-    }
-    const timer = setTimeout(async () => {
-      setSearching(true)
-      try {
-        setSearchResults(await searchServiceOrdersByPlacaOrTicket(searchQuery))
-      } catch {
-        toast.error('Erro ao buscar ordens')
-      } finally {
-        setSearching(false)
-      }
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+    loadOrders()
+  }, [loadOrders])
+
+  useRealtime('service_orders', () => {
+    loadOrders()
+  })
+
+  if (selectedOrder) {
+    return <PosOrderView order={selectedOrder} onBack={() => setSelectedOrder(null)} />
+  }
 
   return (
     <div className="space-y-4">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg py-4 px-6 text-center shadow-md">
-        <h1 className="text-2xl font-bold tracking-tight">Frente de Caixa</h1>
-      </div>
-
-      {mode === 'avulsa' ? (
-        <VendaAvulsaForm onBack={() => setMode('os')} />
-      ) : selectedOrder ? (
-        <PosOrderView
-          order={selectedOrder}
-          onBack={() => {
-            setSelectedOrder(null)
-            setSearchQuery('')
-            setSearchResults([])
-          }}
-        />
-      ) : (
-        <>
-          <div className="flex gap-2 justify-center">
-            <Button
-              variant={mode === 'os' ? 'default' : 'outline'}
-              onClick={() => setMode('os')}
-              className="flex items-center gap-2"
-            >
-              <Search className="w-4 h-4" /> Venda com OS
-            </Button>
-            <Button
-              variant={mode === 'avulsa' ? 'default' : 'outline'}
-              onClick={() => setMode('avulsa')}
-              className="flex items-center gap-2"
-            >
-              <Package className="w-4 h-4" /> Venda Avulsa
-            </Button>
-          </div>
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input
-              placeholder="Buscar por placa ou número da OS..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-12"
-            />
-            <QrCode className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          </div>
-          {searching && <p className="text-sm text-slate-400">Buscando...</p>}
-          {!searching && searchResults.length === 0 && searchQuery.trim() && (
-            <p className="text-sm text-slate-400">Nenhuma ordem encontrada.</p>
+      <h1 className="text-2xl font-bold">Frente de Caixa</h1>
+      <Tabs defaultValue="orders">
+        <TabsList className="grid grid-cols-2 w-full max-w-md">
+          <TabsTrigger value="orders">Ordens de Serviço</TabsTrigger>
+          <TabsTrigger value="avulsa">Venda Avulsa</TabsTrigger>
+        </TabsList>
+        <TabsContent value="orders" className="mt-4">
+          {loading ? (
+            <p className="text-center text-slate-400 py-8">Carregando...</p>
+          ) : orders.length === 0 ? (
+            <p className="text-center text-slate-400 py-8">Nenhuma ordem pendente.</p>
+          ) : (
+            <div className="space-y-2">
+              {orders.map((order) => (
+                <Card
+                  key={order.id}
+                  className="cursor-pointer hover:bg-slate-50 transition-colors"
+                  onClick={() => setSelectedOrder(order)}
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">OS #{order.ticket_number}</p>
+                      <p className="text-sm text-slate-500">
+                        {order.expand?.customer_id?.name || 'Sem cliente'} ·{' '}
+                        {order.placa || order.expand?.vehicle_id?.placa || ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline">{order.status}</Badge>
+                      <ArrowRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
-          <div className="space-y-2">
-            {searchResults.map((order) => (
-              <Card
-                key={order.id}
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => {
-                  setSelectedOrder(order)
-                  setSearchResults([])
-                  setSearchQuery('')
-                }}
-              >
-                <CardContent className="flex items-center justify-between p-4">
-                  <div>
-                    <p className="font-medium">OS #{order.ticket_number}</p>
-                    <p className="text-sm text-slate-500">
-                      {order.expand?.customer_id?.name} · {order.expand?.vehicle_id?.placa} ·{' '}
-                      {order.expand?.vehicle_id?.brand} {order.expand?.vehicle_id?.model}
-                    </p>
-                  </div>
-                  <Badge variant={order.status === 'Em Andamento' ? 'default' : 'secondary'}>
-                    {order.status}
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
+        </TabsContent>
+        <TabsContent value="avulsa" className="mt-4">
+          <PosVendaAvulsa />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
