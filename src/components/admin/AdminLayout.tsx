@@ -31,6 +31,7 @@ import {
   ShoppingCart,
   Receipt,
 } from 'lucide-react'
+import { APP_VERSION } from '@/lib/version'
 
 interface MenuItem {
   label: string
@@ -328,6 +329,9 @@ export default function AdminLayout() {
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
           <Outlet />
         </main>
+        <footer className="no-print border-t border-slate-200 bg-white px-4 py-2.5 text-center text-xs text-slate-400">
+          Lava Rápido XUÁ · v{APP_VERSION}
+        </footer>
       </div>
     </div>
   )

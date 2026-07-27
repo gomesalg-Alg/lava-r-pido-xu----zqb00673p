@@ -64,6 +64,8 @@ export function PosOrderView({ order, onBack }: Props) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const { user } = useAuth()
 
+  const allItems = items
+
   const loadItems = useCallback(async () => {
     try {
       const fetched = await getServiceOrderItems(order.id)
@@ -98,7 +100,7 @@ export function PosOrderView({ order, onBack }: Props) {
   const troco = Math.max(0, totalPaid - finalTotal)
   const canFinalize = remaining <= 0.01 && paymentLines.length > 0
 
-  const isLocked = (item: ServiceOrderItem) => !!item.service_id
+  const isLocked = (item: ServiceOrderItem) => !!item.service_id || !!item.product_id
 
   const handleQtyChange = async (item: ServiceOrderItem, delta: number) => {
     const newQty = Math.max(1, (item.quantity || 1) + delta)
@@ -200,17 +202,25 @@ export function PosOrderView({ order, onBack }: Props) {
         total_surcharge: surcharge,
         exit_at: new Date().toISOString(),
       })
-      const paymentMethods = validLines.map((l) => l.method).join(', ')
-      await createAccountsReceivable({
-        customer_id: order.customer_id,
-        order_id: order.id,
-        description: `Venda PDV - OS #${order.ticket_number}`,
-        amount: finalTotal,
-        due_date: new Date().toISOString().split('T')[0],
-        status: 'Recebido',
-        payment_method: paymentMethods,
-        received_at: new Date().toISOString(),
-      })
+      const nowIso = new Date().toISOString()
+      const today = nowIso.split('T')[0]
+      for (const line of validLines) {
+        let pmStr = line.method
+        if (line.card_flag) pmStr += ` – ${line.card_flag}`
+        if (line.method === 'Cartão de Crédito' && line.installments > 1) {
+          pmStr += ` – ${line.installments}x`
+        }
+        await createAccountsReceivable({
+          customer_id: order.customer_id,
+          order_id: order.id,
+          description: `Venda PDV - OS #${order.ticket_number} - ${pmStr}`,
+          amount: line.amount,
+          due_date: today,
+          status: 'Recebido',
+          payment_method: pmStr,
+          received_at: nowIso,
+        })
+      }
       toast.success('Venda finalizada com sucesso!')
       onBack()
     } catch {
@@ -285,6 +295,19 @@ export function PosOrderView({ order, onBack }: Props) {
                                   item.expand?.product_id?.name ||
                                   '-'}
                               </span>
+                              {!locked && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-5 w-5 p-0 ml-1 text-slate-400 hover:text-slate-600"
+                                  onClick={() => {
+                                    setEditingItem(item)
+                                    setEditDialogOpen(true)
+                                  }}
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="px-2 py-3 text-center whitespace-nowrap">

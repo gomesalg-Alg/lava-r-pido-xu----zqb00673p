@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-26T17:59:41.199Z",
+  "generatedAt": "2026-07-27T22:50:43.615Z",
   "collections": [
     {
       "name": "users",
@@ -323,6 +323,13 @@
           "type": "text",
           "required": false,
           "system": false
+        },
+        {
+          "name": "uso",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Uber", "Táxi", "Passeio", "Convênio"]
         }
       ],
       "indexes": []
@@ -1150,6 +1157,13 @@
           "type": "number",
           "required": false,
           "system": false
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
