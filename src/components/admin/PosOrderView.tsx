@@ -213,8 +213,7 @@ export function PosOrderView({ order, onBack }: Props) {
         if (line.method === 'Cartão de Crédito' && line.installments > 1) {
           pmStr += ` – ${line.installments}x`
         }
-        await createAccountsReceivable({
-          customer_id: order.customer_id,
+        const arData: Record<string, unknown> = {
           order_id: order.id,
           description: `Venda PDV - OS #${order.ticket_number} - ${pmStr}`,
           amount: line.amount,
@@ -222,7 +221,9 @@ export function PosOrderView({ order, onBack }: Props) {
           status: 'Recebido',
           payment_method: pmStr,
           received_at: nowIso,
-        })
+        }
+        if (order.customer_id) arData.customer_id = order.customer_id
+        await createAccountsReceivable(arData)
       }
       toast.success('Venda finalizada com sucesso!')
       onBack()

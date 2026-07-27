@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27T23:33:28.045Z",
+  "generatedAt": "2026-07-27T23:44:52.518Z",
   "collections": [
     {
       "name": "users",
@@ -1120,19 +1120,6 @@
           "system": false
         },
         {
-          "name": "card_flag",
-          "type": "select",
-          "required": false,
-          "system": false,
-          "selectValues": ["Visa", "Mastercard", "Elo"]
-        },
-        {
-          "name": "installments",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
           "name": "created",
           "type": "autodate",
           "required": false,
@@ -1164,6 +1151,18 @@
           "required": false,
           "system": false,
           "collectionRef": "vendas_avulsas"
+        },
+        {
+          "name": "card_flag",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "installments",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]

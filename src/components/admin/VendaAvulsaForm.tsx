@@ -97,13 +97,14 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
       if (method === 'Cartão de Crédito' && installments > 1) pmStr += ` – ${installments}x`
       const changeAmt = isCortesia ? 0 : Math.max(0, change)
 
-      const venda = await createVendaAvulsa({
-        customer_id: customer?.id || null,
+      const vendaData: Record<string, unknown> = {
         items,
         total_amount: total,
         payment_method: pmStr,
         change_amount: changeAmt,
-      })
+      }
+      if (customer?.id) vendaData.customer_id = customer.id
+      const venda = await createVendaAvulsa(vendaData)
 
       const appliedRate =
         isCard(method) && cardFlag
@@ -124,9 +125,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
         }),
       )
 
-      await createAccountsReceivable({
-        customer_id: customer?.id || null,
-        order_id: null,
+      const arData: Record<string, unknown> = {
         venda_avulsa_id: venda.id,
         description: `Venda Avulsa – ${customer?.name || 'Cliente Avulso'}`,
         amount: total,
@@ -134,7 +133,9 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
         status: 'Recebido',
         payment_method: pmStr,
         received_at: new Date().toISOString(),
-      })
+      }
+      if (customer?.id) arData.customer_id = customer.id
+      await createAccountsReceivable(arData)
 
       toast.success('Venda avulsa finalizada!')
       onBack()

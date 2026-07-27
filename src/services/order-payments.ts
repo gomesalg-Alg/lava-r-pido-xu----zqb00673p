@@ -37,16 +37,19 @@ export const buildPaymentData = (params: {
 }) => {
   const isCardPayment =
     params.method === 'Cartão de Crédito' || params.method === 'Cartão de Débito'
-  return {
-    order_id: params.order_id ?? null,
-    venda_avulsa_id: params.venda_avulsa_id ?? null,
+  const data: Record<string, unknown> = {
     method: params.method,
     amount: Number(params.amount) || 0,
-    card_flag: isCardPayment && params.card_flag ? params.card_flag : null,
-    installments: isCardPayment ? params.installments || 1 : null,
     applied_rate: Number(params.applied_rate) || 0,
     fee_amount: Number(params.fee_amount) || 0,
   }
+  if (params.order_id) data.order_id = params.order_id
+  if (params.venda_avulsa_id) data.venda_avulsa_id = params.venda_avulsa_id
+  if (isCardPayment) {
+    if (params.card_flag) data.card_flag = params.card_flag
+    data.installments = params.installments || 1
+  }
+  return data
 }
 
 export const getOrderPayments = (orderId: string) =>
