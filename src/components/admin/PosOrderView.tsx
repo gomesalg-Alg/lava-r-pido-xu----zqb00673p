@@ -26,7 +26,8 @@ import { PosProductGrid } from '@/components/admin/PosProductGrid'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { Label } from '@/components/ui/label'
 import { getCardRates, getRateForPayment, type CardRate } from '@/services/card-rates'
-import { createOrderPayment, type PaymentLine } from '@/services/order-payments'
+import { createOrderPayment, buildPaymentData, type PaymentLine } from '@/services/order-payments'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
 import {
   getServiceOrderItems,
   updateServiceOrder,
@@ -183,15 +184,17 @@ export function PosOrderView({ order, onBack }: Props) {
               ? getRateForPayment(cardRates, line.card_flag, line.method, line.installments)
               : 0
           const feeAmount = line.amount > 0 ? (line.amount * appliedRate) / 100 : 0
-          await createOrderPayment({
-            order_id: order.id,
-            method: line.method,
-            amount: line.amount,
-            card_flag: line.card_flag || '',
-            installments: line.installments || 1,
-            applied_rate: appliedRate,
-            fee_amount: feeAmount,
-          })
+          await createOrderPayment(
+            buildPaymentData({
+              order_id: order.id,
+              method: line.method,
+              amount: line.amount,
+              card_flag: line.card_flag,
+              installments: line.installments,
+              applied_rate: appliedRate,
+              fee_amount: feeAmount,
+            }),
+          )
         }
       }
       const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
@@ -223,8 +226,8 @@ export function PosOrderView({ order, onBack }: Props) {
       }
       toast.success('Venda finalizada com sucesso!')
       onBack()
-    } catch {
-      toast.error('Erro ao finalizar venda')
+    } catch (err) {
+      toast.error(getErrorMessage(err) || 'Erro ao finalizar venda')
     } finally {
       setFinalizing(false)
     }
