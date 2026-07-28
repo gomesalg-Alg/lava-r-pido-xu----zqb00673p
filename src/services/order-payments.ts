@@ -61,10 +61,39 @@ export const getOrderPayments = (orderId: string) =>
     sort: 'created',
   })
 
-export const createOrderPayment = async (data: Record<string, unknown>) => {
-  const cleaned = Object.fromEntries(
+export const sanitizePaymentData = (data: Record<string, unknown>): Record<string, unknown> => {
+  // Step 1: Remove null, undefined, and empty string values
+  let cleaned = Object.fromEntries(
     Object.entries(data).filter(([, v]) => v !== null && v !== undefined && v !== ''),
   )
+
+  // Step 2: Conditionally keep/remove card-specific fields based on method
+  const method = cleaned.method as string | undefined
+  const isCardPayment = method === 'Cartão de Crédito' || method === 'Cartão de Débito'
+
+  const cardFields = ['card_flag', 'installments', 'applied_rate', 'fee_amount'] as const
+
+  if (!isCardPayment) {
+    // Remove all card-specific fields when method is not a card payment
+    for (const f of cardFields) {
+      delete cleaned[f]
+    }
+  } else {
+    // For card payments: keep card_flag and installments if provided;
+    // keep applied_rate and fee_amount only if present and non-null
+    for (const f of cardFields) {
+      const val = cleaned[f]
+      if (val === null || val === undefined || val === '') {
+        delete cleaned[f]
+      }
+    }
+  }
+
+  return cleaned
+}
+
+export const createOrderPayment = async (data: Record<string, unknown>) => {
+  const cleaned = sanitizePaymentData(data)
   try {
     return await pb.collection('order_payments').create<OrderPayment>(cleaned)
   } catch (error) {
@@ -74,7 +103,8 @@ export const createOrderPayment = async (data: Record<string, unknown>) => {
         '[createOrderPayment] PocketBase error:\n' +
           `  status: ${error.status}\n` +
           `  message: ${error.message}\n` +
-          `  responseData: ${JSON.stringify(error.response, null, 2)}\n` +
+          `  rawResponse: ${JSON.stringify(error.response, null, 2)}\n` +
+          `  responseData: ${JSON.stringify(error.response?.data, null, 2)}\n` +
           `  fieldErrors: ${JSON.stringify(fieldErrors, null, 2)}\n` +
           `  requestData: ${JSON.stringify(cleaned, null, 2)}`,
       )
@@ -82,6 +112,7 @@ export const createOrderPayment = async (data: Record<string, unknown>) => {
       console.error(
         '[createOrderPayment] Unexpected error:\n' +
           `  error: ${error}\n` +
+          `  errorString: ${String(error)}\n` +
           `  requestData: ${JSON.stringify(cleaned, null, 2)}`,
       )
     }

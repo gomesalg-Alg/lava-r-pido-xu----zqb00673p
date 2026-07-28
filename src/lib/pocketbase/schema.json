@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-28T00:16:56.299Z",
+  "generatedAt": "2026-07-28T00:20:45.908Z",
   "collections": [
     {
       "name": "users",
@@ -1113,16 +1113,9 @@
           "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
-          "name": "order_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "service_orders"
-        },
-        {
           "name": "method",
           "type": "select",
-          "required": false,
+          "required": true,
           "system": false,
           "selectValues": [
             "Dinheiro",
@@ -1138,6 +1131,20 @@
           "type": "text",
           "required": false,
           "system": false
+        },
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
         },
         {
           "name": "installments",
@@ -1156,13 +1163,6 @@
           "type": "number",
           "required": false,
           "system": false
-        },
-        {
-          "name": "venda_avulsa_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "vendas_avulsas"
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
