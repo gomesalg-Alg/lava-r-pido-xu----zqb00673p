@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-28T00:07:10.629Z",
+  "generatedAt": "2026-07-28T00:16:56.299Z",
   "collections": [
     {
       "name": "users",
@@ -1113,37 +1113,6 @@
           "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
-          "name": "applied_rate",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "fee_amount",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "venda_avulsa_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "vendas_avulsas"
-        },
-        {
-          "name": "installments",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "card_flag",
-          "type": "text",
-          "required": false,
-          "system": false
-        },
-        {
           "name": "order_id",
           "type": "relation",
           "required": false,
@@ -1163,6 +1132,37 @@
             "Cortesia",
             "Outros"
           ]
+        },
+        {
+          "name": "card_flag",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "installments",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "applied_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "fee_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]

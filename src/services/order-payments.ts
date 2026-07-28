@@ -46,7 +46,7 @@ export const buildPaymentData = (params: {
   if (params.venda_avulsa_id) data.venda_avulsa_id = params.venda_avulsa_id
   if (isCardPayment) {
     if (params.card_flag) data.card_flag = params.card_flag
-    data.installments = params.installments || 1
+    data.installments = params.installments && params.installments > 0 ? params.installments : 1
     const rate = Number(params.applied_rate)
     data.applied_rate = Number.isFinite(rate) ? rate : 0
     const fee = Number(params.fee_amount)
@@ -63,23 +63,27 @@ export const getOrderPayments = (orderId: string) =>
 
 export const createOrderPayment = async (data: Record<string, unknown>) => {
   const cleaned = Object.fromEntries(
-    Object.entries(data).filter(([, v]) => v !== null && v !== undefined),
+    Object.entries(data).filter(([, v]) => v !== null && v !== undefined && v !== ''),
   )
   try {
     return await pb.collection('order_payments').create<OrderPayment>(cleaned)
   } catch (error) {
     if (error instanceof ClientResponseError) {
-      console.error('[createOrderPayment] PocketBase error:', {
-        status: error.status,
-        message: error.message,
-        responseData: error.response,
-        fieldErrors: error.response?.data,
-        requestData: cleaned,
-      })
+      const fieldErrors = error.response?.data
+      console.error(
+        '[createOrderPayment] PocketBase error:\n' +
+          `  status: ${error.status}\n` +
+          `  message: ${error.message}\n` +
+          `  responseData: ${JSON.stringify(error.response, null, 2)}\n` +
+          `  fieldErrors: ${JSON.stringify(fieldErrors, null, 2)}\n` +
+          `  requestData: ${JSON.stringify(cleaned, null, 2)}`,
+      )
     } else {
-      console.error('[createOrderPayment] Unexpected error:', error, {
-        requestData: cleaned,
-      })
+      console.error(
+        '[createOrderPayment] Unexpected error:\n' +
+          `  error: ${error}\n` +
+          `  requestData: ${JSON.stringify(cleaned, null, 2)}`,
+      )
     }
     throw error
   }
