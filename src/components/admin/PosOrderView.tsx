@@ -176,35 +176,35 @@ export function PosOrderView({ order, onBack }: Props) {
     if (!canFinalize) return
     setFinalizing(true)
     try {
-      for (const line of paymentLines) {
-        if (line.method && line.amount > 0) {
-          const isCard = line.method === 'Cartão de Crédito' || line.method === 'Cartão de Débito'
-          const appliedRate =
-            isCard && line.card_flag
-              ? getRateForPayment(cardRates, line.card_flag, line.method, line.installments)
-              : 0
-          const feeAmount = line.amount > 0 ? (line.amount * appliedRate) / 100 : 0
-          await createOrderPayment(
-            buildPaymentData({
-              order_id: order.id,
-              method: line.method,
-              amount: line.amount,
-              card_flag: line.card_flag,
-              installments: line.installments,
-              applied_rate: appliedRate,
-              fee_amount: feeAmount,
-            }),
-          )
-        }
-      }
       const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
+      for (const line of validLines) {
+        const isCard = line.method === 'Cartão de Crédito' || line.method === 'Cartão de Débito'
+        const appliedRate =
+          isCard && line.card_flag
+            ? getRateForPayment(cardRates, line.card_flag, line.method, line.installments)
+            : 0
+        const feeAmount = line.amount > 0 ? (line.amount * appliedRate) / 100 : 0
+        await createOrderPayment(
+          buildPaymentData({
+            order_id: order.id,
+            method: line.method,
+            amount: line.amount,
+            card_flag: line.card_flag,
+            installments: line.installments,
+            applied_rate: appliedRate,
+            fee_amount: feeAmount,
+          }),
+        )
+      }
+
       await updateServiceOrder(order.id, {
         status: 'Pago',
-        amount_paid: finalTotal,
-        total_discount: discount,
-        total_surcharge: surcharge,
+        amount_paid: Math.round(finalTotal * 100) / 100,
+        total_discount: Math.round(discount * 100) / 100,
+        total_surcharge: Math.round(surcharge * 100) / 100,
         exit_at: new Date().toISOString(),
       })
+
       const nowIso = new Date().toISOString()
       const today = nowIso.split('T')[0]
       for (const line of validLines) {
@@ -216,7 +216,7 @@ export function PosOrderView({ order, onBack }: Props) {
         const arData: Record<string, unknown> = {
           order_id: order.id,
           description: `Venda PDV - OS #${order.ticket_number} - ${pmStr}`,
-          amount: line.amount,
+          amount: Math.round(line.amount * 100) / 100,
           due_date: today,
           status: 'Recebido',
           payment_method: pmStr,
@@ -225,6 +225,7 @@ export function PosOrderView({ order, onBack }: Props) {
         if (order.customer_id) arData.customer_id = order.customer_id
         await createAccountsReceivable(arData)
       }
+
       toast.success('Venda finalizada com sucesso!')
       onBack()
     } catch (err) {

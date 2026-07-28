@@ -38,20 +38,41 @@ export const buildPaymentData = (params: {
 }) => {
   const isCardPayment =
     params.method === 'Cartão de Crédito' || params.method === 'Cartão de Débito'
+
+  const rawAmount = Number(params.amount)
+  const amount = Number.isFinite(rawAmount) ? Math.round(rawAmount * 100) / 100 : 0
+
   const data: Record<string, unknown> = {
-    method: params.method,
-    amount: Number(params.amount) || 0,
+    method: params.method ? params.method.trim() : '',
+    amount: amount,
   }
-  if (params.order_id) data.order_id = params.order_id
-  if (params.venda_avulsa_id) data.venda_avulsa_id = params.venda_avulsa_id
+
+  if (params.order_id && typeof params.order_id === 'string' && params.order_id.trim() !== '') {
+    data.order_id = params.order_id.trim()
+  }
+
+  if (
+    params.venda_avulsa_id &&
+    typeof params.venda_avulsa_id === 'string' &&
+    params.venda_avulsa_id.trim() !== ''
+  ) {
+    data.venda_avulsa_id = params.venda_avulsa_id.trim()
+  }
+
   if (isCardPayment) {
-    if (params.card_flag) data.card_flag = params.card_flag
-    data.installments = params.installments && params.installments > 0 ? params.installments : 1
+    if (params.card_flag && params.card_flag.trim() !== '') {
+      data.card_flag = params.card_flag.trim()
+    }
+    data.installments =
+      params.installments && params.installments > 0 ? Math.round(params.installments) : 1
+
     const rate = Number(params.applied_rate)
-    data.applied_rate = Number.isFinite(rate) ? rate : 0
+    data.applied_rate = Number.isFinite(rate) ? Math.round(rate * 10000) / 10000 : 0
+
     const fee = Number(params.fee_amount)
-    data.fee_amount = Number.isFinite(fee) ? fee : 0
+    data.fee_amount = Number.isFinite(fee) ? Math.round(fee * 100) / 100 : 0
   }
+
   return data
 }
 
@@ -62,9 +83,13 @@ export const getOrderPayments = (orderId: string) =>
   })
 
 export const sanitizePaymentData = (data: Record<string, unknown>): Record<string, unknown> => {
-  // Step 1: Remove null, undefined, and empty string values
+  // Step 1: Remove null, undefined, empty string "", or NaN values
   let cleaned = Object.fromEntries(
-    Object.entries(data).filter(([, v]) => v !== null && v !== undefined && v !== ''),
+    Object.entries(data).filter(([, v]) => {
+      if (v === null || v === undefined || v === '') return false
+      if (typeof v === 'number' && isNaN(v)) return false
+      return true
+    }),
   )
 
   // Step 2: Conditionally keep/remove card-specific fields based on method
@@ -74,19 +99,30 @@ export const sanitizePaymentData = (data: Record<string, unknown>): Record<strin
   const cardFields = ['card_flag', 'installments', 'applied_rate', 'fee_amount'] as const
 
   if (!isCardPayment) {
-    // Remove all card-specific fields when method is not a card payment
     for (const f of cardFields) {
       delete cleaned[f]
     }
   } else {
-    // For card payments: keep card_flag and installments if provided;
-    // keep applied_rate and fee_amount only if present and non-null
     for (const f of cardFields) {
       const val = cleaned[f]
       if (val === null || val === undefined || val === '') {
         delete cleaned[f]
       }
     }
+  }
+
+  if (typeof cleaned.amount === 'number') {
+    cleaned.amount = Math.round(cleaned.amount * 100) / 100
+  } else if (typeof cleaned.amount === 'string') {
+    cleaned.amount = Math.round(parseFloat(cleaned.amount) * 100) / 100
+  }
+
+  if (typeof cleaned.fee_amount === 'number') {
+    cleaned.fee_amount = Math.round(cleaned.fee_amount * 100) / 100
+  }
+
+  if (typeof cleaned.applied_rate === 'number') {
+    cleaned.applied_rate = Math.round(cleaned.applied_rate * 10000) / 10000
   }
 
   return cleaned

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-28T00:20:45.908Z",
+  "generatedAt": "2026-07-28T14:48:14.996Z",
   "collections": [
     {
       "name": "users",
@@ -1093,12 +1093,6 @@
       },
       "fields": [
         {
-          "name": "amount",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
           "name": "created",
           "type": "autodate",
           "required": false,
@@ -1127,24 +1121,16 @@
           ]
         },
         {
+          "name": "amount",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
           "name": "card_flag",
           "type": "text",
           "required": false,
           "system": false
-        },
-        {
-          "name": "order_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "service_orders"
-        },
-        {
-          "name": "venda_avulsa_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "vendas_avulsas"
         },
         {
           "name": "installments",
@@ -1163,6 +1149,20 @@
           "type": "number",
           "required": false,
           "system": false
+        },
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]

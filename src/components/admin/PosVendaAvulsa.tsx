@@ -74,15 +74,15 @@ export function PosVendaAvulsa() {
       const items: VendaAvulsaItem[] = cart.map((i) => ({
         product_id: i.product.id,
         quantity: i.quantity,
-        unit_price: i.product.price,
-        total_price: i.product.price * i.quantity,
+        unit_price: Math.round(i.product.price * 100) / 100,
+        total_price: Math.round(i.product.price * i.quantity * 100) / 100,
       }))
 
       const venda = await createVendaAvulsa({
         items,
-        total_amount: finalTotal,
+        total_amount: Math.round(finalTotal * 100) / 100,
         payment_method: paymentLines.map((l) => l.method).join(' + '),
-        change_amount: troco,
+        change_amount: Math.round(troco * 100) / 100,
       })
 
       const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
@@ -117,7 +117,7 @@ export function PosVendaAvulsa() {
         await createAccountsReceivable({
           venda_avulsa_id: venda.id,
           description: `Venda Avulsa - ${pmStr}`,
-          amount: line.amount,
+          amount: Math.round(line.amount * 100) / 100,
           due_date: today,
           status: 'Recebido',
           payment_method: pmStr,
@@ -131,7 +131,7 @@ export function PosVendaAvulsa() {
       setDiscount(0)
       setSurcharge(0)
     } catch (err) {
-      toast.error(getErrorMessage(err))
+      toast.error(getErrorMessage(err) || 'Erro ao finalizar venda')
     } finally {
       setFinalizing(false)
     }
