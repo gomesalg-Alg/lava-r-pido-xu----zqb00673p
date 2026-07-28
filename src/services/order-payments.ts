@@ -1,4 +1,5 @@
 import pb from '@/lib/pocketbase/client'
+import { ClientResponseError } from 'pocketbase'
 import type { PaymentMethod } from './service-orders'
 import type { CardFlag } from './card-rates'
 
@@ -46,8 +47,10 @@ export const buildPaymentData = (params: {
   if (isCardPayment) {
     if (params.card_flag) data.card_flag = params.card_flag
     data.installments = params.installments || 1
-    data.applied_rate = Number(params.applied_rate) || 0
-    data.fee_amount = Number(params.fee_amount) || 0
+    const rate = Number(params.applied_rate)
+    data.applied_rate = Number.isFinite(rate) ? rate : 0
+    const fee = Number(params.fee_amount)
+    data.fee_amount = Number.isFinite(fee) ? fee : 0
   }
   return data
 }
@@ -58,7 +61,28 @@ export const getOrderPayments = (orderId: string) =>
     sort: 'created',
   })
 
-export const createOrderPayment = (data: Record<string, unknown>) =>
-  pb.collection('order_payments').create<OrderPayment>(data)
+export const createOrderPayment = async (data: Record<string, unknown>) => {
+  const cleaned = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== null && v !== undefined),
+  )
+  try {
+    return await pb.collection('order_payments').create<OrderPayment>(cleaned)
+  } catch (error) {
+    if (error instanceof ClientResponseError) {
+      console.error('[createOrderPayment] PocketBase error:', {
+        status: error.status,
+        message: error.message,
+        responseData: error.response,
+        fieldErrors: error.response?.data,
+        requestData: cleaned,
+      })
+    } else {
+      console.error('[createOrderPayment] Unexpected error:', error, {
+        requestData: cleaned,
+      })
+    }
+    throw error
+  }
+}
 
 export const deleteOrderPayment = (id: string) => pb.collection('order_payments').delete(id)

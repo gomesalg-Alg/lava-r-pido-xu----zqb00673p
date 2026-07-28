@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27T23:52:47.422Z",
+  "generatedAt": "2026-07-28T00:07:10.629Z",
   "collections": [
     {
       "name": "users",
@@ -1093,27 +1093,6 @@
       },
       "fields": [
         {
-          "name": "order_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "service_orders"
-        },
-        {
-          "name": "method",
-          "type": "select",
-          "required": false,
-          "system": false,
-          "selectValues": [
-            "Dinheiro",
-            "Cartão de Crédito",
-            "Cartão de Débito",
-            "Pix",
-            "Cortesia",
-            "Outros"
-          ]
-        },
-        {
           "name": "amount",
           "type": "number",
           "required": false,
@@ -1163,6 +1142,27 @@
           "type": "text",
           "required": false,
           "system": false
+        },
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "method",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "Dinheiro",
+            "Cartão de Crédito",
+            "Cartão de Débito",
+            "Pix",
+            "Cortesia",
+            "Outros"
+          ]
         }
       ],
       "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]

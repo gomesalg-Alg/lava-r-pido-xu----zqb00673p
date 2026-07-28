@@ -58,6 +58,7 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
 
   const activeFlags = cardRates.filter((r) => r.is_active)
   const isCreditCard = paymentMethod === 'Cartão de Crédito'
+  const isCard = paymentMethod === 'Cartão de Crédito' || paymentMethod === 'Cartão de Débito'
   const isCortesia = paymentMethod === 'Cortesia'
 
   const maxInstallments = activeFlags.find((r) => r.flag === cardFlag)?.max_installments || 4
@@ -68,9 +69,12 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
 
   const handleMethodChange = (v: string) => {
     setPaymentMethod(v)
-    if (v !== 'Cartão de Crédito') {
+    const vIsCard = v === 'Cartão de Crédito' || v === 'Cartão de Débito'
+    if (!vIsCard) {
       setCardFlag('')
       setInstallments(0)
+    } else if (v === 'Cartão de Débito') {
+      setInstallments(1)
     }
   }
 
@@ -83,10 +87,12 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
   }
 
   const canFinalize =
-    !!paymentMethod && items.length > 0 && (!isCreditCard || (cardFlag !== '' && installments > 0))
+    !!paymentMethod &&
+    items.length > 0 &&
+    (!isCard || cardFlag !== '') &&
+    (!isCreditCard || installments > 0)
 
   const handleFinalize = () => {
-    const isCard = paymentMethod === 'Cartão de Crédito' || paymentMethod === 'Cartão de Débito'
     const appliedRate =
       isCard && cardFlag ? getRateForPayment(cardRates, cardFlag, paymentMethod, installments) : 0
     const paymentAmount = isCortesia ? 0 : amountPaid
@@ -96,10 +102,10 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
       total_discount: discount,
       total_surcharge: surcharge,
       amount_paid: paymentAmount,
-      card_flag: isCreditCard ? cardFlag : undefined,
-      installments: isCreditCard ? installments : undefined,
-      applied_rate: appliedRate,
-      fee_amount: feeAmount,
+      card_flag: isCard && cardFlag ? cardFlag : undefined,
+      installments: isCard ? installments || 1 : undefined,
+      applied_rate: isCard ? appliedRate : undefined,
+      fee_amount: isCard ? feeAmount : undefined,
     })
   }
 
@@ -200,7 +206,7 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
         </div>
       </div>
 
-      {isCreditCard && (
+      {isCard && (
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label className="text-xs">Bandeira *</Label>
@@ -217,24 +223,26 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Parcelas *</Label>
-            <Select
-              value={installments > 0 ? String(installments) : undefined}
-              onValueChange={(v) => setInstallments(parseInt(v))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: maxInstallments }, (_, i) => i + 1).map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {n}x
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {isCreditCard && (
+            <div className="space-y-1">
+              <Label className="text-xs">Parcelas *</Label>
+              <Select
+                value={installments > 0 ? String(installments) : undefined}
+                onValueChange={(v) => setInstallments(parseInt(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: maxInstallments }, (_, i) => i + 1).map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}x
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
       )}
 
