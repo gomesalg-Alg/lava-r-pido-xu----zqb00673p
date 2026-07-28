@@ -83,46 +83,54 @@ export const getOrderPayments = (orderId: string) =>
   })
 
 export const sanitizePaymentData = (data: Record<string, unknown>): Record<string, unknown> => {
-  // Step 1: Remove null, undefined, empty string "", or NaN values
-  let cleaned = Object.fromEntries(
-    Object.entries(data).filter(([, v]) => {
-      if (v === null || v === undefined || v === '') return false
-      if (typeof v === 'number' && isNaN(v)) return false
-      return true
-    }),
-  )
-
-  // Step 2: Conditionally keep/remove card-specific fields based on method
-  const method = cleaned.method as string | undefined
+  const method = typeof data.method === 'string' ? data.method.trim() : ''
   const isCardPayment = method === 'Cartão de Crédito' || method === 'Cartão de Débito'
 
-  const cardFields = ['card_flag', 'installments', 'applied_rate', 'fee_amount'] as const
+  const cleaned: Record<string, unknown> = {}
 
-  if (!isCardPayment) {
-    for (const f of cardFields) {
-      delete cleaned[f]
+  // Required: method (must be a non-empty string matching a select value)
+  if (method) {
+    cleaned.method = method
+  }
+
+  // Required: amount (always include, default to 0 if invalid)
+  const rawAmount =
+    typeof data.amount === 'number' ? data.amount : parseFloat(String(data.amount ?? '0'))
+  cleaned.amount = Number.isFinite(rawAmount) ? Math.round(rawAmount * 100) / 100 : 0
+
+  // Optional: order_id — only include if it's a non-empty string
+  if (typeof data.order_id === 'string' && data.order_id.trim() !== '') {
+    cleaned.order_id = data.order_id.trim()
+  }
+
+  // Optional: venda_avulsa_id — only include if it's a non-empty string
+  if (typeof data.venda_avulsa_id === 'string' && data.venda_avulsa_id.trim() !== '') {
+    cleaned.venda_avulsa_id = data.venda_avulsa_id.trim()
+  }
+
+  // Card-specific fields — only include for card payments
+  if (isCardPayment) {
+    if (typeof data.card_flag === 'string' && data.card_flag.trim() !== '') {
+      cleaned.card_flag = data.card_flag.trim()
     }
-  } else {
-    for (const f of cardFields) {
-      const val = cleaned[f]
-      if (val === null || val === undefined || val === '') {
-        delete cleaned[f]
-      }
-    }
-  }
 
-  if (typeof cleaned.amount === 'number') {
-    cleaned.amount = Math.round(cleaned.amount * 100) / 100
-  } else if (typeof cleaned.amount === 'string') {
-    cleaned.amount = Math.round(parseFloat(cleaned.amount) * 100) / 100
-  }
+    const rawInst =
+      typeof data.installments === 'number'
+        ? data.installments
+        : parseInt(String(data.installments ?? '1'), 10)
+    cleaned.installments = Number.isFinite(rawInst) && rawInst > 0 ? rawInst : 1
 
-  if (typeof cleaned.fee_amount === 'number') {
-    cleaned.fee_amount = Math.round(cleaned.fee_amount * 100) / 100
-  }
+    const rawRate =
+      typeof data.applied_rate === 'number'
+        ? data.applied_rate
+        : parseFloat(String(data.applied_rate ?? '0'))
+    cleaned.applied_rate = Number.isFinite(rawRate) ? Math.round(rawRate * 10000) / 10000 : 0
 
-  if (typeof cleaned.applied_rate === 'number') {
-    cleaned.applied_rate = Math.round(cleaned.applied_rate * 10000) / 10000
+    const rawFee =
+      typeof data.fee_amount === 'number'
+        ? data.fee_amount
+        : parseFloat(String(data.fee_amount ?? '0'))
+    cleaned.fee_amount = Number.isFinite(rawFee) ? Math.round(rawFee * 100) / 100 : 0
   }
 
   return cleaned
@@ -142,7 +150,8 @@ export const createOrderPayment = async (data: Record<string, unknown>) => {
           `  rawResponse: ${JSON.stringify(error.response, null, 2)}\n` +
           `  responseData: ${JSON.stringify(error.response?.data, null, 2)}\n` +
           `  fieldErrors: ${JSON.stringify(fieldErrors, null, 2)}\n` +
-          `  requestData: ${JSON.stringify(cleaned, null, 2)}`,
+          `  sanitizedData: ${JSON.stringify(cleaned, null, 2)}\n` +
+          `  originalData: ${JSON.stringify(data, null, 2)}`,
       )
     } else {
       console.error(

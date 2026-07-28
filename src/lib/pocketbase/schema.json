@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-28T14:48:14.996Z",
+  "generatedAt": "2026-07-28T15:01:08.663Z",
   "collections": [
     {
       "name": "users",
@@ -1082,92 +1082,6 @@
       "indexes": ["CREATE UNIQUE INDEX `idx_card_rates_flag` ON `card_rates` (flag)"]
     },
     {
-      "name": "order_payments",
-      "type": "base",
-      "apiRules": {
-        "list": "@request.auth.id != ''",
-        "view": "@request.auth.id != ''",
-        "create": "@request.auth.id != ''",
-        "update": "@request.auth.id != ''",
-        "delete": "@request.auth.id != ''"
-      },
-      "fields": [
-        {
-          "name": "created",
-          "type": "autodate",
-          "required": false,
-          "system": false,
-          "autodateTriggers": ["onCreate"]
-        },
-        {
-          "name": "updated",
-          "type": "autodate",
-          "required": false,
-          "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
-        },
-        {
-          "name": "method",
-          "type": "select",
-          "required": true,
-          "system": false,
-          "selectValues": [
-            "Dinheiro",
-            "Cartão de Crédito",
-            "Cartão de Débito",
-            "Pix",
-            "Cortesia",
-            "Outros"
-          ]
-        },
-        {
-          "name": "amount",
-          "type": "number",
-          "required": true,
-          "system": false
-        },
-        {
-          "name": "card_flag",
-          "type": "text",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "installments",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "applied_rate",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "fee_amount",
-          "type": "number",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "order_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "service_orders"
-        },
-        {
-          "name": "venda_avulsa_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "vendas_avulsas"
-        }
-      ],
-      "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
-    },
-    {
       "name": "accounts_receivable",
       "type": "base",
       "apiRules": {
@@ -1314,6 +1228,92 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "order_payments",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "method",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": [
+            "Dinheiro",
+            "Cartão de Crédito",
+            "Cartão de Débito",
+            "Pix",
+            "Cortesia",
+            "Outros"
+          ]
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "card_flag",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "installments",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "applied_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "fee_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
     }
   ]
 }

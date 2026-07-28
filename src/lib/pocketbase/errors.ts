@@ -8,10 +8,8 @@ export function extractFieldErrors(error: unknown): FieldErrors {
   if (!data || typeof data !== 'object') return {}
   const errors: FieldErrors = {}
   for (const [field, detail] of Object.entries(data)) {
-    if (!detail) continue
-    if (typeof detail === 'string') {
-      errors[field] = detail
-    } else if (
+    if (
+      detail &&
       typeof detail === 'object' &&
       'message' in detail &&
       typeof (detail as { message: unknown }).message === 'string'
@@ -24,15 +22,8 @@ export function extractFieldErrors(error: unknown): FieldErrors {
 
 export function getErrorMessage(error: unknown): string {
   if (!(error instanceof ClientResponseError)) {
-    return error instanceof Error ? error.message : 'Ocorreu um erro inesperado.'
+    return error instanceof Error ? error.message : 'An unexpected error occurred.'
   }
-  const fieldErrors = extractFieldErrors(error)
-  const entries = Object.entries(fieldErrors)
-  if (entries.length > 0) {
-    return entries.map(([field, msg]) => `Campo "${field}": ${msg}`).join(' | ')
-  }
-  if (error.message) {
-    return error.message
-  }
-  return 'Ocorreu um erro inesperado ao salvar os dados.'
+  const msgs = Object.values(extractFieldErrors(error))
+  return msgs.length > 0 ? msgs.join(' ') : error.message || 'An unexpected error occurred.'
 }
