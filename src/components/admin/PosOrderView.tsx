@@ -237,12 +237,13 @@ export function PosOrderView({ order, onBack }: Props) {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-3xl font-bold text-center text-slate-800">Frente de Caixa</h1>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-xl font-bold text-slate-800">OS #{order.ticket_number}</h1>
+          <h2 className="text-xl font-bold text-slate-800">OS #{order.ticket_number}</h2>
           <p className="text-sm text-slate-500">
             {order.expand?.customer_id?.name} · {order.expand?.vehicle_id?.placa} ·{' '}
             {order.expand?.vehicle_id?.brand} {order.expand?.vehicle_id?.model}

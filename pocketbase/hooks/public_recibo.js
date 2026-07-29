@@ -42,22 +42,6 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         amount_paid: order.getDouble('amount_paid'),
       }
 
-      const orderPayments = $app.findRecordsByFilter(
-        'order_payments',
-        'order_id = "' + order.id + '"',
-        'created',
-        0,
-        0,
-      )
-      for (const p of orderPayments) {
-        result.payments.push({
-          method: p.getString('method'),
-          amount: p.getDouble('amount'),
-          card_flag: p.getString('card_flag'),
-          installments: p.getInt('installments'),
-        })
-      }
-
       const orderItems = $app.findRecordsByFilter(
         'service_order_items',
         'order_id = "' + order.id + '"',
@@ -101,6 +85,95 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         change_amount: venda.getDouble('change_amount'),
       }
     }
+
+    let rawPayments = []
+    if (order) {
+      rawPayments = $app.findRecordsByFilter(
+        'order_payments',
+        'order_id = "' + order.id + '"',
+        'created',
+        0,
+        0,
+      )
+    } else if (venda) {
+      rawPayments = $app.findRecordsByFilter(
+        'order_payments',
+        'venda_avulsa_id = "' + venda.id + '"',
+        'created',
+        0,
+        0,
+      )
+    }
+
+    const orderTotal = ar.getDouble('amount') || 0
+    const fallbackMethod =
+      ar.getString('payment_method') || (venda ? venda.getString('payment_method') : '')
+    const changeAmount = venda ? venda.getDouble('change_amount') : 0
+
+    const parsedPayments = []
+    for (let i = 0; i < rawPayments.length; i++) {
+      const p = rawPayments[i]
+      parsedPayments.push({
+        method: p.getString('method'),
+        amount: p.getDouble('amount'),
+        card_flag: p.getString('card_flag'),
+        installments: p.getInt('installments'),
+      })
+    }
+
+    let finalPayments = []
+    let rawSum = 0
+    for (let i = 0; i < parsedPayments.length; i++) {
+      rawSum += parsedPayments[i].amount
+    }
+
+    if (parsedPayments.length > 0) {
+      if (rawSum > orderTotal + 0.01) {
+        const uniqueMap = {}
+        const dedupedList = []
+        for (let i = 0; i < parsedPayments.length; i++) {
+          const item = parsedPayments[i]
+          const sig =
+            item.method +
+            '_' +
+            item.amount.toFixed(2) +
+            '_' +
+            (item.card_flag || '') +
+            '_' +
+            (item.installments || 1)
+          if (!uniqueMap[sig]) {
+            uniqueMap[sig] = true
+            dedupedList.push(item)
+          }
+        }
+        let dedupedSum = 0
+        for (let i = 0; i < dedupedList.length; i++) {
+          dedupedSum += dedupedList[i].amount
+        }
+        if (
+          Math.abs(dedupedSum - orderTotal) < 0.01 ||
+          Math.abs(dedupedSum - (orderTotal + changeAmount)) < 0.01 ||
+          (dedupedSum >= orderTotal && rawSum > dedupedSum)
+        ) {
+          finalPayments = dedupedList
+        } else {
+          finalPayments = parsedPayments
+        }
+      } else {
+        finalPayments = parsedPayments
+      }
+    }
+
+    if (finalPayments.length === 0 && fallbackMethod) {
+      finalPayments.push({
+        method: fallbackMethod,
+        amount: orderTotal,
+        card_flag: '',
+        installments: 1,
+      })
+    }
+
+    result.payments = finalPayments
 
     let company = null
     try {

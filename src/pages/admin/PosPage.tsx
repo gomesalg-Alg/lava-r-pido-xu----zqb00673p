@@ -42,7 +42,7 @@ export default function PosPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Frente de Caixa</h1>
+      <h1 className="text-3xl font-bold text-center text-slate-800">Frente de Caixa</h1>
       <Tabs defaultValue="orders">
         <TabsList className="grid grid-cols-2 w-full max-w-md">
           <TabsTrigger value="orders">Ordens de Serviço</TabsTrigger>

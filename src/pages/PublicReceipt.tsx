@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicReceipt, type PublicReceiptData } from '@/services/receipts'
+import { consolidatePayments } from '@/lib/payment-utils'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import { maskCPF, maskPhone } from '@/lib/masks'
 import { MetaTags } from '@/components/MetaTags'
@@ -53,12 +54,18 @@ export default function PublicReceipt() {
   const itemSurcharge = allItems.reduce((s, i) => s + (i.surcharge_amount || 0), 0)
   const totalDiscount = itemDiscount + (data.order?.total_discount || 0)
   const totalSurcharge = itemSurcharge + (data.order?.total_surcharge || 0)
-  const totalPaid = data.payments.reduce((s, p) => s + (p.amount || 0), 0)
-  const troco =
-    data.venda_avulsa?.change_amount || (totalPaid > data.amount ? totalPaid - data.amount : 0)
-  const paymentMethodLabel = data.payment_method || data.venda_avulsa?.payment_method || ''
 
-  const renderItemsTable = (title: string, items: any[], subtotal?: number) => {
+  const paymentMethodLabel = data.payment_method || data.venda_avulsa?.payment_method || ''
+  const changeAmount = data.venda_avulsa?.change_amount || 0
+
+  const consolidated = consolidatePayments({
+    rawPayments: data.payments,
+    orderTotal: data.amount || 0,
+    fallbackMethod: paymentMethodLabel,
+    changeAmount: changeAmount,
+  })
+
+  const renderItemsTable = (title: string, items: any[], groupSubtotal?: number) => {
     if (items.length === 0) return null
     return (
       <div className="mt-6">
@@ -89,11 +96,11 @@ export default function PublicReceipt() {
             ))}
           </tbody>
         </table>
-        {subtotal !== undefined && (
+        {groupSubtotal !== undefined && (
           <div className="flex justify-end mt-2">
             <div className="flex justify-between w-64 text-sm font-semibold border-t border-gray-300 pt-1">
               <span>Sub-total:</span>
-              <span>{formatCurrency(subtotal)}</span>
+              <span>{formatCurrency(groupSubtotal)}</span>
             </div>
           </div>
         )}
@@ -193,46 +200,35 @@ export default function PublicReceipt() {
           </div>
         </div>
 
-        {(data.payments.length > 0 || paymentMethodLabel) && (
-          <div className="mt-6">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
-              Forma de Pagamento
-            </h3>
-            <div className="space-y-1">
-              {data.payments.length > 0 ? (
-                data.payments.map((p, i) => (
-                  <div key={i} className="flex justify-between text-sm">
-                    <span>
-                      {p.method}
-                      {p.card_flag ? ` · ${p.card_flag}` : ''}
-                      {p.method === 'Cartão de Crédito' && p.installments > 1
-                        ? ` (${p.installments}x)`
-                        : ''}
-                    </span>
-                    <span className="font-medium">{formatCurrency(p.amount)}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="flex justify-between text-sm">
-                  <span>{paymentMethodLabel}</span>
-                  <span className="font-medium">{formatCurrency(data.amount)}</span>
-                </div>
-              )}
-              {troco > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Troco:</span>
-                  <span className="font-medium">{formatCurrency(troco)}</span>
-                </div>
-              )}
-              {data.payments.length > 0 && (
-                <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
-                  <span>Total Pago:</span>
-                  <span>{formatCurrency(totalPaid)}</span>
-                </div>
-              )}
+        <div className="mt-6">
+          <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
+            FORMA DE PAGAMENTO
+          </h3>
+          <div className="space-y-1">
+            {consolidated.payments.map((p, i) => (
+              <div key={i} className="flex justify-between text-sm">
+                <span>
+                  {p.method}
+                  {p.card_flag ? ` · ${p.card_flag}` : ''}
+                  {p.method === 'Cartão de Crédito' && p.installments && p.installments > 1
+                    ? ` (${p.installments}x)`
+                    : ''}
+                </span>
+                <span className="font-medium">{formatCurrency(p.amount)}</span>
+              </div>
+            ))}
+            {consolidated.troco > 0 && (
+              <div className="flex justify-between text-sm">
+                <span>Troco:</span>
+                <span className="font-medium">{formatCurrency(consolidated.troco)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
+              <span>Total Pago:</span>
+              <span>{formatCurrency(consolidated.totalPaid)}</span>
             </div>
           </div>
-        )}
+        </div>
 
         {data.status === 'Recebido' && (
           <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded">

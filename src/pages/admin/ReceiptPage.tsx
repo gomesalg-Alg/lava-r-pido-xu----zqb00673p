@@ -4,8 +4,9 @@ import { ArrowLeft, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getCompany, type Company } from '@/services/company'
 import { getServiceOrderItems } from '@/services/service-orders'
-import { getOrderPayments } from '@/services/order-payments'
+import { getOrderPayments, getOrderPaymentsByVendaAvulsa } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
+import { consolidatePayments } from '@/lib/payment-utils'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import { maskCPF, maskPhone } from '@/lib/masks'
 import pb from '@/lib/pocketbase/client'
@@ -36,12 +37,16 @@ export default function ReceiptPage() {
         const comp = await getCompany()
         setRecord(rec)
         setCompany(comp)
+
         if (rec.order_id) {
           const [items, pays] = await Promise.all([
             getServiceOrderItems(rec.order_id),
             getOrderPayments(rec.order_id),
           ])
           setOrderItems(items)
+          setPayments(pays)
+        } else if (rec.venda_avulsa_id) {
+          const pays = await getOrderPaymentsByVendaAvulsa(rec.venda_avulsa_id)
           setPayments(pays)
         }
       } catch (err) {
@@ -84,12 +89,15 @@ export default function ReceiptPage() {
   const serviceItems = orderItems.filter((i) => i.service_id)
   const productItems = orderItems.filter((i) => i.product_id)
   const totals = orderItems.length > 0 ? calculateOrderTotals(orderItems) : null
-  const totalPaid = payments.reduce((s: number, p: any) => s + (p.amount || 0), 0)
-  const orderTotal = totals ? totals.grandTotal : record.amount
-  const trocoFromPayments = payments.length > 0 ? totalPaid - orderTotal : 0
-  const troco = trocoFromPayments > 0 ? trocoFromPayments : changeAmount
-  const currentYear = new Date().getFullYear()
   const paymentMethodLabel = record.payment_method || record.expand?.venda_avulsa_id?.payment_method
+  const currentYear = new Date().getFullYear()
+
+  const consolidated = consolidatePayments({
+    rawPayments: payments,
+    orderTotal: record.amount || 0,
+    fallbackMethod: paymentMethodLabel,
+    changeAmount: changeAmount,
+  })
 
   const renderItemsTable = (title: string, items: any[], nameField: string) => {
     if (items.length === 0) return null
@@ -229,53 +237,42 @@ export default function ReceiptPage() {
           </div>
         </div>
 
-        {(payments.length > 0 || paymentMethodLabel || changeAmount > 0) && (
-          <div className="mt-6">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
-              Forma de Pagamento
-            </h3>
-            <div className="space-y-1">
-              {payments.length > 0 ? (
-                payments.map((p) => (
-                  <div key={p.id} className="space-y-0.5">
-                    <div className="flex justify-between text-sm">
-                      <span>
-                        {p.method}
-                        {p.method === 'Cartão de Crédito' && p.installments > 1
-                          ? ` (${p.installments}x)`
-                          : ''}
-                      </span>
-                      <span className="font-medium">{formatCurrency(p.amount)}</span>
+        <div className="mt-6">
+          <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
+            FORMA DE PAGAMENTO
+          </h3>
+          <div className="space-y-1">
+            {consolidated.payments.map((p, idx) => (
+              <div key={p.id || idx} className="space-y-0.5">
+                <div className="flex justify-between text-sm">
+                  <span>
+                    {p.method}
+                    {p.method === 'Cartão de Crédito' && p.installments && p.installments > 1
+                      ? ` (${p.installments}x)`
+                      : ''}
+                  </span>
+                  <span className="font-medium">{formatCurrency(p.amount)}</span>
+                </div>
+                {(p.method === 'Cartão de Crédito' || p.method === 'Cartão de Débito') &&
+                  p.card_flag && (
+                    <div className="flex justify-between text-sm text-slate-500 pl-2">
+                      <span>Bandeira: {p.card_flag}</span>
                     </div>
-                    {(p.method === 'Cartão de Crédito' || p.method === 'Cartão de Débito') &&
-                      p.card_flag && (
-                        <div className="flex justify-between text-sm text-slate-500 pl-2">
-                          <span>Bandeira: {p.card_flag}</span>
-                        </div>
-                      )}
-                  </div>
-                ))
-              ) : paymentMethodLabel ? (
-                <div className="flex justify-between text-sm">
-                  <span>{paymentMethodLabel}</span>
-                  <span className="font-medium">{formatCurrency(record.amount)}</span>
-                </div>
-              ) : null}
-              {troco > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Troco:</span>
-                  <span className="font-medium">{formatCurrency(troco)}</span>
-                </div>
-              )}
-              {payments.length > 0 && (
-                <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
-                  <span>Total Pago:</span>
-                  <span>{formatCurrency(totalPaid)}</span>
-                </div>
-              )}
+                  )}
+              </div>
+            ))}
+            {consolidated.troco > 0 && (
+              <div className="flex justify-between text-sm">
+                <span>Troco:</span>
+                <span className="font-medium">{formatCurrency(consolidated.troco)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
+              <span>Total Pago:</span>
+              <span>{formatCurrency(consolidated.totalPaid)}</span>
             </div>
           </div>
-        )}
+        </div>
 
         {record.status === 'Recebido' && (
           <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded">

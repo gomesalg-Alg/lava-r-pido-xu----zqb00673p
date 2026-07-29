@@ -82,6 +82,12 @@ export const getOrderPayments = (orderId: string) =>
     sort: 'created',
   })
 
+export const getOrderPaymentsByVendaAvulsa = (vendaAvulsaId: string) =>
+  pb.collection('order_payments').getFullList<OrderPayment>({
+    filter: `venda_avulsa_id = "${vendaAvulsaId}"`,
+    sort: 'created',
+  })
+
 export const sanitizePaymentData = (data: Record<string, unknown>): Record<string, unknown> => {
   const method = typeof data.method === 'string' ? data.method.trim() : ''
   const isCardPayment = method === 'Cartão de Crédito' || method === 'Cartão de Débito'
