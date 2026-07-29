@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-28T16:27:38.927Z",
+  "generatedAt": "2026-07-29T21:37:44.353Z",
   "collections": [
     {
       "name": "users",
@@ -29,29 +29,21 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "role",
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "Administrador",
-            "Operador"
-          ]
+          "selectValues": ["Administrador", "Operador"]
         }
       ],
       "indexes": [
@@ -105,19 +97,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -150,24 +137,17 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
-      "indexes": [
-        "CREATE INDEX idx_page_views_path_created ON page_views (path, created DESC)"
-      ]
+      "indexes": ["CREATE INDEX idx_page_views_path_created ON page_views (path, created DESC)"]
     },
     {
       "name": "customers",
@@ -263,19 +243,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -303,13 +278,7 @@
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": [
-            "Automóvel",
-            "Moto",
-            "Pick-up",
-            "Caminhonete",
-            "Van"
-          ]
+          "selectValues": ["Automóvel", "Moto", "Pick-up", "Caminhonete", "Van"]
         },
         {
           "name": "brand",
@@ -334,19 +303,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "fuel",
@@ -365,12 +329,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "Uber",
-            "Táxi",
-            "Passeio",
-            "Convênio"
-          ]
+          "selectValues": ["Uber", "Táxi", "Passeio", "Convênio"]
         }
       ],
       "indexes": []
@@ -463,19 +422,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "home_page",
@@ -544,19 +498,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "cep",
@@ -657,13 +606,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "Em Andamento",
-            "Finalizado",
-            "Orçamento",
-            "Pago",
-            "Cancelado"
-          ]
+          "selectValues": ["Em Andamento", "Finalizado", "Orçamento", "Pago", "Cancelado"]
         },
         {
           "name": "observation",
@@ -676,19 +619,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "created_by",
@@ -729,9 +667,7 @@
           "system": false
         }
       ],
-      "indexes": [
-        "CREATE INDEX `idx_service_orders_placa` ON `service_orders` (placa)"
-      ]
+      "indexes": ["CREATE INDEX `idx_service_orders_placa` ON `service_orders` (placa)"]
     },
     {
       "name": "service_order_items",
@@ -812,19 +748,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "product_id",
@@ -883,19 +814,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": [
@@ -942,19 +868,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "expires_at",
@@ -993,39 +914,28 @@
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": [
-            "Receita",
-            "Despesa"
-          ]
+          "selectValues": ["Receita", "Despesa"]
         },
         {
           "name": "nature",
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": [
-            "Sintética",
-            "Analítica"
-          ]
+          "selectValues": ["Sintética", "Analítica"]
         },
         {
           "name": "created",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "parent_id",
@@ -1035,9 +945,7 @@
           "collectionRef": "account_categories"
         }
       ],
-      "indexes": [
-        "CREATE INDEX idx_account_categories_code ON account_categories (code)"
-      ]
+      "indexes": ["CREATE INDEX idx_account_categories_code ON account_categories (code)"]
     },
     {
       "name": "products",
@@ -1085,19 +993,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -1154,19 +1057,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "flag",
@@ -1181,107 +1079,7 @@
           "system": false
         }
       ],
-      "indexes": [
-        "CREATE UNIQUE INDEX `idx_card_rates_flag` ON `card_rates` (flag)"
-      ]
-    },
-    {
-      "name": "accounts_receivable",
-      "type": "base",
-      "apiRules": {
-        "list": "@request.auth.id != ''",
-        "view": "@request.auth.id != ''",
-        "create": "@request.auth.id != ''",
-        "update": "@request.auth.id != ''",
-        "delete": "@request.auth.id != ''"
-      },
-      "fields": [
-        {
-          "name": "customer_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "customers"
-        },
-        {
-          "name": "order_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "service_orders"
-        },
-        {
-          "name": "description",
-          "type": "text",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "amount",
-          "type": "number",
-          "required": true,
-          "system": false
-        },
-        {
-          "name": "due_date",
-          "type": "date",
-          "required": true,
-          "system": false
-        },
-        {
-          "name": "status",
-          "type": "select",
-          "required": false,
-          "system": false,
-          "selectValues": [
-            "Pendente",
-            "Recebido",
-            "Cancelado"
-          ]
-        },
-        {
-          "name": "payment_method",
-          "type": "text",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "received_at",
-          "type": "date",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "created",
-          "type": "autodate",
-          "required": false,
-          "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
-        },
-        {
-          "name": "updated",
-          "type": "autodate",
-          "required": false,
-          "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
-        },
-        {
-          "name": "venda_avulsa_id",
-          "type": "relation",
-          "required": false,
-          "system": false,
-          "collectionRef": "vendas_avulsas"
-        }
-      ],
-      "indexes": [
-        "CREATE INDEX idx_accounts_receivable_order_id ON accounts_receivable (order_id)",
-        "CREATE INDEX idx_accounts_receivable_status ON accounts_receivable (status)"
-      ]
+      "indexes": ["CREATE UNIQUE INDEX `idx_card_rates_flag` ON `card_rates` (flag)"]
     },
     {
       "name": "vendas_avulsas",
@@ -1330,19 +1128,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": []
@@ -1421,23 +1214,105 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"]
+    },
+    {
+      "name": "accounts_receivable",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "customer_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "customers"
+        },
+        {
+          "name": "order_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "service_orders"
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Pendente", "Recebido", "Cancelado"]
+        },
+        {
+          "name": "payment_method",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "received_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "venda_avulsa_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vendas_avulsas"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": [
-        "CREATE INDEX idx_order_payments_order_id ON order_payments (order_id)"
+        "CREATE INDEX idx_accounts_receivable_order_id ON accounts_receivable (order_id)",
+        "CREATE INDEX idx_accounts_receivable_status ON accounts_receivable (status)"
       ]
     }
   ]
