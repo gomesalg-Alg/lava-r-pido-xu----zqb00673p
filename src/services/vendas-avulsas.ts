@@ -3,6 +3,7 @@ import type { Customer } from './customers'
 
 export type VendaAvulsaItem = {
   product_id: string
+  name: string
   quantity: number
   unit_price: number
   total_price: number

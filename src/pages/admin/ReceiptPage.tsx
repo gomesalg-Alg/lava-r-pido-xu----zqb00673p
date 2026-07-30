@@ -238,6 +238,9 @@ export default function ReceiptPage() {
             FORMA DE PAGAMENTO
           </h3>
           <div className="space-y-1">
+            {record.payment_method && (
+              <div className="text-sm font-medium pb-1">{record.payment_method}</div>
+            )}
             {consolidated.payments.map((p, idx) => (
               <div key={p.id || idx} className="space-y-0.5">
                 <div className="flex justify-between text-sm">

@@ -73,6 +73,7 @@ export function PosVendaAvulsa() {
     try {
       const items: VendaAvulsaItem[] = cart.map((i) => ({
         product_id: i.product.id,
+        name: i.product.name,
         quantity: i.quantity,
         unit_price: Math.round(i.product.price * 100) / 100,
         total_price: Math.round(i.product.price * i.quantity * 100) / 100,
@@ -108,22 +109,32 @@ export function PosVendaAvulsa() {
             fee_amount: feeAmount,
           }),
         )
-
-        let pmStr = line.method
-        if (line.card_flag) pmStr += ` – ${line.card_flag}`
-        if (line.method === 'Cartão de Crédito' && line.installments > 1) {
-          pmStr += ` – ${line.installments}x`
-        }
-        await createAccountsReceivable({
-          venda_avulsa_id: venda.id,
-          description: `Venda Avulsa - ${pmStr}`,
-          amount: Math.round(line.amount * 100) / 100,
-          due_date: today,
-          status: 'Recebido',
-          payment_method: pmStr,
-          received_at: nowIso,
-        })
       }
+
+      const paymentDescriptions = validLines.map((line) => {
+        let desc = line.method
+        if (line.card_flag) desc += ` – ${line.card_flag}`
+        if (line.method === 'Cartão de Crédito' && line.installments > 1) {
+          desc += ` – ${line.installments}x`
+        }
+        desc += `: ${formatCurrency(line.amount)}`
+        return desc
+      })
+      const paymentMethodStr = paymentDescriptions.join(', ')
+
+      const arData: Record<string, unknown> = {
+        venda_avulsa_id: venda.id,
+        description: 'Venda Avulsa',
+        amount: Math.round(finalTotal * 100) / 100,
+        discount_amount: Math.round(discount * 100) / 100,
+        surcharge_amount: Math.round(surcharge * 100) / 100,
+        due_date: today,
+        status: 'Recebido',
+        payment_method: paymentMethodStr,
+        received_at: nowIso,
+      }
+      if (venda.customer_id) arData.customer_id = venda.customer_id
+      await createAccountsReceivable(arData)
 
       toast.success('Venda finalizada com sucesso!')
       setCart([])
