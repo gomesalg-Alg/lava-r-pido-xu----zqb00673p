@@ -286,12 +286,15 @@ export default function PublicReceipt() {
         </div>
 
         <div className="mt-6">
-          <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
+          <h3 className="font-bold text-sm uppercase text-gray-700 mb-2 border-b border-gray-200 pb-1">
             FORMA DE PAGAMENTO
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-0">
             {consolidated.payments.map((p, i) => (
-              <div key={i} className="flex justify-between text-sm">
+              <div
+                key={i}
+                className={`flex justify-between text-sm px-2 py-1 ${i % 2 === 0 ? 'bg-slate-50' : ''}`}
+              >
                 <span>{formatPaymentLabel(p)}</span>
                 <span className="font-medium">{formatCurrency(p.amount)}</span>
               </div>

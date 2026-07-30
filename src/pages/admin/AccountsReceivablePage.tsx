@@ -40,7 +40,6 @@ import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { deleteVendaAvulsa } from '@/services/vendas-avulsas'
 import { getCompany, type Company } from '@/services/company'
-import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
 import { AccountsReceivableFormDialog } from '@/components/admin/AccountsReceivableFormDialog'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 
@@ -300,11 +299,6 @@ export default function AccountsReceivablePage() {
                           <Printer className="w-4 h-4" />
                         </Link>
                       </Button>
-                      <WhatsAppReceiptButton
-                        customerName={r.expand?.customer_id?.name || 'Cliente'}
-                        customerPhone={r.expand?.customer_id?.phone || ''}
-                        receiptId={r.id}
-                      />
                       {r.status === 'Pendente' && (
                         <Button
                           variant="outline"

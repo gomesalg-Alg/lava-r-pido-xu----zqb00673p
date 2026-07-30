@@ -93,15 +93,6 @@ export default function ReceiptPage() {
     changeAmount: changeAmount,
   })
 
-  const paymentDescription = consolidated.payments
-    .map((p) => {
-      const label = formatPaymentLabel(p)
-      const value = formatCurrency(p.amount)
-      const sep = p.method === 'Cartão de Crédito' || p.method === 'Cartão de Débito' ? ' - ' : ': '
-      return `${label}${sep}${value}`
-    })
-    .join(', ')
-
   const renderItemsTable = (title: string, items: any[], nameField: string) => {
     if (items.length === 0) return null
     const groupSubtotal = items.reduce(
@@ -327,16 +318,19 @@ export default function ReceiptPage() {
         </div>
 
         <div className="mt-6">
-          <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
+          <h3 className="font-bold text-sm uppercase text-gray-700 mb-2 border-b border-gray-200 pb-1">
             FORMA DE PAGAMENTO
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-0">
             {consolidated.payments.map((p, idx) => (
-              <div key={p.id || idx} className="flex justify-between text-sm">
+              <div
+                key={p.id || idx}
+                className={`flex justify-between text-sm px-2 py-1 ${idx % 2 === 0 ? 'bg-slate-50' : ''}`}
+              >
                 <span>{formatPaymentLabel(p)}</span>
                 <span className="font-medium">{formatCurrency(p.amount)}</span>
               </div>
-            ))}{' '}
+            ))}
             {consolidated.troco > 0 && (
               <div className="flex justify-between text-sm">
                 <span>Troco:</span>
@@ -358,11 +352,10 @@ export default function ReceiptPage() {
           </div>
         )}
 
-        {(record.description || paymentDescription) && (
+        {record.description && (
           <div className="mt-6">
             <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Descrição</h3>
-            {record.description && <p className="text-sm">{record.description}</p>}
-            {paymentDescription && <p className="text-sm">{paymentDescription}</p>}
+            <p className="text-sm">{record.description}</p>
           </div>
         )}
 
