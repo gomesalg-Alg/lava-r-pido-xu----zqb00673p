@@ -332,9 +332,9 @@ export default function ReceiptPage() {
               </div>
             ))}
             {consolidated.troco > 0 && (
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm px-2 py-1">
                 <span>Troco:</span>
-                <span className="font-medium">{formatCurrency(consolidated.troco)}</span>
+                <span className="font-medium text-right">{formatCurrency(consolidated.troco)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
