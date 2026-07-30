@@ -7,7 +7,7 @@ import { consolidatePayments } from '@/lib/payment-utils'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import { maskCPF, maskPhone } from '@/lib/masks'
 import { MetaTags } from '@/components/MetaTags'
-import '@/styles/print.css'
+import { generateReceiptPdf, formatPaymentLabel } from '@/lib/receipt-pdf'
 
 export default function PublicReceipt() {
   const { id } = useParams<{ id: string }>()
@@ -108,6 +108,81 @@ export default function PublicReceipt() {
     )
   }
 
+  const handlePrint = () => {
+    generateReceiptPdf({
+      companyName,
+      companyPhone: data.company?.phone,
+      companyAddress: data.company?.address,
+      companyNumber: data.company?.number,
+      companyCity: data.company?.city,
+      companyState: data.company?.state,
+      logoUrl,
+      orderNumber: data.order?.ticket_number ?? null,
+      emissionDate: data.created,
+      status: data.status,
+      customerName: data.customer?.name,
+      customerPhone: data.customer?.phone,
+      customerCpf: data.customer?.cpf,
+      itemGroups: [
+        ...(serviceItems.length > 0
+          ? [
+              {
+                title: 'Serviços',
+                items: serviceItems.map((i: any) => ({
+                  name: i.name || '--',
+                  quantity: i.quantity || 1,
+                  unit_price: i.unit_price || 0,
+                  total_price: i.total_price || 0,
+                })),
+                subtotal: data.service_subtotal || 0,
+              },
+            ]
+          : []),
+        ...(productItems.length > 0
+          ? [
+              {
+                title: 'Produtos',
+                items: productItems.map((i: any) => ({
+                  name: i.name || '--',
+                  quantity: i.quantity || 1,
+                  unit_price: i.unit_price || 0,
+                  total_price: i.total_price || 0,
+                })),
+                subtotal: data.product_subtotal || 0,
+              },
+            ]
+          : []),
+        ...(vendaItems.length > 0
+          ? [
+              {
+                title: 'Itens',
+                items: vendaItems.map((i: any) => ({
+                  name: i.name || '--',
+                  quantity: i.quantity || 1,
+                  unit_price: i.unit_price || 0,
+                  total_price: i.total_price || 0,
+                })),
+                subtotal: vendaItems.reduce(
+                  (s: number, i: any) => s + (i.unit_price || 0) * (i.quantity || 1),
+                  0,
+                ),
+              },
+            ]
+          : []),
+      ],
+      subtotal,
+      discount: totalDiscount,
+      surcharge: totalSurcharge,
+      total: data.amount,
+      payments: consolidated.payments,
+      totalPaid: consolidated.totalPaid,
+      troco: consolidated.troco,
+      description: data.description,
+      receivedAt: data.received_at,
+      isPaid: data.status === 'Recebido',
+    })
+  }
+
   return (
     <div className="min-h-screen bg-slate-100">
       <MetaTags
@@ -117,7 +192,7 @@ export default function PublicReceipt() {
         url={window.location.href}
       />
       <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
-        <Button variant="outline" onClick={() => window.print()}>
+        <Button variant="outline" onClick={handlePrint}>
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
         </Button>
       </div>
@@ -207,13 +282,7 @@ export default function PublicReceipt() {
           <div className="space-y-1">
             {consolidated.payments.map((p, i) => (
               <div key={i} className="flex justify-between text-sm">
-                <span>
-                  {p.method}
-                  {p.card_flag ? ` · ${p.card_flag}` : ''}
-                  {p.method === 'Cartão de Crédito' && p.installments && p.installments > 1
-                    ? ` (${p.installments}x)`
-                    : ''}
-                </span>
+                <span>{formatPaymentLabel(p)}</span>
                 <span className="font-medium">{formatCurrency(p.amount)}</span>
               </div>
             ))}

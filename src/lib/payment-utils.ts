@@ -74,12 +74,9 @@ export function consolidatePayments(params: {
   }
 
   const calculatedTotalPaid = finalPayments.reduce((s, p) => s + (p.amount || 0), 0)
-  const totalPaid =
-    calculatedTotalPaid > 0
-      ? calculatedTotalPaid
-      : orderTotal + (changeAmount > 0 ? changeAmount : 0)
-  const calculatedTroco = totalPaid > orderTotal ? totalPaid - orderTotal : 0
-  const troco = calculatedTroco > 0 ? calculatedTroco : changeAmount > 0 ? changeAmount : 0
+  const calculatedTroco = calculatedTotalPaid > orderTotal ? calculatedTotalPaid - orderTotal : 0
+  const troco = changeAmount > 0 ? changeAmount : calculatedTroco > 0 ? calculatedTroco : 0
+  const totalPaid = troco > 0 ? Math.max(0, calculatedTotalPaid - troco) : calculatedTotalPaid
 
   return {
     payments: finalPayments,

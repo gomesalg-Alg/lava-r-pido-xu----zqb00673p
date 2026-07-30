@@ -10,7 +10,7 @@ import { consolidatePayments } from '@/lib/payment-utils'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import { maskCPF, maskPhone } from '@/lib/masks'
 import pb from '@/lib/pocketbase/client'
-import '@/styles/print.css'
+import { generateReceiptPdf, formatPaymentLabel } from '@/lib/receipt-pdf'
 
 interface VendaItem {
   name?: string
@@ -58,13 +58,6 @@ export default function ReceiptPage() {
     loadData()
   }, [id])
 
-  useEffect(() => {
-    if (!loading && record) {
-      const timer = setTimeout(() => window.print(), 500)
-      return () => clearTimeout(timer)
-    }
-  }, [loading, record])
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-gray-500">
@@ -98,6 +91,15 @@ export default function ReceiptPage() {
     fallbackMethod: paymentMethodLabel,
     changeAmount: changeAmount,
   })
+
+  const paymentDescription = consolidated.payments
+    .map((p) => {
+      const label = formatPaymentLabel(p)
+      const value = formatCurrency(p.amount)
+      const sep = p.method === 'Cartão de Crédito' || p.method === 'Cartão de Débito' ? ' - ' : ': '
+      return `${label}${sep}${value}`
+    })
+    .join(', ')
 
   const renderItemsTable = (title: string, items: any[], nameField: string) => {
     if (items.length === 0) return null
@@ -144,6 +146,89 @@ export default function ReceiptPage() {
     )
   }
 
+  const handlePrint = () => {
+    generateReceiptPdf({
+      companyName,
+      companyPhone: company?.phone,
+      companyAddress: company?.address,
+      companyNumber: company?.number,
+      companyCity: company?.city,
+      companyState: company?.state,
+      logoUrl,
+      orderNumber: record.expand?.order_id?.ticket_number ?? null,
+      emissionDate: record.created,
+      status: record.status,
+      customerName: record.expand?.customer_id?.name,
+      customerPhone: record.expand?.customer_id?.phone,
+      customerCpf: record.expand?.customer_id?.cpf,
+      itemGroups: [
+        ...(vendaItems.length > 0
+          ? [
+              {
+                title: 'Itens',
+                items: vendaItems.map((i) => ({
+                  name: i.name || '--',
+                  quantity: i.quantity || 1,
+                  unit_price: i.unit_price || 0,
+                  total_price: i.total_price || 0,
+                })),
+                subtotal: vendaItems.reduce(
+                  (s, i) => s + (i.total_price || (i.quantity || 1) * (i.unit_price || 0)),
+                  0,
+                ),
+              },
+            ]
+          : []),
+        ...(serviceItems.length > 0
+          ? [
+              {
+                title: 'Serviços',
+                items: serviceItems.map((i: any) => ({
+                  name: i.expand?.service_id?.name || '--',
+                  quantity: i.quantity || 1,
+                  unit_price: i.unit_price || 0,
+                  total_price: i.total_price || 0,
+                })),
+                subtotal: serviceItems.reduce(
+                  (s: number, i: any) =>
+                    s + (i.total_price || (i.quantity || 1) * (i.unit_price || 0)),
+                  0,
+                ),
+              },
+            ]
+          : []),
+        ...(productItems.length > 0
+          ? [
+              {
+                title: 'Produtos',
+                items: productItems.map((i: any) => ({
+                  name: i.expand?.product_id?.name || '--',
+                  quantity: i.quantity || 1,
+                  unit_price: i.unit_price || 0,
+                  total_price: i.total_price || 0,
+                })),
+                subtotal: productItems.reduce(
+                  (s: number, i: any) =>
+                    s + (i.total_price || (i.quantity || 1) * (i.unit_price || 0)),
+                  0,
+                ),
+              },
+            ]
+          : []),
+      ],
+      subtotal: totals?.subtotal ?? 0,
+      discount: record.discount_amount ?? 0,
+      surcharge: record.surcharge_amount ?? 0,
+      total: record.amount,
+      payments: consolidated.payments,
+      totalPaid: consolidated.totalPaid,
+      troco: consolidated.troco,
+      description: record.description,
+      receivedAt: record.received_at,
+      isPaid: record.status === 'Recebido',
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 print:min-h-0">
       <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
@@ -152,7 +237,7 @@ export default function ReceiptPage() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </Link>
         </Button>
-        <Button onClick={() => window.print()}>
+        <Button onClick={handlePrint}>
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
         </Button>
       </div>
@@ -238,28 +323,12 @@ export default function ReceiptPage() {
             FORMA DE PAGAMENTO
           </h3>
           <div className="space-y-1">
-            {record.payment_method && (
-              <div className="text-sm font-medium pb-1">{record.payment_method}</div>
-            )}
             {consolidated.payments.map((p, idx) => (
-              <div key={p.id || idx} className="space-y-0.5">
-                <div className="flex justify-between text-sm">
-                  <span>
-                    {p.method}
-                    {p.method === 'Cartão de Crédito' && p.installments && p.installments > 1
-                      ? ` (${p.installments}x)`
-                      : ''}
-                  </span>
-                  <span className="font-medium">{formatCurrency(p.amount)}</span>
-                </div>
-                {(p.method === 'Cartão de Crédito' || p.method === 'Cartão de Débito') &&
-                  p.card_flag && (
-                    <div className="flex justify-between text-sm text-slate-500 pl-2">
-                      <span>Bandeira: {p.card_flag}</span>
-                    </div>
-                  )}
+              <div key={p.id || idx} className="flex justify-between text-sm">
+                <span>{formatPaymentLabel(p)}</span>
+                <span className="font-medium">{formatCurrency(p.amount)}</span>
               </div>
-            ))}
+            ))}{' '}
             {consolidated.troco > 0 && (
               <div className="flex justify-between text-sm">
                 <span>Troco:</span>
@@ -281,10 +350,11 @@ export default function ReceiptPage() {
           </div>
         )}
 
-        {record.description && (
+        {(record.description || paymentDescription) && (
           <div className="mt-6">
             <h3 className="font-bold text-sm uppercase text-gray-500 mb-1">Descrição</h3>
-            <p className="text-sm">{record.description}</p>
+            {record.description && <p className="text-sm">{record.description}</p>}
+            {paymentDescription && <p className="text-sm">{paymentDescription}</p>}
           </div>
         )}
 

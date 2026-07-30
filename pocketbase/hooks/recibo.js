@@ -177,6 +177,15 @@ routerAdd(
 
       result.payments = finalPayments
 
+      var paymentSum = 0
+      for (var i = 0; i < finalPayments.length; i++) {
+        paymentSum += finalPayments[i].amount
+      }
+      var computedTroco =
+        changeAmount > 0 ? changeAmount : paymentSum > orderTotal ? paymentSum - orderTotal : 0
+      result.troco = computedTroco
+      result.total_paid = computedTroco > 0 ? paymentSum - computedTroco : paymentSum
+
       return e.json(200, result)
     } catch (err) {
       return e.notFoundError('Registro não encontrado')

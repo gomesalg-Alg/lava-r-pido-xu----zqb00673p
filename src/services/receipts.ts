@@ -39,6 +39,8 @@ export interface PublicReceiptData {
     card_flag: string
     installments: number
   }>
+  total_paid?: number
+  troco?: number
   items: PublicReceiptItem[]
   company: {
     id: string

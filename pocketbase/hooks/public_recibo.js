@@ -175,6 +175,15 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
 
     result.payments = finalPayments
 
+    var paymentSum = 0
+    for (var i = 0; i < finalPayments.length; i++) {
+      paymentSum += finalPayments[i].amount
+    }
+    var computedTroco =
+      changeAmount > 0 ? changeAmount : paymentSum > orderTotal ? paymentSum - orderTotal : 0
+    result.troco = computedTroco
+    result.total_paid = computedTroco > 0 ? paymentSum - computedTroco : paymentSum
+
     let company = null
     try {
       company = $app.findFirstRecordByFilter('company', "id != ''")

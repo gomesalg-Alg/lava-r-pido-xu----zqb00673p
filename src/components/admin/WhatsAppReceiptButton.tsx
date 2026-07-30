@@ -38,7 +38,7 @@ export function WhatsAppReceiptButton({
   }
 
   const receiptUrl = `${window.location.origin}/recibo/${receiptId}`
-  const message = `Olá ${customerName}! Sua nota de serviço está disponível aqui: ${receiptUrl}`
+  const message = `Olá ${customerName}! Seu recibo está disponível aqui: ${receiptUrl}`
   const waUrl = buildWhatsAppShareUrl(customerPhone, message)
 
   return (
