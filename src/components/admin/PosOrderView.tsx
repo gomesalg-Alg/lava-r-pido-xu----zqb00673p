@@ -207,24 +207,29 @@ export function PosOrderView({ order, onBack }: Props) {
 
       const nowIso = new Date().toISOString()
       const today = nowIso.split('T')[0]
-      for (const line of validLines) {
-        let pmStr = line.method
-        if (line.card_flag) pmStr += ` – ${line.card_flag}`
+      const paymentDescriptions = validLines.map((line) => {
+        let desc = line.method
+        if (line.card_flag) desc += ` – ${line.card_flag}`
         if (line.method === 'Cartão de Crédito' && line.installments > 1) {
-          pmStr += ` – ${line.installments}x`
+          desc += ` – ${line.installments}x`
         }
-        const arData: Record<string, unknown> = {
-          order_id: order.id,
-          description: `Venda PDV - OS #${order.ticket_number} - ${pmStr}`,
-          amount: Math.round(line.amount * 100) / 100,
-          due_date: today,
-          status: 'Recebido',
-          payment_method: pmStr,
-          received_at: nowIso,
-        }
-        if (order.customer_id) arData.customer_id = order.customer_id
-        await createAccountsReceivable(arData)
+        desc += `: ${formatCurrency(line.amount)}`
+        return desc
+      })
+      const paymentMethodStr = paymentDescriptions.join(', ')
+      const arData: Record<string, unknown> = {
+        order_id: order.id,
+        description: `Venda PDV - OS #${order.ticket_number}`,
+        amount: Math.round(finalTotal * 100) / 100,
+        discount_amount: Math.round(discount * 100) / 100,
+        surcharge_amount: Math.round(surcharge * 100) / 100,
+        due_date: today,
+        status: 'Recebido',
+        payment_method: paymentMethodStr,
+        received_at: nowIso,
       }
+      if (order.customer_id) arData.customer_id = order.customer_id
+      await createAccountsReceivable(arData)
 
       toast.success('Venda finalizada com sucesso!')
       onBack()

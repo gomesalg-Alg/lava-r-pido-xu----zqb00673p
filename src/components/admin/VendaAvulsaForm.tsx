@@ -125,13 +125,17 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
         }),
       )
 
+      const arPaymentAmount = isCortesia ? 0 : Math.max(total, amountPaid)
+      const arPmStr = `${pmStr}: ${formatCurrency(arPaymentAmount)}`
       const arData: Record<string, unknown> = {
         venda_avulsa_id: venda.id,
         description: `Venda Avulsa – ${customer?.name || 'Cliente Avulso'}`,
         amount: total,
+        discount_amount: Math.round(discount * 100) / 100,
+        surcharge_amount: Math.round(surcharge * 100) / 100,
         due_date: new Date().toISOString().split('T')[0],
         status: 'Recebido',
-        payment_method: pmStr,
+        payment_method: arPmStr,
         received_at: new Date().toISOString(),
       }
       if (customer?.id) arData.customer_id = customer.id
