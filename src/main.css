@@ -35,3 +35,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+thead tr {
+  background-color: #1e293b;
+}
+
+thead tr:hover {
+  background-color: #1e293b;
+}
+
+thead th {
+  color: #ffffff;
+  font-weight: 700;
+}

@@ -9,7 +9,7 @@ import {
 } from '@/services/service-orders'
 import type { Company } from '@/services/company'
 import { calculateOrderTotals } from '@/lib/order-calculations'
-import { formatCurrency, formatDuration, toDateInput } from '@/lib/format'
+import { formatCurrency, formatDuration, formatDateTimeBR } from '@/lib/format'
 import { sanitizePhone, buildOrderShareMessage, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
 import { MetaTags } from '@/components/MetaTags'
 import '@/styles/print.css'
@@ -195,25 +195,14 @@ export default function PublicServiceOrder() {
           </div>
         </div>
 
-        {(order.entry_at || order.exit_at || order.payment_method) && (
-          <div className="grid grid-cols-3 gap-4 mt-6 text-sm">
-            {order.entry_at && (
-              <div>
-                <strong>Entrada:</strong> {toDateInput(order.entry_at)}
-              </div>
-            )}
-            {order.exit_at && (
-              <div>
-                <strong>Saída:</strong> {toDateInput(order.exit_at)}
-              </div>
-            )}
-            {order.payment_method && (
-              <div>
-                <strong>Pagamento:</strong> {order.payment_method}
-              </div>
-            )}
+        <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
+          <div>
+            <strong>Entrada:</strong> {order.entry_at ? formatDateTimeBR(order.entry_at) : '—'}
           </div>
-        )}
+          <div>
+            <strong>Saída:</strong> {order.exit_at ? formatDateTimeBR(order.exit_at) : '—'}
+          </div>
+        </div>
         {order.entry_at && order.exit_at && (
           <p className="text-sm text-gray-500 mt-1">
             Duração: {formatDuration(order.entry_at, order.exit_at)}

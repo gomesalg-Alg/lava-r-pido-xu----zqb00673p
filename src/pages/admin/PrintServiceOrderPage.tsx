@@ -9,9 +9,8 @@ import {
   type ServiceOrderItem,
 } from '@/services/service-orders'
 import { getCompany, type Company } from '@/services/company'
-import { getOrderPayments, type OrderPayment } from '@/services/order-payments'
 import { calculateOrderTotals } from '@/lib/order-calculations'
-import { formatCurrency, formatDuration, formatDateBR } from '@/lib/format'
+import { formatCurrency, formatDuration, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import pb from '@/lib/pocketbase/client'
 import '@/styles/print.css'
 
@@ -19,7 +18,7 @@ export default function PrintServiceOrderPage() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<ServiceOrder | null>(null)
   const [items, setItems] = useState<ServiceOrderItem[]>([])
-  const [payments, setPayments] = useState<OrderPayment[]>([])
+
   const [company, setCompany] = useState<Company | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -27,16 +26,14 @@ export default function PrintServiceOrderPage() {
     const loadData = async () => {
       if (!id) return
       try {
-        const [ord, itms, comp, pays] = await Promise.all([
+        const [ord, itms, comp] = await Promise.all([
           getServiceOrder(id),
           getServiceOrderItems(id),
           getCompany(),
-          getOrderPayments(id),
         ])
         setOrder(ord)
         setItems(itms)
         setCompany(comp)
-        setPayments(pays)
       } catch (err) {
         console.error('Failed to load print data:', err)
       } finally {
@@ -78,8 +75,6 @@ export default function PrintServiceOrderPage() {
   const photoUrl = order.photo
     ? pb.files.getURL({ id: order.id, collectionName: 'service_orders' } as never, order.photo)
     : null
-  const totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0)
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
@@ -202,46 +197,14 @@ export default function PrintServiceOrderPage() {
           </div>
         </div>
 
-        {payments.length > 0 && (
-          <div className="mt-6">
-            <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">
-              Forma de Pagamento
-            </h3>
-            <div className="space-y-1">
-              {payments.map((p) => (
-                <div key={p.id} className="flex justify-between text-sm">
-                  <span>
-                    {p.method}
-                    {p.card_flag && ` · ${p.card_flag}`}
-                    {p.method === 'Cartão de Crédito' && p.installments > 1
-                      ? ` (${p.installments}x)`
-                      : ''}
-                  </span>
-                  <span className="font-medium">{formatCurrency(p.amount)}</span>
-                </div>
-              ))}
-              <div className="flex justify-between text-sm font-bold border-t pt-1 mt-1">
-                <span>Total Pago:</span>
-                <span>{formatCurrency(totalPaid)}</span>
-              </div>
-            </div>
+        <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
+          <div>
+            <strong>Entrada:</strong> {order.entry_at ? formatDateTimeBR(order.entry_at) : '—'}
           </div>
-        )}
-
-        {(order.entry_at || order.exit_at) && (
-          <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
-            {order.entry_at && (
-              <div>
-                <strong>Entrada:</strong> {formatDateBR(order.entry_at)}
-              </div>
-            )}
-            {order.exit_at && (
-              <div>
-                <strong>Saída:</strong> {formatDateBR(order.exit_at)}
-              </div>
-            )}
+          <div>
+            <strong>Saída:</strong> {order.exit_at ? formatDateTimeBR(order.exit_at) : '—'}
           </div>
-        )}
+        </div>
         {order.entry_at && order.exit_at && (
           <p className="text-sm text-gray-500 mt-1">
             Duração: {formatDuration(order.entry_at, order.exit_at)}

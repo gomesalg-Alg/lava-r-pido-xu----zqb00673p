@@ -6,7 +6,7 @@ import {
   type ServiceOrder,
   type ServiceOrderItem,
 } from '@/services/service-orders'
-import { formatCurrency } from '@/lib/format'
+import { formatCurrency, formatDuration } from '@/lib/format'
 
 function fileUrl(collection: string, recordId: string, filename: string): string {
   return `${import.meta.env.VITE_POCKETBASE_URL}/api/files/${collection}/${recordId}/${filename}`
@@ -20,6 +20,18 @@ function formatDate(dateStr: string): string {
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const year = d.getFullYear()
   return `${day}/${month}/${year}`
+}
+
+function formatDateTime(dateStr: string): string {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return '—'
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} ${hours}:${minutes}`
 }
 
 function buildItemsRows(items: ServiceOrderItem[]): string {
@@ -170,8 +182,10 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
           </div></div>
         </div>
         <div class="col">
-          <div class="field"><div class="label">Forma de Pagamento</div><div class="value">${order.payment_method || '--'}</div></div>
           <div class="field"><div class="label">Nº Prisma</div><div class="value">${order.prisma_number || '--'}</div></div>
+          <div class="field"><div class="label">Entrada</div><div class="value">${order.entry_at ? formatDateTime(order.entry_at) : '—'}</div></div>
+          <div class="field"><div class="label">Saída</div><div class="value">${order.exit_at ? formatDateTime(order.exit_at) : '—'}</div></div>
+          <div class="field"><div class="label">Permanência</div><div class="value">${order.entry_at && order.exit_at ? formatDuration(order.entry_at, order.exit_at) : '—'}</div></div>
         </div>
       </div>
     </div>

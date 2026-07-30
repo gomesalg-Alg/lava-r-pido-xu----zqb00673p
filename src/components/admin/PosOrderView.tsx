@@ -101,7 +101,7 @@ export function PosOrderView({ order, onBack }: Props) {
   const troco = Math.max(0, totalPaid - finalTotal)
   const canFinalize = remaining <= 0.01 && paymentLines.length > 0
 
-  const isLocked = (item: ServiceOrderItem) => !!item.service_id || !!item.product_id
+  const isLocked = (item: ServiceOrderItem) => !!item.service_id
 
   const handleQtyChange = async (item: ServiceOrderItem, delta: number) => {
     const newQty = Math.max(1, (item.quantity || 1) + delta)
@@ -242,7 +242,9 @@ export function PosOrderView({ order, onBack }: Props) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold text-center text-slate-800">Frente de Caixa</h1>
+      <div className="bg-slate-800 px-4 py-3 text-center rounded-lg">
+        <h1 className="text-3xl font-bold text-white">Frente de Caixa</h1>
+      </div>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
