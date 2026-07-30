@@ -16,6 +16,8 @@ export interface AccountsReceivable {
   status: AccountsReceivableStatus | ''
   payment_method: string
   received_at: string
+  discount_amount: number | null
+  surcharge_amount: number | null
   created: string
   updated: string
   expand?: {

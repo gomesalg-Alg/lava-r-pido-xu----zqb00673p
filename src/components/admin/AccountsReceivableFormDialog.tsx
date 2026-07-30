@@ -19,7 +19,7 @@ import {
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { getCustomers } from '@/services/customers'
-import { getServiceOrders } from '@/services/service-orders'
+import { getServiceOrder, getServiceOrders } from '@/services/service-orders'
 import { getVendasAvulsas } from '@/services/vendas-avulsas'
 import {
   createAccountsReceivable,
@@ -126,6 +126,23 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
       payment_method: form.payment_method,
       received_at: form.status === 'Recebido' && form.received_at ? form.received_at : null,
     }
+
+    let discountAmount: number | null = null
+    let surchargeAmount: number | null = null
+
+    if (form.order_id) {
+      try {
+        const order = await getServiceOrder(form.order_id)
+        discountAmount = order.total_discount != null ? order.total_discount : null
+        surchargeAmount = order.total_surcharge != null ? order.total_surcharge : null
+      } catch {
+        // order not found — leave null
+      }
+    }
+
+    data.discount_amount = discountAmount
+    data.surcharge_amount = surchargeAmount
+
     try {
       if (record) {
         await updateAccountsReceivable(record.id, data)

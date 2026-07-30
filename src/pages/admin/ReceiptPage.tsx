@@ -209,26 +209,22 @@ export default function ReceiptPage() {
         <div className="flex justify-end mt-4">
           <div className="w-64 space-y-1">
             {totals && (
-              <>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span>{formatCurrency(totals.subtotal)}</span>
-                </div>
-                {totals.totalDiscount > 0 && (
-                  <div className="flex justify-between text-sm font-bold bg-red-50 px-2 py-1 rounded">
-                    <span className="text-red-700">Desconto:</span>
-                    <span className="text-red-700">- {formatCurrency(totals.totalDiscount)}</span>
-                  </div>
-                )}
-                {totals.totalSurcharge > 0 && (
-                  <div className="flex justify-between text-sm font-bold bg-green-50 px-2 py-1 rounded">
-                    <span className="text-green-700">Acréscimo:</span>
-                    <span className="text-green-700">
-                      + {formatCurrency(totals.totalSurcharge)}
-                    </span>
-                  </div>
-                )}
-              </>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subtotal:</span>
+                <span>{formatCurrency(totals.subtotal)}</span>
+              </div>
+            )}
+            {record.discount_amount != null && record.discount_amount > 0 && (
+              <div className="flex justify-between text-sm font-bold bg-red-50 px-2 py-1 rounded">
+                <span className="text-red-700">Desconto:</span>
+                <span className="text-red-700">- {formatCurrency(record.discount_amount)}</span>
+              </div>
+            )}
+            {record.surcharge_amount != null && record.surcharge_amount > 0 && (
+              <div className="flex justify-between text-sm font-bold bg-green-50 px-2 py-1 rounded">
+                <span className="text-green-700">Acréscimo:</span>
+                <span className="text-green-700">+ {formatCurrency(record.surcharge_amount)}</span>
+              </div>
             )}
             <div className="flex justify-between text-base font-bold border-t-2 border-gray-800 pt-1">
               <span>Total:</span>

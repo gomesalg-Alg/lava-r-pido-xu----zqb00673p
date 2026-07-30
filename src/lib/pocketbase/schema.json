@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-29T21:49:18.543Z",
+  "generatedAt": "2026-07-29T21:58:40.061Z",
   "collections": [
     {
       "name": "users",
@@ -1308,6 +1308,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "discount_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "surcharge_amount",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
