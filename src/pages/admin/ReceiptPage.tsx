@@ -233,11 +233,20 @@ export default function ReceiptPage() {
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
         </Button>
         {record.expand?.customer_id && (record.order_id || record.id) && (
-          <WhatsAppReceiptButton
-            customerName={record.expand.customer_id.name || ''}
-            customerPhone={record.expand.customer_id.phone || ''}
-            receiptId={record.order_id || record.id}
-          />
+          <>
+            <WhatsAppReceiptButton
+              customerName={record.expand.customer_id.name || ''}
+              customerPhone={record.expand.customer_id.phone || ''}
+              receiptId={record.order_id || record.id}
+              description={record.description}
+              amount={record.amount}
+              showLabel
+            />
+            <p className="text-xs text-slate-500 max-w-xs">
+              💡 Após abrir o WhatsApp, faça o download do PDF e anexe manualmente à conversa para
+              enviar o documento completo.
+            </p>
+          </>
         )}
       </div>
 
@@ -265,6 +274,9 @@ export default function ReceiptPage() {
             </div>
           </div>
           <div className="text-right">
+            <p className="text-sm">
+              Recibo Nº: <strong>{record.id.slice(-8).toUpperCase()}</strong>
+            </p>
             {record.expand?.order_id && (
               <p className="text-sm">
                 OS Nº: <strong>{record.expand.order_id.ticket_number}</strong>

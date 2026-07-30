@@ -42,6 +42,7 @@ import { deleteVendaAvulsa } from '@/services/vendas-avulsas'
 import { getCompany, type Company } from '@/services/company'
 import { AccountsReceivableFormDialog } from '@/components/admin/AccountsReceivableFormDialog'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
@@ -299,6 +300,14 @@ export default function AccountsReceivablePage() {
                           <Printer className="w-4 h-4" />
                         </Link>
                       </Button>
+                      <WhatsAppReceiptButton
+                        customerName={r.expand?.customer_id?.name || ''}
+                        customerPhone={r.expand?.customer_id?.phone || ''}
+                        receiptId={r.id}
+                        description={r.description}
+                        amount={r.amount}
+                        className="h-8 w-8 p-0"
+                      />
                       {r.status === 'Pendente' && (
                         <Button
                           variant="outline"

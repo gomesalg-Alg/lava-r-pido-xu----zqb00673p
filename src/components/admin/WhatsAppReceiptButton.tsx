@@ -2,11 +2,14 @@ import { MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { sanitizePhone, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
+import { formatCurrency } from '@/lib/format'
 
 interface Props {
   customerName: string
   customerPhone: string
   receiptId: string
+  description?: string
+  amount?: number
   className?: string
 }
 
@@ -14,6 +17,8 @@ export function WhatsAppReceiptButton({
   customerName,
   customerPhone,
   receiptId,
+  description,
+  amount,
   className,
 }: Props) {
   const cleanPhone = sanitizePhone(customerPhone)
@@ -42,7 +47,9 @@ export function WhatsAppReceiptButton({
       ? window.location.origin
       : 'https://www.lavarapidoxua.com.br'
   const receiptUrl = `${publicUrl}/recibo/${receiptId}`
-  const message = `Olá ${customerName}! Seu recibo está disponível aqui: ${receiptUrl}`
+  const descText = description || 'pagamento'
+  const amountText = amount != null ? formatCurrency(amount) : ''
+  const message = `Olá ${customerName}, segue o comprovante do seu pagamento referente a ${descText} no valor de ${amountText} na Lava Rápido Xua. Você pode visualizar o recibo completo aqui: ${receiptUrl}`
   const waUrl = buildWhatsAppShareUrl(customerPhone, message)
 
   return (
