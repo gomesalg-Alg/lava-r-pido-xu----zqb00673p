@@ -36,6 +36,7 @@ import AccountsReceivablePage from './pages/admin/AccountsReceivablePage'
 import CardRatesPage from './pages/admin/CardRatesPage'
 import ReceiptPage from './pages/admin/ReceiptPage'
 import PublicReceipt from './pages/PublicReceipt'
+import SalesDashboard from './pages/admin/SalesDashboard'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -66,6 +67,7 @@ const App = () => (
             }
           >
             <Route index element={<WelcomePage />} />
+            <Route path="dashboard" element={<SalesDashboard />} />
             <Route path="monitoramento" element={<AdminDashboard />} />
             <Route path="empresa" element={<CompanyListPage />} />
             <Route path="empresa/novo" element={<CompanyPage />} />

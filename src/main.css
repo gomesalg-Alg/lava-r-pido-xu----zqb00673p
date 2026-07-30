@@ -45,6 +45,6 @@ thead tr:hover {
 }
 
 thead th {
-  color: #ffffff;
-  font-weight: 700;
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
