@@ -244,6 +244,16 @@ export default function PublicReceipt() {
           </div>
         )}
 
+        {data.vehicle && (
+          <div className="mt-1">
+            <p className="text-sm font-medium">
+              Veículo: {data.vehicle.brand} {data.vehicle.model}
+              {data.vehicle.year ? ` - ${data.vehicle.year}` : ''}
+              {data.vehicle.placa ? ` - Placa: ${data.vehicle.placa.toUpperCase()}` : ''}
+            </p>
+          </div>
+        )}
+
         {serviceItems.length > 0 &&
           renderItemsTable('Serviços', serviceItems, data.service_subtotal)}
         {productItems.length > 0 &&
@@ -299,7 +309,7 @@ export default function PublicReceipt() {
           </div>
         </div>
 
-        {data.status === 'Recebido' && (
+        {(data.status === 'Recebido' || data.status === 'Pago') && (
           <div className="mt-6 p-3 bg-green-50 border border-green-200 rounded">
             <p className="text-sm font-bold text-green-700">
               ✓ PAGO{data.received_at ? ` em ${formatDateTimeBR(data.received_at)}` : ''}

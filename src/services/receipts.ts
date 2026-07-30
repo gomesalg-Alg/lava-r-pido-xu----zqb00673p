@@ -21,6 +21,7 @@ export interface PublicReceiptData {
   service_subtotal: number
   product_subtotal: number
   customer: { name: string; phone: string; cpf: string } | null
+  vehicle?: { brand: string; model: string; year: number; placa: string; type: string } | null
   order: {
     ticket_number: number
     total_discount: number

@@ -37,7 +37,11 @@ export function WhatsAppReceiptButton({
     )
   }
 
-  const receiptUrl = `${window.location.origin}/recibo/${receiptId}`
+  const publicUrl =
+    typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://www.lavarapidoxua.com.br'
+  const receiptUrl = `${publicUrl}/recibo/${receiptId}`
   const message = `Olá ${customerName}! Seu recibo está disponível aqui: ${receiptUrl}`
   const waUrl = buildWhatsAppShareUrl(customerPhone, message)
 

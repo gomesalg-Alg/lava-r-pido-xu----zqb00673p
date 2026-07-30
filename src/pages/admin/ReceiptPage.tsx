@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
 import { getCompany, type Company } from '@/services/company'
 import { getServiceOrderItems } from '@/services/service-orders'
 import { getOrderPayments, getOrderPaymentsByVendaAvulsa } from '@/services/order-payments'
@@ -240,6 +241,13 @@ export default function ReceiptPage() {
         <Button onClick={handlePrint}>
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
         </Button>
+        {record.expand?.customer_id && (record.order_id || record.id) && (
+          <WhatsAppReceiptButton
+            customerName={record.expand.customer_id.name || ''}
+            customerPhone={record.expand.customer_id.phone || ''}
+            receiptId={record.order_id || record.id}
+          />
+        )}
       </div>
 
       <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
