@@ -12,6 +12,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -19,6 +21,7 @@ export default function CompanyListPage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<Company | null>(null)
+  const { sortedItems, sortState, toggleSort } = useSortableData(companies)
 
   const loadData = async () => {
     try {
@@ -64,12 +67,22 @@ export default function CompanyListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Razão Social</TableHead>
-              <TableHead>Nome Fantasia</TableHead>
-              <TableHead>CNPJ</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>Home Page</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Razão Social
+              </SortableHeader>
+              <SortableHeader columnKey="trading_name" sortState={sortState} onSort={toggleSort}>
+                Nome Fantasia
+              </SortableHeader>
+              <SortableHeader columnKey="cnpj" sortState={sortState} onSort={toggleSort}>
+                CNPJ
+              </SortableHeader>
+              <SortableHeader columnKey="phone" sortState={sortState} onSort={toggleSort}>
+                Telefone
+              </SortableHeader>
+              <SortableHeader columnKey="home_page" sortState={sortState} onSort={toggleSort}>
+                Home Page
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,14 +92,14 @@ export default function CompanyListPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : companies.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Nenhuma empresa cadastrada.
                 </TableCell>
               </TableRow>
             ) : (
-              companies.map((c) => (
+              sortedItems.map((c) => (
                 <TableRow key={c.id} className="even:bg-slate-50">
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell className="text-slate-600">{c.trading_name || '-'}</TableCell>

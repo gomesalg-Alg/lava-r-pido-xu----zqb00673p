@@ -13,6 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -58,6 +60,7 @@ export default function CustomersPage() {
       c.cpf.includes(search) ||
       c.phone.includes(search),
   )
+  const { sortedItems, sortState, toggleSort } = useSortableData(filtered)
 
   return (
     <div>
@@ -84,12 +87,22 @@ export default function CustomersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>CPF</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Cidade</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Nome
+              </SortableHeader>
+              <SortableHeader columnKey="cpf" sortState={sortState} onSort={toggleSort}>
+                CPF
+              </SortableHeader>
+              <SortableHeader columnKey="phone" sortState={sortState} onSort={toggleSort}>
+                Telefone
+              </SortableHeader>
+              <SortableHeader columnKey="email" sortState={sortState} onSort={toggleSort}>
+                Email
+              </SortableHeader>
+              <SortableHeader columnKey="city" sortState={sortState} onSort={toggleSort}>
+                Cidade
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -99,14 +112,14 @@ export default function CustomersPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Nenhum cliente encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((c) => (
+              sortedItems.map((c) => (
                 <TableRow key={c.id} className="even:bg-slate-50">
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.cpf}</TableCell>

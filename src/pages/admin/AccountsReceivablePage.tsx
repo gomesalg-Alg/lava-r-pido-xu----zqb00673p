@@ -43,6 +43,8 @@ import { getCompany, type Company } from '@/services/company'
 import { AccountsReceivableFormDialog } from '@/components/admin/AccountsReceivableFormDialog'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
@@ -111,8 +113,9 @@ export default function AccountsReceivablePage() {
     [records],
   )
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const { sortedItems, sortState, toggleSort } = useSortableData(filtered)
+  const totalPages = Math.ceil(sortedItems.length / PAGE_SIZE)
+  const paginated = sortedItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   useEffect(() => {
     if (page > totalPages) setPage(1)
   }, [totalPages, page])
@@ -229,15 +232,44 @@ export default function AccountsReceivablePage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>OS</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
-              <TableHead>Vencimento</TableHead>
-              <TableHead>Pagamento</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Recebido</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="description" sortState={sortState} onSort={toggleSort}>
+                Descrição
+              </SortableHeader>
+              <SortableHeader
+                columnKey="expand.customer_id.name"
+                sortState={sortState}
+                onSort={toggleSort}
+              >
+                Cliente
+              </SortableHeader>
+              <SortableHeader
+                columnKey="expand.order_id.ticket_number"
+                sortState={sortState}
+                onSort={toggleSort}
+              >
+                OS
+              </SortableHeader>
+              <SortableHeader
+                columnKey="amount"
+                sortState={sortState}
+                onSort={toggleSort}
+                className="text-right"
+              >
+                Valor
+              </SortableHeader>
+              <SortableHeader columnKey="due_date" sortState={sortState} onSort={toggleSort}>
+                Vencimento
+              </SortableHeader>
+              <SortableHeader columnKey="payment_method" sortState={sortState} onSort={toggleSort}>
+                Pagamento
+              </SortableHeader>
+              <SortableHeader columnKey="status" sortState={sortState} onSort={toggleSort}>
+                Status
+              </SortableHeader>
+              <SortableHeader columnKey="received_at" sortState={sortState} onSort={toggleSort}>
+                Recebido
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -340,7 +372,7 @@ export default function AccountsReceivablePage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <p className="text-sm text-slate-500">
-            Página {page} de {totalPages} ({filtered.length} registros)
+            Página {page} de {totalPages} ({sortedItems.length} registros)
           </p>
           <div className="flex gap-2">
             <Button

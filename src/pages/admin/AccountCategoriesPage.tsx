@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/table'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { AccountCategoryForm } from '@/components/admin/AccountCategoryForm'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -100,6 +102,7 @@ export default function AccountCategoriesPage() {
       (c) => c.name.toLowerCase().includes(q) || (c.code || '').toLowerCase().includes(q),
     )
   }, [flat, search])
+  const { sortedItems, sortState, toggleSort } = useSortableData(filtered)
 
   const openCreate = () => {
     setEditing(null)
@@ -156,11 +159,34 @@ export default function AccountCategoriesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-32">Código</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead className="w-32">Tipo</TableHead>
-              <TableHead className="w-32">Natureza</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader
+                columnKey="code"
+                sortState={sortState}
+                onSort={toggleSort}
+                className="w-32"
+              >
+                Código
+              </SortableHeader>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Nome
+              </SortableHeader>
+              <SortableHeader
+                columnKey="type"
+                sortState={sortState}
+                onSort={toggleSort}
+                className="w-32"
+              >
+                Tipo
+              </SortableHeader>
+              <SortableHeader
+                columnKey="nature"
+                sortState={sortState}
+                onSort={toggleSort}
+                className="w-32"
+              >
+                Natureza
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -170,14 +196,14 @@ export default function AccountCategoriesPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Nenhuma categoria encontrada.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((c) => (
+              sortedItems.map((c) => (
                 <TableRow key={c.id} className="even:bg-slate-50">
                   <TableCell className="font-mono text-sm text-slate-600">
                     {c.code || '-'}

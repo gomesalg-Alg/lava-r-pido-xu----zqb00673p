@@ -17,6 +17,8 @@ import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CardRateFormDialog } from '@/components/admin/CardRateFormDialog'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 
 export default function CardRatesPage() {
   const { user } = useAuth()
@@ -42,6 +44,8 @@ export default function CardRatesPage() {
   useRealtime('card_rates', () => {
     loadData()
   })
+
+  const { sortedItems, sortState, toggleSort } = useSortableData(rates)
 
   if (user?.role !== 'Administrador') return <Navigate to="/admin" replace />
 
@@ -80,16 +84,52 @@ export default function CardRatesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Bandeira</TableHead>
-                <TableHead>Débito (%)</TableHead>
-                <TableHead>1x (%)</TableHead>
-                <TableHead>2x (%)</TableHead>
-                <TableHead>3x (%)</TableHead>
-                <TableHead>4x (%)</TableHead>
-                <TableHead>Parc. Máx.</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
+                <SortableHeader columnKey="flag" sortState={sortState} onSort={toggleSort}>
+                  Bandeira
+                </SortableHeader>
+                <SortableHeader columnKey="debit_rate" sortState={sortState} onSort={toggleSort}>
+                  Débito (%)
+                </SortableHeader>
+                <SortableHeader
+                  columnKey="credit_1x_rate"
+                  sortState={sortState}
+                  onSort={toggleSort}
+                >
+                  1x (%)
+                </SortableHeader>
+                <SortableHeader
+                  columnKey="credit_2x_rate"
+                  sortState={sortState}
+                  onSort={toggleSort}
+                >
+                  2x (%)
+                </SortableHeader>
+                <SortableHeader
+                  columnKey="credit_3x_rate"
+                  sortState={sortState}
+                  onSort={toggleSort}
+                >
+                  3x (%)
+                </SortableHeader>
+                <SortableHeader
+                  columnKey="credit_4x_rate"
+                  sortState={sortState}
+                  onSort={toggleSort}
+                >
+                  4x (%)
+                </SortableHeader>
+                <SortableHeader
+                  columnKey="max_installments"
+                  sortState={sortState}
+                  onSort={toggleSort}
+                >
+                  Parc. Máx.
+                </SortableHeader>
+                <SortableHeader columnKey="is_active" sortState={sortState} onSort={toggleSort}>
+                  Status
+                </SortableHeader>
+                <StaticHeader className="text-right">Ações</StaticHeader>
+              </TableRow>{' '}
             </TableHeader>
             <TableBody>
               {loading ? (
@@ -98,14 +138,14 @@ export default function CardRatesPage() {
                     Carregando...
                   </TableCell>
                 </TableRow>
-              ) : rates.length === 0 ? (
+              ) : sortedItems.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                     Nenhuma bandeira encontrada.
                   </TableCell>
                 </TableRow>
               ) : (
-                rates.map((rate) => (
+                sortedItems.map((rate) => (
                   <TableRow key={rate.id}>
                     <TableCell className="font-medium">{rate.flag}</TableCell>
                     <TableCell>{rate.debit_rate?.toFixed(2)}</TableCell>

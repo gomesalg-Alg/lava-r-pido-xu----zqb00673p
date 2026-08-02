@@ -36,15 +36,41 @@
   }
 }
 
-thead tr {
-  background-color: #1e293b;
+thead tr,
+thead tr:hover,
+thead tr:active,
+thead tr:focus,
+thead tr:focus-within,
+thead tr:focus-visible {
+  background-color: #1e293b !important;
 }
 
-thead tr:hover {
-  background-color: #1e293b;
-}
-
-thead th {
+thead th,
+thead th:hover,
+thead th:active,
+thead th:focus,
+thead th:focus-visible,
+thead th:focus-within {
+  background-color: #1e293b !important;
   color: #ffffff !important;
   font-weight: 700 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+thead th button,
+thead th button:hover,
+thead th button:active,
+thead th button:focus,
+thead th button:focus-visible {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+thead tr,
+thead th,
+thead th button {
+  transition: none !important;
 }

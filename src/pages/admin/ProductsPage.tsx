@@ -28,6 +28,8 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/format'
@@ -42,6 +44,7 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(emptyForm)
+  const { sortedItems, sortState, toggleSort } = useSortableData(products)
 
   const loadData = async () => {
     try {
@@ -147,14 +150,14 @@ export default function ProductsPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : products.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Nenhum produto encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              products.map((p) => (
+              sortedItems.map((p) => (
                 <TableRow key={p.id} className="even:bg-slate-50">
                   <TableCell className="font-medium">{p.name}</TableCell>
                   <TableCell className="text-slate-600">{p.sku || '-'}</TableCell>

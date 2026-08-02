@@ -2,17 +2,12 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Edit, Trash2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from '@/components/ui/table'
+import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/table'
 import { getAllVehicles, deleteVehicle } from '@/services/vehicles'
 import { useRealtime } from '@/hooks/use-realtime'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import type { RecordModel } from 'pocketbase'
 import { toast } from 'sonner'
 
@@ -20,6 +15,7 @@ export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<RecordModel[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState<RecordModel | null>(null)
+  const { sortedItems, sortState, toggleSort } = useSortableData(vehicles)
 
   const loadData = async () => {
     try {
@@ -66,14 +62,32 @@ export default function VehiclesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="font-semibold text-slate-700">Cliente</TableHead>
-              <TableHead className="font-semibold text-slate-700">Placa</TableHead>
-              <TableHead className="font-semibold text-slate-700">Tipo</TableHead>
-              <TableHead className="font-semibold text-slate-700">Marca</TableHead>
-              <TableHead className="font-semibold text-slate-700">Modelo</TableHead>
-              <TableHead className="font-semibold text-slate-700">Ano</TableHead>
-              <TableHead className="font-semibold text-slate-700">Combustível</TableHead>
-              <TableHead className="font-semibold text-slate-700 text-right">Ações</TableHead>{' '}
+              <SortableHeader
+                columnKey="expand.customer_id.name"
+                sortState={sortState}
+                onSort={toggleSort}
+              >
+                Cliente
+              </SortableHeader>
+              <SortableHeader columnKey="placa" sortState={sortState} onSort={toggleSort}>
+                Placa
+              </SortableHeader>
+              <SortableHeader columnKey="type" sortState={sortState} onSort={toggleSort}>
+                Tipo
+              </SortableHeader>
+              <SortableHeader columnKey="brand" sortState={sortState} onSort={toggleSort}>
+                Marca
+              </SortableHeader>
+              <SortableHeader columnKey="model" sortState={sortState} onSort={toggleSort}>
+                Modelo
+              </SortableHeader>
+              <SortableHeader columnKey="year" sortState={sortState} onSort={toggleSort}>
+                Ano
+              </SortableHeader>
+              <SortableHeader columnKey="fuel" sortState={sortState} onSort={toggleSort}>
+                Combustível
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -83,14 +97,14 @@ export default function VehiclesPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : vehicles.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center text-slate-500 py-8">
                   Nenhum veículo cadastrado.
                 </TableCell>
               </TableRow>
             ) : (
-              vehicles.map((v) => (
+              sortedItems.map((v) => (
                 <TableRow key={v.id} className="even:bg-slate-50">
                   <TableCell className="font-medium text-slate-800">
                     {v.expand?.customer_id?.name || '—'}

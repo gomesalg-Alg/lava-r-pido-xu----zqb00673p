@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2, Search, Printer, Ban } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateServiceOrderPdf } from '@/lib/service-order-pdf'
@@ -76,6 +78,7 @@ export default function ServiceOrdersPage() {
       String(o.ticket_number).includes(search)
     )
   })
+  const { sortedItems, sortState, toggleSort } = useSortableData(filtered)
 
   const badgeVariant = (s: string): 'default' | 'secondary' | 'outline' | 'destructive' =>
     s === 'Cancelado'
@@ -137,15 +140,37 @@ export default function ServiceOrdersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ticket</TableHead>
-              <TableHead>Foto</TableHead>
-              <TableHead>Emissão</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Veículo</TableHead>
-              <TableHead>Placa</TableHead>
-              <TableHead>Nº Prisma</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="ticket_number" sortState={sortState} onSort={toggleSort}>
+                Ticket
+              </SortableHeader>
+              <StaticHeader>Foto</StaticHeader>
+              <SortableHeader columnKey="emission_date" sortState={sortState} onSort={toggleSort}>
+                Emissão
+              </SortableHeader>
+              <SortableHeader
+                columnKey="expand.customer_id.name"
+                sortState={sortState}
+                onSort={toggleSort}
+              >
+                Cliente
+              </SortableHeader>
+              <SortableHeader
+                columnKey="expand.vehicle_id.brand"
+                sortState={sortState}
+                onSort={toggleSort}
+              >
+                Veículo
+              </SortableHeader>
+              <SortableHeader columnKey="placa" sortState={sortState} onSort={toggleSort}>
+                Placa
+              </SortableHeader>
+              <SortableHeader columnKey="prisma_number" sortState={sortState} onSort={toggleSort}>
+                Nº Prisma
+              </SortableHeader>
+              <SortableHeader columnKey="status" sortState={sortState} onSort={toggleSort}>
+                Status
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -155,14 +180,14 @@ export default function ServiceOrdersPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Nenhuma ordem de serviço encontrada.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((o) => (
+              sortedItems.map((o) => (
                 <TableRow key={o.id} className="even:bg-slate-50">
                   <TableCell className="font-bold text-blue-600">
                     #{String(o.ticket_number).padStart(4, '0')}

@@ -13,6 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -58,6 +60,7 @@ export default function SuppliersPage() {
       s.cnpj.includes(search) ||
       s.phone.includes(search),
   )
+  const { sortedItems, sortState, toggleSort } = useSortableData(filtered)
 
   return (
     <div>
@@ -84,11 +87,19 @@ export default function SuppliersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>CNPJ</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Nome
+              </SortableHeader>
+              <SortableHeader columnKey="cnpj" sortState={sortState} onSort={toggleSort}>
+                CNPJ
+              </SortableHeader>
+              <SortableHeader columnKey="phone" sortState={sortState} onSort={toggleSort}>
+                Telefone
+              </SortableHeader>
+              <SortableHeader columnKey="email" sortState={sortState} onSort={toggleSort}>
+                Email
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,14 +109,14 @@ export default function SuppliersPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : filtered.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Nenhum fornecedor encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((s) => (
+              sortedItems.map((s) => (
                 <TableRow key={s.id} className="even:bg-slate-50">
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell>{s.cnpj || '-'}</TableCell>

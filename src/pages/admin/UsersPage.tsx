@@ -29,6 +29,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Edit, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import pb from '@/lib/pocketbase/client'
@@ -52,6 +54,7 @@ export default function UsersPage() {
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { sortedItems, sortState, toggleSort } = useSortableData(users)
 
   const loadData = async () => {
     try {
@@ -185,11 +188,19 @@ export default function UsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Perfil de Acesso</TableHead>
-              <TableHead>Criado em</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Nome
+              </SortableHeader>
+              <SortableHeader columnKey="email" sortState={sortState} onSort={toggleSort}>
+                Email
+              </SortableHeader>
+              <SortableHeader columnKey="role" sortState={sortState} onSort={toggleSort}>
+                Perfil de Acesso
+              </SortableHeader>
+              <SortableHeader columnKey="created" sortState={sortState} onSort={toggleSort}>
+                Criado em
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -199,14 +210,14 @@ export default function UsersPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : users.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Nenhum usuário encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((u) => (
+              sortedItems.map((u) => (
                 <TableRow key={u.id} className="even:bg-slate-50">
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
