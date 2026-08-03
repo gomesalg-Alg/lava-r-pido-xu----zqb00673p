@@ -31,6 +31,8 @@ import {
   Package,
   ShoppingCart,
   Receipt,
+  Landmark,
+  ReceiptText,
 } from 'lucide-react'
 import { APP_VERSION } from '@/lib/version'
 
@@ -62,6 +64,7 @@ const menuGroups: MenuGroup[] = [
       { label: 'Veículos', to: '/admin/veiculos', icon: Car },
       { label: 'Fornecedores', to: '/admin/fornecedores', icon: Truck },
       { label: 'Plano de Contas', to: '/admin/plano-contas', icon: Wallet },
+      { label: 'Contas Bancárias', to: '/admin/contas-bancarias', icon: Landmark },
     ],
   },
   {
@@ -71,6 +74,7 @@ const menuGroups: MenuGroup[] = [
       { label: 'Frente de Caixa', to: '/admin/frente-caixa', icon: ShoppingCart },
       { label: 'Ordens de Serviço', to: '/admin/ordem-servico', icon: Wrench },
       { label: 'Contas a Receber', to: '/admin/contas-receber', icon: Receipt },
+      { label: 'Contas a Pagar', to: '/admin/contas-pagar', icon: ReceiptText },
     ],
   },
   {

@@ -2,6 +2,7 @@ import pb from '@/lib/pocketbase/client'
 import type { Customer } from './customers'
 import type { ServiceOrder } from './service-orders'
 import type { VendaAvulsa } from './vendas-avulsas'
+import type { BankAccount } from './bank-accounts'
 
 export type AccountsReceivableStatus = 'Pendente' | 'Recebido' | 'Cancelado'
 
@@ -16,6 +17,7 @@ export interface AccountsReceivable {
   status: AccountsReceivableStatus | ''
   payment_method: string
   received_at: string
+  bank_account_id: string | null
   discount_amount: number | null
   surcharge_amount: number | null
   created: string
@@ -24,13 +26,14 @@ export interface AccountsReceivable {
     customer_id?: Customer
     order_id?: ServiceOrder
     venda_avulsa_id?: VendaAvulsa
+    bank_account_id?: BankAccount
   }
 }
 
 export const getAccountsReceivable = () =>
   pb.collection('accounts_receivable').getFullList<AccountsReceivable>({
     sort: '-created',
-    expand: 'customer_id,order_id,venda_avulsa_id',
+    expand: 'customer_id,order_id,venda_avulsa_id,bank_account_id',
   })
 
 export const createAccountsReceivable = (data: Record<string, unknown>) =>
