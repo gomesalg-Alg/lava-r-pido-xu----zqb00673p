@@ -46,6 +46,8 @@ import { toast } from 'sonner'
 import { PosItemEditDialog } from '@/components/admin/PosItemEditDialog'
 import { cn } from '@/lib/utils'
 import type { Product } from '@/services/products'
+import { SearchableSelect } from '@/components/admin/SearchableSelect'
+import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
 
 interface Props {
   order: ServiceOrder
@@ -63,6 +65,8 @@ export function PosOrderView({ order, onBack }: Props) {
   const [surcharge, setSurcharge] = useState(0)
   const [editingItem, setEditingItem] = useState<ServiceOrderItem | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [selectedBankId, setSelectedBankId] = useState('')
   const { user } = useAuth()
 
   const allItems = items
@@ -86,6 +90,9 @@ export function PosOrderView({ order, onBack }: Props) {
     getCardRates()
       .then(setCardRates)
       .catch(() => {})
+    getActiveBankAccounts()
+      .then(setBankAccounts)
+      .catch(() => {})
   }, [])
 
   useRealtime('service_order_items', () => {
@@ -99,7 +106,7 @@ export function PosOrderView({ order, onBack }: Props) {
     .reduce((s, l) => s + l.amount, 0)
   const remaining = finalTotal - totalPaid
   const troco = Math.max(0, totalPaid - finalTotal)
-  const canFinalize = remaining <= 0.01 && paymentLines.length > 0
+  const canFinalize = remaining <= 0.01 && paymentLines.length > 0 && !!selectedBankId
 
   const isLocked = (item: ServiceOrderItem) => !!item.service_id
 
@@ -193,6 +200,7 @@ export function PosOrderView({ order, onBack }: Props) {
             installments: line.installments,
             applied_rate: appliedRate,
             fee_amount: feeAmount,
+            bank_account_id: selectedBankId,
           }),
         )
       }
@@ -414,6 +422,25 @@ export function PosOrderView({ order, onBack }: Props) {
                   onLinesChange={setPaymentLines}
                   cardRates={cardRates}
                 />
+                <div className="space-y-1">
+                  <Label className="text-xs">Banco *</Label>
+                  <SearchableSelect
+                    options={bankAccounts
+                      .slice()
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((b) => ({
+                        value: b.id,
+                        label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
+                      }))}
+                    value={selectedBankId}
+                    onChange={setSelectedBankId}
+                    placeholder="Selecionar banco..."
+                    searchPlaceholder="Buscar banco..."
+                  />
+                  {!selectedBankId && (
+                    <p className="text-sm text-red-500">Selecione uma conta bancária</p>
+                  )}
+                </div>
                 <div className="space-y-1.5 border-t pt-3">
                   <div
                     className={cn(

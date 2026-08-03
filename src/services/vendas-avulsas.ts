@@ -16,6 +16,7 @@ export type VendaAvulsa = {
   total_amount: number
   payment_method: string
   change_amount: number
+  customer_document: string
   created: string
   updated: string
   expand?: {

@@ -21,6 +21,9 @@ import { getCardRates, getRateForPayment, type CardRate } from '@/services/card-
 import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
 import { Trash2, CheckCircle, Search, ArrowLeft, Plus, Minus } from 'lucide-react'
+import { SearchableSelect } from '@/components/admin/SearchableSelect'
+import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
+import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
 
 type CartItem = { product_id: string; name: string; quantity: number; unit_price: number }
 const PAYMENTS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Cortesia', 'Outros']
@@ -40,10 +43,17 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
   const [discount, setDiscount] = useState(0)
   const [surcharge, setSurcharge] = useState(0)
   const [cardRates, setCardRates] = useState<CardRate[]>([])
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [selectedBankId, setSelectedBankId] = useState('')
+  const [customerDocument, setCustomerDocument] = useState('')
+  const [docError, setDocError] = useState('')
 
   useEffect(() => {
     getCardRates()
       .then(setCardRates)
+      .catch(() => {})
+    getActiveBankAccounts()
+      .then(setBankAccounts)
       .catch(() => {})
   }, [])
 
@@ -83,7 +93,11 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
   const isCortesia = method === 'Cortesia'
 
   const handleFinalize = async () => {
-    if (!method || cart.length === 0) return
+    if (!method || cart.length === 0 || !selectedBankId) return
+    if (customerDocument.trim() && !validateCPFCNPJ(customerDocument)) {
+      setDocError('CPF/CNPJ inválido')
+      return
+    }
     setFinalizing(true)
     try {
       const items = cart.map((i) => ({
@@ -104,6 +118,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
         change_amount: changeAmt,
       }
       if (customer?.id) vendaData.customer_id = customer.id
+      if (customerDocument.trim()) vendaData.customer_document = customerDocument.trim()
       const venda = await createVendaAvulsa(vendaData)
 
       const appliedRate =
@@ -122,6 +137,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
           installments: installments,
           applied_rate: appliedRate,
           fee_amount: feeAmount,
+          bank_account_id: selectedBankId,
         }),
       )
 
@@ -309,6 +325,44 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
               <span>Total</span>
               <span className="text-blue-600">{formatCurrency(total)}</span>
             </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Banco *</Label>
+              <SearchableSelect
+                options={bankAccounts
+                  .slice()
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((b) => ({
+                    value: b.id,
+                    label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
+                  }))}
+                value={selectedBankId}
+                onChange={setSelectedBankId}
+                placeholder="Selecionar banco..."
+                searchPlaceholder="Buscar banco..."
+              />
+              {!selectedBankId && (
+                <p className="text-sm text-red-500">Selecione uma conta bancária</p>
+              )}
+            </div>
+            {(!customer || customer.name === 'Consumidor Final') && (
+              <div className="space-y-1">
+                <Label className="text-xs">CPF/CNPJ (Consumidor Final)</Label>
+                <Input
+                  value={customerDocument}
+                  onChange={(e) => {
+                    const masked = maskCPFCNPJ(e.target.value)
+                    setCustomerDocument(masked)
+                    if (masked.trim() && !validateCPFCNPJ(masked)) {
+                      setDocError('CPF/CNPJ inválido')
+                    } else {
+                      setDocError('')
+                    }
+                  }}
+                  placeholder="000.000.000-00"
+                />
+                {docError && <p className="text-sm text-red-500">{docError}</p>}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Pagamento *</Label>
@@ -382,7 +436,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
             )}
             <Button
               onClick={handleFinalize}
-              disabled={finalizing || !method || cart.length === 0}
+              disabled={finalizing || !method || cart.length === 0 || !selectedBankId}
               className="w-full h-12"
               size="lg"
             >

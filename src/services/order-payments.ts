@@ -12,6 +12,7 @@ export type OrderPayment = {
   installments: number
   applied_rate: number | null
   fee_amount: number | null
+  bank_account_id: string | null
   created: string
   updated: string
 }
@@ -35,6 +36,7 @@ export const buildPaymentData = (params: {
   fee_amount: number
   order_id?: string | null
   venda_avulsa_id?: string | null
+  bank_account_id?: string | null
 }) => {
   const isCardPayment =
     params.method === 'Cartão de Crédito' || params.method === 'Cartão de Débito'
@@ -57,6 +59,14 @@ export const buildPaymentData = (params: {
     params.venda_avulsa_id.trim() !== ''
   ) {
     data.venda_avulsa_id = params.venda_avulsa_id.trim()
+  }
+
+  if (
+    params.bank_account_id &&
+    typeof params.bank_account_id === 'string' &&
+    params.bank_account_id.trim() !== ''
+  ) {
+    data.bank_account_id = params.bank_account_id.trim()
   }
 
   if (isCardPayment) {
@@ -112,6 +122,11 @@ export const sanitizePaymentData = (data: Record<string, unknown>): Record<strin
   // Optional: venda_avulsa_id — only include if it's a non-empty string
   if (typeof data.venda_avulsa_id === 'string' && data.venda_avulsa_id.trim() !== '') {
     cleaned.venda_avulsa_id = data.venda_avulsa_id.trim()
+  }
+
+  // Optional: bank_account_id — only include if it's a non-empty string
+  if (typeof data.bank_account_id === 'string' && data.bank_account_id.trim() !== '') {
+    cleaned.bank_account_id = data.bank_account_id.trim()
   }
 
   // Card-specific fields — only include for card payments

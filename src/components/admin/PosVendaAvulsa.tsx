@@ -16,6 +16,10 @@ import { formatCurrency } from '@/lib/format'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { Product } from '@/services/products'
+import { SearchableSelect } from '@/components/admin/SearchableSelect'
+import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
+import { Input } from '@/components/ui/input'
+import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
 
 interface CartItem {
   product: Product
@@ -29,10 +33,17 @@ export function PosVendaAvulsa() {
   const [discount, setDiscount] = useState(0)
   const [surcharge, setSurcharge] = useState(0)
   const [finalizing, setFinalizing] = useState(false)
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [selectedBankId, setSelectedBankId] = useState('')
+  const [customerDocument, setCustomerDocument] = useState('')
+  const [docError, setDocError] = useState('')
 
   useEffect(() => {
     getCardRates()
       .then(setCardRates)
+      .catch(() => {})
+    getActiveBankAccounts()
+      .then(setBankAccounts)
       .catch(() => {})
   }, [])
 
@@ -65,7 +76,8 @@ export function PosVendaAvulsa() {
     .reduce((s, l) => s + l.amount, 0)
   const remaining = finalTotal - totalPaid
   const troco = Math.max(0, totalPaid - finalTotal)
-  const canFinalize = remaining <= 0.01 && paymentLines.length > 0 && cart.length > 0
+  const canFinalize =
+    remaining <= 0.01 && paymentLines.length > 0 && cart.length > 0 && !!selectedBankId
 
   const handleFinalize = async () => {
     if (!canFinalize) return
@@ -79,12 +91,14 @@ export function PosVendaAvulsa() {
         total_price: Math.round(i.product.price * i.quantity * 100) / 100,
       }))
 
-      const venda = await createVendaAvulsa({
+      const vendaData: Record<string, unknown> = {
         items,
         total_amount: Math.round(finalTotal * 100) / 100,
         payment_method: paymentLines.map((l) => l.method).join(' + '),
         change_amount: Math.round(troco * 100) / 100,
-      })
+      }
+      if (customerDocument.trim()) vendaData.customer_document = customerDocument.trim()
+      const venda = await createVendaAvulsa(vendaData)
 
       const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
       const nowIso = new Date().toISOString()
@@ -107,6 +121,7 @@ export function PosVendaAvulsa() {
             installments: line.installments,
             applied_rate: appliedRate,
             fee_amount: feeAmount,
+            bank_account_id: selectedBankId,
           }),
         )
       }
@@ -141,6 +156,8 @@ export function PosVendaAvulsa() {
       setPaymentLines([])
       setDiscount(0)
       setSurcharge(0)
+      setSelectedBankId('')
+      setCustomerDocument('')
     } catch (err) {
       toast.error(getErrorMessage(err) || 'Erro ao finalizar venda')
     } finally {
@@ -242,6 +259,42 @@ export function PosVendaAvulsa() {
                 onLinesChange={setPaymentLines}
                 cardRates={cardRates}
               />
+              <div className="space-y-1">
+                <Label className="text-xs">Banco *</Label>
+                <SearchableSelect
+                  options={bankAccounts
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((b) => ({
+                      value: b.id,
+                      label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
+                    }))}
+                  value={selectedBankId}
+                  onChange={setSelectedBankId}
+                  placeholder="Selecionar banco..."
+                  searchPlaceholder="Buscar banco..."
+                />
+                {!selectedBankId && (
+                  <p className="text-sm text-red-500">Selecione uma conta bancária</p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">CPF/CNPJ (Consumidor Final)</Label>
+                <Input
+                  value={customerDocument}
+                  onChange={(e) => {
+                    const masked = maskCPFCNPJ(e.target.value)
+                    setCustomerDocument(masked)
+                    if (masked.trim() && !validateCPFCNPJ(masked)) {
+                      setDocError('CPF/CNPJ inválido')
+                    } else {
+                      setDocError('')
+                    }
+                  }}
+                  placeholder="000.000.000-00"
+                />
+                {docError && <p className="text-sm text-red-500">{docError}</p>}
+              </div>
               <div className="space-y-1.5 border-t pt-3">
                 <div
                   className={cn(

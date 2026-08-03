@@ -54,3 +54,43 @@ export function validateCPF(cpf: string): boolean {
   if (rev >= 10) rev = 0
   return rev === parseInt(d[10])
 }
+
+export function validateCNPJ(cnpj: string): boolean {
+  const d = cnpj.replace(/\D/g, '')
+  if (d.length !== 14) return false
+  if (/^(\d)\1{13}$/.test(d)) return false
+  let size = d.length - 2
+  let nums = d.substring(0, size)
+  const digits = d.substring(size)
+  let sum = 0
+  let pos = size - 7
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(nums.charAt(size - i)) * pos--
+    if (pos < 2) pos = 9
+  }
+  let result = sum % 11 < 2 ? 0 : 11 - (sum % 11)
+  if (result !== parseInt(digits.charAt(0))) return false
+  size = size + 1
+  nums = d.substring(0, size)
+  sum = 0
+  pos = size - 7
+  for (let i = size; i >= 1; i--) {
+    sum += parseInt(nums.charAt(size - i)) * pos--
+    if (pos < 2) pos = 9
+  }
+  result = sum % 11 < 2 ? 0 : 11 - (sum % 11)
+  return result === parseInt(digits.charAt(1))
+}
+
+export function maskCPFCNPJ(value: string): string {
+  const d = value.replace(/\D/g, '')
+  if (d.length <= 11) return maskCPF(d)
+  return maskCNPJ(d)
+}
+
+export function validateCPFCNPJ(value: string): boolean {
+  const d = value.replace(/\D/g, '')
+  if (d.length === 11) return validateCPF(d)
+  if (d.length === 14) return validateCNPJ(d)
+  return false
+}
