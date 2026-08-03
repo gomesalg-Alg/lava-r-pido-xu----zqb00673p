@@ -3,9 +3,11 @@ import pb from '@/lib/pocketbase/client'
 export type Customer = {
   id: string
   name: string
+  tipo_pessoa: 'F' | 'J'
   social_name: string
   birth_date: string | null
   cpf: string
+  cnpj: string
   phone: string
   has_whatsapp: boolean
   email: string

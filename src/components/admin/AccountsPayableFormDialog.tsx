@@ -53,6 +53,8 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
     status: 'Pendente',
     payment_method: '',
     paid_at: '',
+    discount_amount: 0,
+    surcharge_amount: 0,
   })
 
   useEffect(() => {
@@ -76,6 +78,8 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         status: record.status || 'Pendente',
         payment_method: record.payment_method || '',
         paid_at: record.paid_at ? record.paid_at.split('T')[0] : '',
+        discount_amount: record.discount_amount || 0,
+        surcharge_amount: record.surcharge_amount || 0,
       })
     } else {
       setForm({
@@ -87,6 +91,8 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         status: 'Pendente',
         payment_method: '',
         paid_at: '',
+        discount_amount: 0,
+        surcharge_amount: 0,
       })
     }
     setErrors({})
@@ -106,6 +112,8 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
       status: form.status,
       payment_method: form.payment_method,
       paid_at: form.status === 'Pago' && form.paid_at ? form.paid_at : null,
+      discount_amount: form.discount_amount || null,
+      surcharge_amount: form.surcharge_amount || null,
     }
     try {
       if (record) {
@@ -128,28 +136,37 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
   const supplierOpts = [NONE, ...suppliers.map((s) => ({ value: s.id, label: s.name }))]
   const bankOpts = [
     NONE,
-    ...bankAccounts.map((b) => ({
-      value: b.id,
-      label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
-    })),
+    ...bankAccounts.map((b) => ({ value: b.id, label: b.trading_name || b.name })),
   ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{record ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
-          <div className="space-y-1">
-            <Label>Fornecedor</Label>
-            <SearchableSelect
-              options={supplierOpts}
-              value={form.supplier_id}
-              onChange={(v) => set('supplier_id', v)}
-              placeholder="Selecionar fornecedor..."
-              searchPlaceholder="Buscar fornecedor..."
-            />
+        <div className="space-y-3 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Fornecedor</Label>
+              <SearchableSelect
+                options={supplierOpts}
+                value={form.supplier_id}
+                onChange={(v) => set('supplier_id', v)}
+                placeholder="Selecionar..."
+                searchPlaceholder="Buscar..."
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Banco</Label>
+              <SearchableSelect
+                options={bankOpts}
+                value={form.bank_account_id}
+                onChange={(v) => set('bank_account_id', v)}
+                placeholder="Selecionar..."
+                searchPlaceholder="Buscar..."
+              />
+            </div>
           </div>
           <div className="space-y-1">
             <Label>Descrição *</Label>
@@ -160,12 +177,28 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
             />
             {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label>Valor (R$) *</Label>
               <CurrencyInput value={form.amount} onChange={(v) => set('amount', v)} />
               {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
             </div>
+            <div className="space-y-1">
+              <Label>Desconto (R$)</Label>
+              <CurrencyInput
+                value={form.discount_amount}
+                onChange={(v) => set('discount_amount', v)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Acréscimo (R$)</Label>
+              <CurrencyInput
+                value={form.surcharge_amount}
+                onChange={(v) => set('surcharge_amount', v)}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label>Vencimento</Label>
               <Input
@@ -174,8 +207,6 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
                 onChange={(e) => set('due_date', e.target.value)}
               />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Status *</Label>
               <Select value={form.status} onValueChange={(v) => set('status', v)}>
@@ -196,19 +227,9 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
               <Input
                 value={form.payment_method}
                 onChange={(e) => set('payment_method', e.target.value)}
-                placeholder="Ex: Pix, Dinheiro..."
+                placeholder="Ex: Pix..."
               />
             </div>
-          </div>
-          <div className="space-y-1">
-            <Label>Banco</Label>
-            <SearchableSelect
-              options={bankOpts}
-              value={form.bank_account_id}
-              onChange={(v) => set('bank_account_id', v)}
-              placeholder="Selecionar banco..."
-              searchPlaceholder="Buscar banco..."
-            />
           </div>
           {form.status === 'Pago' && (
             <div className="space-y-1">

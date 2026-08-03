@@ -36,6 +36,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
   const [errors, setErrors] = useState<FieldErrors>({})
   const [form, setForm] = useState({
     name: '',
+    trading_name: '',
     agency: '',
     account_number: '',
     account_type: 'Corrente',
@@ -46,6 +47,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
     if (record) {
       setForm({
         name: record.name || '',
+        trading_name: record.trading_name || '',
         agency: record.agency || '',
         account_number: record.account_number || '',
         account_type: record.account_type || 'Corrente',
@@ -54,6 +56,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
     } else {
       setForm({
         name: '',
+        trading_name: '',
         agency: '',
         account_number: '',
         account_type: 'Corrente',
@@ -102,6 +105,14 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
               placeholder="Ex: Banco do Brasil"
             />
             {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+          </div>
+          <div className="space-y-1">
+            <Label>Nome Fantasia</Label>
+            <Input
+              value={form.trading_name}
+              onChange={(e) => set('trading_name', e.target.value)}
+              placeholder="Ex: BB"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">

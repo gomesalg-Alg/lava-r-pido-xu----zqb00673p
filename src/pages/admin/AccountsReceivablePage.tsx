@@ -260,9 +260,6 @@ export default function AccountsReceivablePage() {
               <SortableHeader columnKey="due_date" sortState={sortState} onSort={toggleSort}>
                 Vencimento
               </SortableHeader>
-              <SortableHeader columnKey="payment_method" sortState={sortState} onSort={toggleSort}>
-                Pagamento
-              </SortableHeader>
               <SortableHeader
                 columnKey="expand.bank_account_id.name"
                 sortState={sortState}
@@ -282,13 +279,13 @@ export default function AccountsReceivablePage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Nenhuma conta encontrada.
                 </TableCell>
               </TableRow>
@@ -309,10 +306,9 @@ export default function AccountsReceivablePage() {
                     {r.due_date ? new Date(r.due_date).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
                   <TableCell className="text-sm text-slate-600">
-                    {r.payment_method || '-'}
-                  </TableCell>
-                  <TableCell className="text-sm text-slate-600">
-                    {r.expand?.bank_account_id?.name || '-'}
+                    {r.expand?.bank_account_id?.trading_name ||
+                      r.expand?.bank_account_id?.name ||
+                      '-'}
                   </TableCell>
                   <TableCell>{statusBadge(r.status)}</TableCell>
                   <TableCell className="text-sm text-slate-600">

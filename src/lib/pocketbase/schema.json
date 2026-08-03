@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-03T00:21:37.624Z",
+  "generatedAt": "2026-08-03T00:45:56.729Z",
   "collections": [
     {
       "name": "users",
@@ -251,9 +251,22 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "tipo_pessoa",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["F", "J"]
+        },
+        {
+          "name": "cnpj",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
-      "indexes": []
+      "indexes": ["CREATE INDEX `idx_customers_tipo_pessoa` ON `customers` (tipo_pessoa)"]
     },
     {
       "name": "vehicles",
@@ -536,9 +549,22 @@
           "type": "text",
           "required": false,
           "system": false
+        },
+        {
+          "name": "tipo_pessoa",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["F", "J"]
+        },
+        {
+          "name": "cpf",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
-      "indexes": []
+      "indexes": ["CREATE INDEX `idx_suppliers_tipo_pessoa` ON `suppliers` (tipo_pessoa)"]
     },
     {
       "name": "service_orders",
@@ -1406,6 +1432,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "trading_name",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": ["CREATE INDEX idx_bank_accounts_is_active ON bank_accounts (is_active)"]

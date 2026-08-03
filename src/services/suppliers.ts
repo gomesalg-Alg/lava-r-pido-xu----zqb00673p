@@ -3,7 +3,9 @@ import pb from '@/lib/pocketbase/client'
 export type Supplier = {
   id: string
   name: string
+  tipo_pessoa: 'F' | 'J'
   cnpj: string
+  cpf: string
   phone: string
   email: string
   address: string

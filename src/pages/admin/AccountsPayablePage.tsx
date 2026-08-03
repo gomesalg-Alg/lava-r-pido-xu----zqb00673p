@@ -229,9 +229,6 @@ export default function AccountsPayablePage() {
               <SortableHeader columnKey="status" sortState={sortState} onSort={toggleSort}>
                 Status
               </SortableHeader>
-              <SortableHeader columnKey="payment_method" sortState={sortState} onSort={toggleSort}>
-                Pagamento
-              </SortableHeader>
               <SortableHeader
                 columnKey="expand.bank_account_id.name"
                 sortState={sortState}
@@ -245,13 +242,13 @@ export default function AccountsPayablePage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
                   Nenhuma conta encontrada.
                 </TableCell>
               </TableRow>
@@ -268,10 +265,9 @@ export default function AccountsPayablePage() {
                   </TableCell>
                   <TableCell>{statusBadge(r.status)}</TableCell>
                   <TableCell className="text-sm text-slate-600">
-                    {r.payment_method || '-'}
-                  </TableCell>
-                  <TableCell className="text-sm text-slate-600">
-                    {r.expand?.bank_account_id?.name || '-'}
+                    {r.expand?.bank_account_id?.trading_name ||
+                      r.expand?.bank_account_id?.name ||
+                      '-'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

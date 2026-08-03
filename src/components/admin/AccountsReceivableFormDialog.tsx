@@ -20,7 +20,7 @@ import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { getCustomers } from '@/services/customers'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
-import { getServiceOrder, getServiceOrders } from '@/services/service-orders'
+import { getServiceOrders } from '@/services/service-orders'
 import { getVendasAvulsas } from '@/services/vendas-avulsas'
 import {
   createAccountsReceivable,
@@ -44,18 +44,10 @@ interface Props {
 export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuccess }: Props) {
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([])
   const [orders, setOrders] = useState<
-    {
-      id: string
-      ticket_number: number
-      expand?: { customer_id?: { name: string } }
-    }[]
+    { id: string; ticket_number: number; expand?: { customer_id?: { name: string } } }[]
   >([])
   const [vendas, setVendas] = useState<
-    {
-      id: string
-      total_amount: number
-      expand?: { customer_id?: { name: string } }
-    }[]
+    { id: string; total_amount: number; expand?: { customer_id?: { name: string } } }[]
   >([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [saving, setSaving] = useState(false)
@@ -71,6 +63,8 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
     status: 'Pendente',
     payment_method: '',
     received_at: '',
+    discount_amount: 0,
+    surcharge_amount: 0,
   })
 
   useEffect(() => {
@@ -98,6 +92,8 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
         status: record.status || 'Pendente',
         payment_method: record.payment_method || '',
         received_at: record.received_at ? record.received_at.split('T')[0] : '',
+        discount_amount: record.discount_amount || 0,
+        surcharge_amount: record.surcharge_amount || 0,
       })
     } else {
       setForm({
@@ -111,6 +107,8 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
         status: 'Pendente',
         payment_method: '',
         received_at: '',
+        discount_amount: 0,
+        surcharge_amount: 0,
       })
     }
     setErrors({})
@@ -132,24 +130,9 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
       status: form.status,
       payment_method: form.payment_method,
       received_at: form.status === 'Recebido' && form.received_at ? form.received_at : null,
+      discount_amount: form.discount_amount || null,
+      surcharge_amount: form.surcharge_amount || null,
     }
-
-    let discountAmount: number | null = null
-    let surchargeAmount: number | null = null
-
-    if (form.order_id) {
-      try {
-        const order = await getServiceOrder(form.order_id)
-        discountAmount = order.total_discount != null ? order.total_discount : null
-        surchargeAmount = order.total_surcharge != null ? order.total_surcharge : null
-      } catch {
-        // order not found — leave null
-      }
-    }
-
-    data.discount_amount = discountAmount
-    data.surcharge_amount = surchargeAmount
-
     try {
       if (record) {
         await updateAccountsReceivable(record.id, data)
@@ -183,24 +166,40 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
       label: `Venda - ${v.expand?.customer_id?.name || 'Avulso'} - R$ ${(v.total_amount || 0).toFixed(2)}`,
     })),
   ]
+  const bankOpts = [
+    NONE,
+    ...bankAccounts.map((b) => ({ value: b.id, label: b.trading_name || b.name })),
+  ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{record ? 'Editar Conta a Receber' : 'Nova Conta a Receber'}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
-          <div className="space-y-1">
-            <Label>Cliente *</Label>
-            <SearchableSelect
-              options={customerOpts}
-              value={form.customer_id}
-              onChange={(v) => set('customer_id', v)}
-              placeholder="Selecionar cliente..."
-              searchPlaceholder="Buscar cliente..."
-            />
-            {errors.customer_id && <p className="text-sm text-red-500">{errors.customer_id}</p>}
+        <div className="space-y-3 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Cliente *</Label>
+              <SearchableSelect
+                options={customerOpts}
+                value={form.customer_id}
+                onChange={(v) => set('customer_id', v)}
+                placeholder="Selecionar..."
+                searchPlaceholder="Buscar..."
+              />
+              {errors.customer_id && <p className="text-sm text-red-500">{errors.customer_id}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label>Banco</Label>
+              <SearchableSelect
+                options={bankOpts}
+                value={form.bank_account_id}
+                onChange={(v) => set('bank_account_id', v)}
+                placeholder="Selecionar..."
+                searchPlaceholder="Buscar..."
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -209,8 +208,8 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
                 options={orderOpts}
                 value={form.order_id}
                 onChange={(v) => set('order_id', v)}
-                placeholder="Selecionar OS..."
-                searchPlaceholder="Buscar OS..."
+                placeholder="Selecionar..."
+                searchPlaceholder="Buscar..."
               />
             </div>
             <div className="space-y-1">
@@ -219,8 +218,8 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
                 options={vendaOpts}
                 value={form.venda_avulsa_id}
                 onChange={(v) => set('venda_avulsa_id', v)}
-                placeholder="Selecionar venda..."
-                searchPlaceholder="Buscar venda..."
+                placeholder="Selecionar..."
+                searchPlaceholder="Buscar..."
               />
             </div>
           </div>
@@ -232,12 +231,28 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
               placeholder="Descrição..."
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label>Valor (R$) *</Label>
               <CurrencyInput value={form.amount} onChange={(v) => set('amount', v)} />
               {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
             </div>
+            <div className="space-y-1">
+              <Label>Desconto (R$)</Label>
+              <CurrencyInput
+                value={form.discount_amount}
+                onChange={(v) => set('discount_amount', v)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Acréscimo (R$)</Label>
+              <CurrencyInput
+                value={form.surcharge_amount}
+                onChange={(v) => set('surcharge_amount', v)}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label>Vencimento *</Label>
               <Input
@@ -247,8 +262,6 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
               />
               {errors.due_date && <p className="text-sm text-red-500">{errors.due_date}</p>}
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Status *</Label>
               <Select value={form.status} onValueChange={(v) => set('status', v)}>
@@ -269,25 +282,9 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
               <Input
                 value={form.payment_method}
                 onChange={(e) => set('payment_method', e.target.value)}
-                placeholder="Ex: Pix, Dinheiro..."
+                placeholder="Ex: Pix..."
               />
             </div>
-          </div>
-          <div className="space-y-1">
-            <Label>Banco</Label>
-            <SearchableSelect
-              options={[
-                NONE,
-                ...bankAccounts.map((b) => ({
-                  value: b.id,
-                  label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
-                })),
-              ]}
-              value={form.bank_account_id}
-              onChange={(v) => set('bank_account_id', v)}
-              placeholder="Selecionar banco..."
-              searchPlaceholder="Buscar banco..."
-            />
           </div>
           {form.status === 'Recebido' && (
             <div className="space-y-1">

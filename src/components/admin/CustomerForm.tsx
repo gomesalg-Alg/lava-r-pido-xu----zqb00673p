@@ -14,7 +14,14 @@ import {
 import { VehicleGrid, type VehicleRow } from './VehicleGrid'
 import { createCustomer, updateCustomer, type Customer } from '@/services/customers'
 import { createVehicle, updateVehicle, deleteVehicle, type Vehicle } from '@/services/vehicles'
-import { maskCPF, maskPhone, maskCEP, validateCPF } from '@/lib/masks'
+import {
+  maskCPF,
+  maskPhone,
+  maskCEP,
+  validateCPF,
+  maskCNPJAlphanumeric,
+  validateCNPJAlphanumeric,
+} from '@/lib/masks'
 import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
@@ -61,11 +68,13 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
 
   const [form, setForm] = useState({
     name: initialCustomer?.name || '',
+    tipo_pessoa: (initialCustomer?.tipo_pessoa as 'F' | 'J') || 'F',
     social_name: initialCustomer?.social_name || '',
     birth_date: initialCustomer?.birth_date
       ? initialCustomer.birth_date.split(' ')[0].split('T')[0]
       : '',
     cpf: initialCustomer?.cpf || '',
+    cnpj: initialCustomer?.cnpj || '',
     phone: initialCustomer?.phone || '',
     has_whatsapp: initialCustomer?.has_whatsapp || false,
     email: initialCustomer?.email || '',
@@ -100,6 +109,22 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
     })
   }
 
+  const handleTipoPessoaChange = (value: string) => {
+    setForm((p) => ({
+      ...p,
+      tipo_pessoa: value as 'F' | 'J',
+      cpf: value === 'F' ? p.cpf : '',
+      cnpj: value === 'J' ? p.cnpj : '',
+    }))
+    setErrors((p) => {
+      const n = { ...p }
+      delete n.cpf
+      delete n.cnpj
+      delete n.tipo_pessoa
+      return n
+    })
+  }
+
   const handleCep = async (cep: string) => {
     const masked = maskCEP(cep)
     set('cep', masked)
@@ -120,8 +145,14 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
   const validate = () => {
     const e: Record<string, string> = {}
     if (!form.name.trim()) e.name = 'Obrigatório'
-    if (!form.cpf.trim()) e.cpf = 'Obrigatório'
-    else if (!validateCPF(form.cpf)) e.cpf = 'CPF inválido'
+    if (!form.tipo_pessoa) e.tipo_pessoa = 'Obrigatório'
+    if (form.tipo_pessoa === 'F') {
+      if (!form.cpf.trim()) e.cpf = 'Obrigatório'
+      else if (!validateCPF(form.cpf)) e.cpf = 'CPF inválido'
+    } else if (form.tipo_pessoa === 'J') {
+      if (!form.cnpj.trim()) e.cnpj = 'Obrigatório'
+      else if (!validateCNPJAlphanumeric(form.cnpj)) e.cnpj = 'CNPJ inválido'
+    }
     if (!form.phone.trim()) e.phone = 'Obrigatório'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'E-mail inválido'
     const ve: Record<number, Record<string, string>> = {}
@@ -145,7 +176,12 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
     }
     setSaving(true)
     try {
-      const payload = { ...form, birth_date: form.birth_date || null }
+      const payload = {
+        ...form,
+        birth_date: form.birth_date || null,
+        cpf: form.tipo_pessoa === 'F' ? form.cpf : '',
+        cnpj: form.tipo_pessoa === 'J' ? form.cnpj : '',
+      }
       if (isEditMode && initialCustomer) {
         await updateCustomer(initialCustomer.id, payload)
         const currentIds = vehicles.map((v) => v.id)
@@ -198,6 +234,19 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
         <h2 className="font-bold text-lg mb-4">Dados Pessoais</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
+            <Label>Tipo de Pessoa *</Label>
+            <Select value={form.tipo_pessoa} onValueChange={handleTipoPessoaChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="F">Física</SelectItem>
+                <SelectItem value="J">Jurídica</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.tipo_pessoa && <p className="text-xs text-red-500">{errors.tipo_pessoa}</p>}
+          </div>
+          <div className="space-y-1.5">
             <Label>Nome *</Label>
             <Input value={form.name} onChange={(e) => set('name', e.target.value)} />
             {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
@@ -214,11 +263,24 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
               onChange={(e) => set('birth_date', e.target.value)}
             />
           </div>
-          <div className="space-y-1.5">
-            <Label>CPF *</Label>
-            <Input value={form.cpf} onChange={(e) => set('cpf', maskCPF(e.target.value))} />
-            {errors.cpf && <p className="text-xs text-red-500">{errors.cpf}</p>}
-          </div>
+          {form.tipo_pessoa === 'F' && (
+            <div className="space-y-1.5">
+              <Label>CPF *</Label>
+              <Input value={form.cpf} onChange={(e) => set('cpf', maskCPF(e.target.value))} />
+              {errors.cpf && <p className="text-xs text-red-500">{errors.cpf}</p>}
+            </div>
+          )}
+          {form.tipo_pessoa === 'J' && (
+            <div className="space-y-1.5">
+              <Label>CNPJ *</Label>
+              <Input
+                value={form.cnpj}
+                onChange={(e) => set('cnpj', maskCNPJAlphanumeric(e.target.value))}
+                maxLength={18}
+              />
+              {errors.cnpj && <p className="text-xs text-red-500">{errors.cnpj}</p>}
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label>Telefone *</Label>
             <Input value={form.phone} onChange={(e) => set('phone', maskPhone(e.target.value))} />

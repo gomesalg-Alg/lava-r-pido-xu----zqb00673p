@@ -94,3 +94,37 @@ export function validateCPFCNPJ(value: string): boolean {
   if (d.length === 14) return validateCNPJ(d)
   return false
 }
+
+export function maskCNPJAlphanumeric(value: string): string {
+  const d = value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 14)
+  if (d.length <= 2) return d
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
+}
+
+export function validateCNPJAlphanumeric(cnpj: string): boolean {
+  const d = cnpj.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (d.length !== 14) return false
+  if (!/^[A-Z0-9]+$/.test(d)) return false
+  if (/^([A-Z0-9])\1{13}$/.test(d)) return false
+
+  const charVal = (c: string) => c.charCodeAt(0) - 48
+  const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  let sum = 0
+  for (let i = 0; i < 12; i++) sum += charVal(d[i]) * weights1[i]
+  let d1 = sum % 11
+  d1 = d1 < 2 ? 0 : 11 - d1
+
+  const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  sum = 0
+  for (let i = 0; i < 13; i++) sum += charVal(d[i]) * weights2[i]
+  let d2 = sum % 11
+  d2 = d2 < 2 ? 0 : 11 - d2
+
+  return d1 === charVal(d[12]) && d2 === charVal(d[13])
+}

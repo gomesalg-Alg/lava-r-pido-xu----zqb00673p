@@ -117,6 +117,9 @@ export default function BankAccountsPage() {
               <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
                 Nome do Banco
               </SortableHeader>
+              <SortableHeader columnKey="trading_name" sortState={sortState} onSort={toggleSort}>
+                Nome Fantasia
+              </SortableHeader>
               <SortableHeader columnKey="agency" sortState={sortState} onSort={toggleSort}>
                 Agência
               </SortableHeader>
@@ -135,13 +138,13 @@ export default function BankAccountsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : sortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
                   Nenhuma conta bancária encontrada.
                 </TableCell>
               </TableRow>
@@ -149,6 +152,7 @@ export default function BankAccountsPage() {
               sortedItems.map((r) => (
                 <TableRow key={r.id} className="even:bg-slate-50">
                   <TableCell className="font-medium">{r.name}</TableCell>
+                  <TableCell className="text-slate-600">{r.trading_name || '-'}</TableCell>
                   <TableCell className="text-slate-600">{r.agency}</TableCell>
                   <TableCell className="text-slate-600">{r.account_number}</TableCell>
                   <TableCell>

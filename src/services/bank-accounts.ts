@@ -5,6 +5,7 @@ export type AccountType = 'Corrente' | 'Poupança'
 export interface BankAccount {
   id: string
   name: string
+  trading_name?: string
   agency: string
   account_number: string
   account_type: AccountType
