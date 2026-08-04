@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -9,7 +10,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { VEHICLE_TYPES, FUEL_OPTIONS } from '@/lib/vehicle-options'
-import { maskPlaca } from '@/lib/masks'
 
 export type VehicleRow = {
   id: string
@@ -21,108 +21,127 @@ export type VehicleRow = {
   placa: string
 }
 
-interface Props {
+interface VehicleGridProps {
   vehicles: VehicleRow[]
   onChange: (vehicles: VehicleRow[]) => void
-  errors: Record<number, Record<string, string>>
+  errors?: Record<number, Record<string, string>>
 }
 
-export function VehicleGrid({ vehicles, onChange, errors }: Props) {
-  const add = () =>
-    onChange([
-      ...vehicles,
-      { id: crypto.randomUUID(), type: '', brand: '', model: '', year: '', fuel: '', placa: '' },
-    ])
+let counter = 0
+const genId = () => `new-${Date.now()}-${counter++}`
 
-  const remove = (id: string) => onChange(vehicles.filter((v) => v.id !== id))
+const emptyVehicle = (): VehicleRow => ({
+  id: genId(),
+  type: '',
+  brand: '',
+  model: '',
+  year: '',
+  fuel: '',
+  placa: '',
+})
 
-  const update = (id: string, key: keyof VehicleRow, value: string) =>
-    onChange(vehicles.map((v) => (v.id === id ? { ...v, [key]: value } : v)))
+export function VehicleGrid({ vehicles, onChange, errors = {} }: VehicleGridProps) {
+  const addVehicle = () => {
+    onChange([...vehicles, emptyVehicle()])
+  }
+
+  const removeVehicle = (index: number) => {
+    onChange(vehicles.filter((_, i) => i !== index))
+  }
+
+  const updateField = (index: number, field: keyof VehicleRow, value: string) => {
+    onChange(vehicles.map((v, i) => (i === index ? { ...v, [field]: value } : v)))
+  }
 
   return (
-    <div className="space-y-3">
-      {vehicles.map((v, i) => (
-        <div
-          key={v.id}
-          className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end p-3 border rounded-lg bg-slate-50"
-        >
-          <div className="sm:col-span-2 space-y-1">
-            <label className="text-xs font-medium text-slate-600">Tipo</label>
-            <Select value={v.type} onValueChange={(val) => update(v.id, 'type', val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {VEHICLE_TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors[i]?.type && <p className="text-xs text-red-500">{errors[i].type}</p>}
-          </div>
-          <div className="sm:col-span-2 space-y-1">
-            <label className="text-xs font-medium text-slate-600">Placa</label>
-            <Input
-              value={v.placa}
-              onChange={(e) => update(v.id, 'placa', maskPlaca(e.target.value))}
-              placeholder="ABC-1D23"
-              className="uppercase"
-            />
-            {errors[i]?.placa && <p className="text-xs text-red-500">{errors[i].placa}</p>}
-          </div>
-          <div className="sm:col-span-2 space-y-1">
-            <label className="text-xs font-medium text-slate-600">Marca</label>
-            <Input
-              value={v.brand}
-              onChange={(e) => update(v.id, 'brand', e.target.value)}
-              placeholder="Marca"
-            />
-            {errors[i]?.brand && <p className="text-xs text-red-500">{errors[i].brand}</p>}
-          </div>
-          <div className="sm:col-span-2 space-y-1">
-            <label className="text-xs font-medium text-slate-600">Modelo</label>
-            <Input
-              value={v.model}
-              onChange={(e) => update(v.id, 'model', e.target.value)}
-              placeholder="Modelo"
-            />
-            {errors[i]?.model && <p className="text-xs text-red-500">{errors[i].model}</p>}
-          </div>
-          <div className="sm:col-span-1 space-y-1">
-            <label className="text-xs font-medium text-slate-600">Ano</label>
-            <Input
-              type="number"
-              value={v.year}
-              onChange={(e) => update(v.id, 'year', e.target.value)}
-              placeholder="Ano"
-            />
-          </div>
-          <div className="sm:col-span-2 space-y-1">
-            <label className="text-xs font-medium text-slate-600">Combustível</label>
-            <Select value={v.fuel} onValueChange={(val) => update(v.id, 'fuel', val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Combustível" />
-              </SelectTrigger>
-              <SelectContent>
-                {FUEL_OPTIONS.map((f) => (
-                  <SelectItem key={f} value={f}>
-                    {f}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="sm:col-span-1 flex justify-end">
-            <Button type="button" variant="destructive" size="icon" onClick={() => remove(v.id)}>
-              <Trash2 className="w-4 h-4" />
-            </Button>
+    <div className="space-y-4">
+      {vehicles.map((vehicle, index) => (
+        <div key={vehicle.id} className="relative rounded-lg border p-4 space-y-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 h-8 w-8 text-red-500 hover:text-red-700"
+            onClick={() => removeVehicle(index)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pr-8">
+            <div className="space-y-1.5">
+              <Label>Tipo *</Label>
+              <Select value={vehicle.type} onValueChange={(v) => updateField(index, 'type', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {VEHICLE_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors[index]?.type && <p className="text-xs text-red-500">{errors[index].type}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Marca *</Label>
+              <Input
+                value={vehicle.brand}
+                onChange={(e) => updateField(index, 'brand', e.target.value)}
+              />
+              {errors[index]?.brand && (
+                <p className="text-xs text-red-500">{errors[index].brand}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Modelo *</Label>
+              <Input
+                value={vehicle.model}
+                onChange={(e) => updateField(index, 'model', e.target.value)}
+              />
+              {errors[index]?.model && (
+                <p className="text-xs text-red-500">{errors[index].model}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Ano</Label>
+              <Input
+                value={vehicle.year}
+                onChange={(e) => updateField(index, 'year', e.target.value)}
+                maxLength={4}
+                inputMode="numeric"
+                className="w-24"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Combustível</Label>
+              <Select value={vehicle.fuel} onValueChange={(v) => updateField(index, 'fuel', v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FUEL_OPTIONS.map((f) => (
+                    <SelectItem key={f} value={f}>
+                      {f}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Placa</Label>
+              <Input
+                value={vehicle.placa}
+                onChange={(e) => updateField(index, 'placa', e.target.value.toUpperCase())}
+                maxLength={8}
+              />
+            </div>
           </div>
         </div>
       ))}
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="w-4 h-4 mr-2" /> Adicionar Veículo
+      <Button type="button" variant="outline" onClick={addVehicle} className="w-full">
+        <Plus className="h-4 w-4 mr-2" />
+        Adicionar Veículo
       </Button>
     </div>
   )
