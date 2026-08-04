@@ -29,6 +29,8 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
+import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
+import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -48,6 +50,7 @@ export default function ServicesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(emptyForm)
+  const { sortedItems, sortState, toggleSort } = useSortableData(services)
 
   const loadData = async () => {
     try {
@@ -144,11 +147,19 @@ export default function ServicesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Ordem</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="sort_order" sortState={sortState} onSort={toggleSort}>
+                Ordem
+              </SortableHeader>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Nome
+              </SortableHeader>
+              <SortableHeader columnKey="description" sortState={sortState} onSort={toggleSort}>
+                Descrição
+              </SortableHeader>
+              <SortableHeader columnKey="price" sortState={sortState} onSort={toggleSort}>
+                Preço
+              </SortableHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -158,15 +169,16 @@ export default function ServicesPage() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : services.length === 0 ? (
+            ) : sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-slate-400">
                   Nenhum serviço encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              services.map((s) => (
+              sortedItems.map((s) => (
                 <TableRow key={s.id} className="even:bg-slate-50">
+                  <TableCell className="text-slate-600">{s.sort_order ?? 0}</TableCell>
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell className="max-w-[300px] truncate text-slate-600">
                     {s.description || '-'}
@@ -174,7 +186,6 @@ export default function ServicesPage() {
                   <TableCell className="text-slate-600">
                     {fmtPrice(s.price, s.is_starting_price)}
                   </TableCell>
-                  <TableCell className="text-slate-600">{s.sort_order ?? 0}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => openEdit(s)}>
