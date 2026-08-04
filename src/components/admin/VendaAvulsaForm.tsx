@@ -155,6 +155,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
         received_at: new Date().toISOString(),
       }
       if (customer?.id) arData.customer_id = customer.id
+      arData.bank_account_id = selectedBankId
       await createAccountsReceivable(arData)
 
       toast.success('Venda avulsa finalizada!')

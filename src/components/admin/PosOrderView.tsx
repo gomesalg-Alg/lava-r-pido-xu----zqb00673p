@@ -237,6 +237,7 @@ export function PosOrderView({ order, onBack }: Props) {
         received_at: nowIso,
       }
       if (order.customer_id) arData.customer_id = order.customer_id
+      arData.bank_account_id = selectedBankId
       await createAccountsReceivable(arData)
 
       toast.success('Venda finalizada com sucesso!')
