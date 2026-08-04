@@ -1,29 +1,21 @@
 import { useState, useMemo, useEffect } from 'react'
 import { PosProductGrid } from '@/components/admin/PosProductGrid'
+import { PaymentLines } from '@/components/admin/PaymentLines'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
-import { Trash2, Minus, Plus, ShoppingCart } from 'lucide-react'
+import { Trash2, Minus, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { createVendaAvulsa } from '@/services/vendas-avulsas'
 import { getCustomers } from '@/services/customers'
+import { createOrderPayment, buildPaymentData, type PaymentLine } from '@/services/order-payments'
+import { createAccountsReceivable } from '@/services/accounts-receivable'
+import { getCardRates, type CardRate } from '@/services/card-rates'
+import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import type { Product } from '@/services/products'
 
@@ -35,28 +27,26 @@ interface SaleItem {
   total_price: number
 }
 
-const PAYMENT_METHODS = [
-  'Dinheiro',
-  'Cartão de Crédito',
-  'Cartão de Débito',
-  'Pix',
-  'Cortesia',
-  'Outros',
-]
-
 export function PosVendaAvulsa() {
   const [items, setItems] = useState<SaleItem[]>([])
   const [customerId, setCustomerId] = useState('')
   const [customerDoc, setCustomerDoc] = useState('')
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([])
-  const [paymentMethod, setPaymentMethod] = useState('Dinheiro')
-  const [amountReceived, setAmountReceived] = useState('')
+  const [paymentLines, setPaymentLines] = useState<PaymentLine[]>([])
+  const [cardRates, setCardRates] = useState<CardRate[]>([])
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [selectedBankId, setSelectedBankId] = useState('')
   const [saving, setSaving] = useState(false)
-  const [checkoutOpen, setCheckoutOpen] = useState(false)
 
   useEffect(() => {
     getCustomers()
       .then(setCustomers)
+      .catch(() => {})
+    getCardRates()
+      .then(setCardRates)
+      .catch(() => {})
+    getActiveBankAccounts()
+      .then(setBankAccounts)
       .catch(() => {})
   }, [])
 
@@ -101,31 +91,79 @@ export function PosVendaAvulsa() {
     )
   }
 
-  const change = useMemo(
-    () => Math.max(0, (parseFloat(amountReceived) || 0) - total),
-    [amountReceived, total],
-  )
+  const validLines = paymentLines.filter((l) => l.method && l.amount > 0)
+  const totalPaid = validLines.reduce((s, l) => s + l.amount, 0)
+  const changeAmount = totalPaid > total ? totalPaid - total : 0
 
-  const handleCheckout = async () => {
-    if (!items.length) return
+  const handleFinalize = async () => {
+    if (!items.length || !selectedBankId || validLines.length === 0) return
     setSaving(true)
     try {
-      await createVendaAvulsa({
-        customer_id: customerId || null,
-        customer_document: customerDoc || null,
-        items,
+      const pmSummary = validLines
+        .map((l) => {
+          let label = l.method
+          if (l.card_flag) label += ` – ${l.card_flag}`
+          if (l.method === 'Cartão de Crédito' && l.installments > 1)
+            label += ` – ${l.installments}x`
+          return `${label}: ${formatCurrency(l.amount)}`
+        })
+        .join(' | ')
+
+      const vendaData: Record<string, unknown> = {
+        items: items.map((i) => ({
+          product_id: i.product_id,
+          name: i.name,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          total_price: i.total_price,
+        })),
         total_amount: total,
-        payment_method: paymentMethod,
-        change_amount: change,
-      })
+        payment_method: pmSummary,
+        change_amount: changeAmount,
+      }
+      if (customerId) vendaData.customer_id = customerId
+      if (customerDoc) vendaData.customer_document = customerDoc
+
+      const venda = await createVendaAvulsa(vendaData)
+
+      for (const line of validLines) {
+        await createOrderPayment(
+          buildPaymentData({
+            venda_avulsa_id: venda.id,
+            method: line.method,
+            amount: line.amount,
+            card_flag: line.card_flag || undefined,
+            installments: line.installments || undefined,
+            applied_rate: line.applied_rate,
+            fee_amount: line.fee_amount,
+            bank_account_id: selectedBankId,
+          }),
+        )
+      }
+
+      const customerName = customers.find((c) => c.id === customerId)?.name || 'Consumidor Final'
+
+      const arData: Record<string, unknown> = {
+        venda_avulsa_id: venda.id,
+        description: `Venda Avulsa – ${customerName}`,
+        amount: total,
+        due_date: new Date().toISOString().split('T')[0],
+        status: 'Recebido',
+        payment_method: pmSummary,
+        received_at: new Date().toISOString(),
+        bank_account_id: selectedBankId,
+      }
+      if (customerId) arData.customer_id = customerId
+      await createAccountsReceivable(arData)
+
       toast.success('Venda registrada!')
       setItems([])
       setCustomerId('')
       setCustomerDoc('')
-      setAmountReceived('')
-      setCheckoutOpen(false)
-    } catch {
-      toast.error('Erro ao registrar venda')
+      setPaymentLines([])
+      setSelectedBankId('')
+    } catch (err) {
+      toast.error(getErrorMessage(err) || 'Erro ao registrar venda')
     } finally {
       setSaving(false)
     }
@@ -133,8 +171,12 @@ export function PosVendaAvulsa() {
 
   const customerOpts = [
     { value: '', label: 'Consumidor Final' },
-    ...customers.map((c) => ({ value: c.id, label: c.name })),
+    ...customers
+      .filter((c) => c.name !== 'Consumidor Final')
+      .map((c) => ({ value: c.id, label: c.name })),
   ]
+
+  const canFinalize = items.length > 0 && !!selectedBankId && validLines.length > 0 && !saving
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -221,70 +263,47 @@ export function PosVendaAvulsa() {
         </Card>
         {items.length > 0 && (
           <Card>
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-4 space-y-4">
               <div className="flex justify-between">
                 <span className="text-lg font-bold">Total:</span>
                 <span className="text-2xl font-bold text-blue-600">{formatCurrency(total)}</span>
               </div>
-              <Button className="w-full" onClick={() => setCheckoutOpen(true)}>
-                <ShoppingCart className="w-4 h-4 mr-2" /> Finalizar Venda
+              <div className="space-y-1">
+                <Label>Conta Bancária *</Label>
+                <SearchableSelect
+                  options={bankAccounts
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((b) => ({
+                      value: b.id,
+                      label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
+                    }))}
+                  value={selectedBankId}
+                  onChange={setSelectedBankId}
+                  placeholder="Selecionar banco..."
+                  searchPlaceholder="Buscar banco..."
+                />
+                {!selectedBankId && (
+                  <p className="text-sm text-red-500">Selecione uma conta bancária</p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <Label>Pagamentos</Label>
+                <PaymentLines
+                  total={total}
+                  lines={paymentLines}
+                  onLinesChange={setPaymentLines}
+                  cardRates={cardRates}
+                />
+              </div>
+              <Button className="w-full" size="lg" onClick={handleFinalize} disabled={!canFinalize}>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {saving ? 'Processando...' : 'Finalizar Venda'}
               </Button>
             </CardContent>
           </Card>
         )}
       </div>
-      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Finalizar Venda</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total:</span>
-              <span>{formatCurrency(total)}</span>
-            </div>
-            <div className="space-y-1">
-              <Label>Forma de Pagamento</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAYMENT_METHODS.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label>Valor Recebido</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={amountReceived}
-                onChange={(e) => setAmountReceived(e.target.value)}
-                placeholder="0,00"
-              />
-            </div>
-            {change > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Troco:</span>
-                <span className="font-medium">{formatCurrency(change)}</span>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCheckoutOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCheckout} disabled={saving}>
-              {saving ? 'Processando...' : 'Confirmar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
