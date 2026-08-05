@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T12:05:31.144Z",
+  "generatedAt": "2026-08-05T18:09:33.056Z",
   "collections": [
     {
       "name": "users",
@@ -691,9 +691,19 @@
           "type": "text",
           "required": false,
           "system": false
+        },
+        {
+          "name": "account_category_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "account_categories"
         }
       ],
-      "indexes": ["CREATE INDEX `idx_service_orders_placa` ON `service_orders` (placa)"]
+      "indexes": [
+        "CREATE INDEX `idx_service_orders_placa` ON `service_orders` (placa)",
+        "CREATE INDEX `idx_service_orders_account_category_id` ON `service_orders` (account_category_id)"
+      ]
     },
     {
       "name": "service_order_items",
