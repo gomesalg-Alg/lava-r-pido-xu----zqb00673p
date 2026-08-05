@@ -24,7 +24,7 @@ migrate(
 
       if (existingAR) continue
 
-      var totalAmount = venda.getDouble('total_amount') || 0
+      var totalAmount = venda.get('total_amount') || 0
       var paymentMethod = venda.getString('payment_method') || ''
       var customerId = venda.getString('customer_id') || ''
       var customerDoc = venda.getString('customer_document') || ''
