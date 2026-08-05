@@ -9,12 +9,14 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
 
     try {
       ar = $app.findRecordById('accounts_receivable', id)
-      $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
     } catch (_) {
       ar = null
     }
 
     if (ar) {
+      try {
+        $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+      } catch (_) {}
       order = ar.expandedOne('order_id')
       if (order) {
         try {
@@ -22,15 +24,20 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         } catch (_) {}
       }
       venda = ar.expandedOne('venda_avulsa_id')
-    } else {
+    }
+
+    if (!ar) {
       try {
         order = $app.findRecordById('service_orders', id)
-        $app.expandRecord(order, ['customer_id', 'vehicle_id'])
       } catch (_) {
         order = null
       }
 
       if (order) {
+        try {
+          $app.expandRecord(order, ['customer_id', 'vehicle_id'])
+        } catch (_) {}
+
         try {
           ar = $app.findFirstRecordByFilter(
             'accounts_receivable',
@@ -40,7 +47,9 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
             0,
             { oid: id },
           )
-          $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+          try {
+            $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+          } catch (_) {}
           venda = ar.expandedOne('venda_avulsa_id')
         } catch (_) {
           ar = null
@@ -62,7 +71,9 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
               0,
               { vid: id },
             )
-            $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+            try {
+              $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+            } catch (_) {}
             order = ar.expandedOne('order_id')
             if (order) {
               try {

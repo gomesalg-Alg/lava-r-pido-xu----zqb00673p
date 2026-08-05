@@ -11,6 +11,7 @@ interface Props {
   description?: string
   amount?: number
   className?: string
+  showLabel?: boolean
 }
 
 export function WhatsAppReceiptButton({
@@ -20,6 +21,7 @@ export function WhatsAppReceiptButton({
   description,
   amount,
   className,
+  showLabel,
 }: Props) {
   const cleanPhone = sanitizePhone(customerPhone)
 
@@ -62,6 +64,7 @@ export function WhatsAppReceiptButton({
     >
       <a href={waUrl} target="_blank" rel="noreferrer">
         <MessageCircle className="w-4 h-4" />
+        {showLabel && <span className="ml-2">WhatsApp</span>}
       </a>
     </Button>
   )
