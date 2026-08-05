@@ -25,6 +25,7 @@ import {
   getSyntheticParents,
 } from '@/services/account-categories'
 import { toast } from 'sonner'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 interface Props {
   open: boolean
@@ -42,6 +43,7 @@ const emptyForm: AccountCategoryFormData = {
 }
 
 export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [form, setForm] = useState<AccountCategoryFormData>(emptyForm)
   const [parents, setParents] = useState<AccountCategory[]>([])
   const [saving, setSaving] = useState(false)
@@ -122,7 +124,7 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="overflow-y-auto w-full sm:max-w-md">
+      <SheetContent ref={keyboardRef} className="overflow-y-auto w-full sm:max-w-md">
         <SheetHeader className="mb-6">
           <SheetTitle>{editing ? 'Editar Categoria' : 'Nova Categoria'}</SheetTitle>
           <SheetDescription>

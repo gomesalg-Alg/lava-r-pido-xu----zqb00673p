@@ -12,6 +12,7 @@ import { formatCurrency } from '@/lib/format'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { Trash2, CheckCircle } from 'lucide-react'
 import { getCardRates, getRateForPayment, type CardRate } from '@/services/card-rates'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 export type CartItem = {
   id?: string
@@ -42,6 +43,7 @@ interface Props {
 }
 
 export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [discount, setDiscount] = useState(0)
   const [surcharge, setSurcharge] = useState(0)
   const [amountPaid, setAmountPaid] = useState(0)
@@ -110,7 +112,7 @@ export function PosCheckout({ items, onRemove, onFinalize, finalizing }: Props) 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={keyboardRef}>
       <div className="space-y-2 max-h-[200px] overflow-y-auto">
         {items.length === 0 && (
           <p className="text-center text-slate-400 py-4 text-sm">Nenhum item adicionado.</p>

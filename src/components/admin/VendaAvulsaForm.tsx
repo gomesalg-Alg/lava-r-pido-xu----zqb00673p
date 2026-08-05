@@ -24,6 +24,7 @@ import { Trash2, CheckCircle, Search, ArrowLeft, Plus, Minus } from 'lucide-reac
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
 import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 type CartItem = { product_id: string; name: string; quantity: number; unit_price: number }
 const PAYMENTS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Cortesia', 'Outros']
@@ -31,6 +32,7 @@ const FLAGS = ['Visa', 'Mastercard', 'Elo']
 const isCard = (m: string) => m === 'Cartão de Crédito' || m === 'Cartão de Débito'
 
 export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [cart, setCart] = useState<CartItem[]>([])
   const [method, setMethod] = useState('')
   const [amountPaid, setAmountPaid] = useState(0)
@@ -168,7 +170,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={keyboardRef}>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />

@@ -51,6 +51,7 @@ function NumCell({
       )}
       <Input
         type="text"
+        inputMode="decimal"
         className={`h-8 text-xs px-2 ${prefix ? 'pl-7' : ''}`}
         value={str}
         onChange={(e) => setStr(e.target.value)}

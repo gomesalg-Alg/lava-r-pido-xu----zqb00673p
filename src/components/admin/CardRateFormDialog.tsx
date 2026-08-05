@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { createCardRate, updateCardRate, type CardRate } from '@/services/card-rates'
 import { toast } from 'sonner'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 interface Props {
   open: boolean
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function CardRateFormDialog({ open, onOpenChange, rate, onSaved }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [flag, setFlag] = useState('')
   const [debitRate, setDebitRate] = useState('')
   const [credit1x, setCredit1x] = useState('')
@@ -80,7 +82,7 @@ export function CardRateFormDialog({ open, onOpenChange, rate, onSaved }: Props)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent ref={keyboardRef} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{rate ? 'Editar Bandeira' : 'Nova Bandeira'}</DialogTitle>
           <DialogDescription>

@@ -21,6 +21,7 @@ import { createBankAccount, updateBankAccount, type BankAccount } from '@/servic
 import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const ACCOUNT_TYPES = ['Corrente', 'Poupança']
 
@@ -32,6 +33,7 @@ interface Props {
 }
 
 export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [form, setForm] = useState({
@@ -92,7 +94,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent ref={keyboardRef} className="max-w-md">
         <DialogHeader>
           <DialogTitle>{record ? 'Editar Conta Bancária' : 'Nova Conta Bancária'}</DialogTitle>
         </DialogHeader>

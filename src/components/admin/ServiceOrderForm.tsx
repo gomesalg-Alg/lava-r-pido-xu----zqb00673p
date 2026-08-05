@@ -29,6 +29,7 @@ import type { Vehicle } from '@/services/vehicles'
 import { toast } from 'sonner'
 import { Save, Camera, Upload } from 'lucide-react'
 import { PaymentSummary } from '@/components/admin/PaymentSummary'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const STATUSES = ['Orçamento', 'Em Andamento']
 const LOCKED_STATUSES = ['Pago', 'Finalizado', 'Cancelado']
@@ -43,6 +44,7 @@ export function ServiceOrderForm({ orderId }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const existingItemIds = useRef<string[]>([])
+  const keyboardRef = useFormKeyboard<HTMLFormElement>()
 
   const [form, setForm] = useState({
     ticket_number: 0,
@@ -243,7 +245,7 @@ export function ServiceOrderForm({ orderId }: Props) {
       : ''
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form ref={keyboardRef} onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white rounded-lg border p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-lg">Cabeçalho da Ordem</h2>

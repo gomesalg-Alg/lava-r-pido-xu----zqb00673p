@@ -22,6 +22,7 @@ import {
 import { toDateInput, fromDatetimeLocal } from '@/lib/format'
 import { Image as ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 interface Props {
   open: boolean
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function PromotionFormDialog({ open, onOpenChange, promotion, onSaved }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isActive, setIsActive] = useState(false)
@@ -98,7 +100,7 @@ export function PromotionFormDialog({ open, onOpenChange, promotion, onSaved }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent ref={keyboardRef} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{promotion ? 'Editar Promoção' : 'Nova Promoção'}</DialogTitle>
           <DialogDescription>

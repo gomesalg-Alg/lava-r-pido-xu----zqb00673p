@@ -28,6 +28,7 @@ import {
 import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const STATUS_OPTIONS = ['Pendente', 'Pago', 'Cancelado']
 const NONE = { value: '', label: 'Nenhum' }
@@ -40,6 +41,7 @@ interface Props {
 }
 
 export function AccountsPayableFormDialog({ open, onOpenChange, record, onSuccess }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [suppliers, setSuppliers] = useState<{ id: string; name: string }[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [saving, setSaving] = useState(false)
@@ -141,7 +143,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent ref={keyboardRef} className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{record ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}</DialogTitle>
         </DialogHeader>

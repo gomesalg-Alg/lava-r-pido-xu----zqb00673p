@@ -22,12 +22,14 @@ import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createUser, type UserRole } from '@/services/users'
 import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 interface UserCreateSheetProps {
   onCreated: () => void
 }
 
 export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -95,7 +97,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
           <UserPlus className="w-4 h-4 mr-2" /> Novo Usuário
         </Button>
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto w-full sm:max-w-md">
+      <SheetContent ref={keyboardRef} className="overflow-y-auto w-full sm:max-w-md">
         <SheetHeader className="mb-6">
           <SheetTitle>Novo Usuário</SheetTitle>
           <SheetDescription>Cadastre um novo usuário no sistema.</SheetDescription>

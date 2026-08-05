@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
 import { formatCurrency } from '@/lib/format'
 import type { ServiceOrderItem } from '@/services/service-orders'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 interface EditItemData {
   quantity: number
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function PosItemEditDialog({ item, open, onOpenChange, onSave }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [quantity, setQuantity] = useState(1)
   const [unitPrice, setUnitPrice] = useState(0)
   const [discountAmount, setDiscountAmount] = useState(0)
@@ -69,7 +71,7 @@ export function PosItemEditDialog({ item, open, onOpenChange, onSave }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent ref={keyboardRef} className="max-w-md">
         <DialogHeader>
           <DialogTitle>Editar Item</DialogTitle>
         </DialogHeader>

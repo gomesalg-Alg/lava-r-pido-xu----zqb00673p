@@ -30,6 +30,7 @@ import {
 import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const STATUS_OPTIONS = ['Pendente', 'Recebido', 'Cancelado']
 const NONE = { value: '', label: 'Nenhum' }
@@ -42,6 +43,7 @@ interface Props {
 }
 
 export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuccess }: Props) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([])
   const [orders, setOrders] = useState<
     { id: string; ticket_number: number; expand?: { customer_id?: { name: string } } }[]
@@ -173,7 +175,7 @@ export function AccountsReceivableFormDialog({ open, onOpenChange, record, onSuc
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent ref={keyboardRef} className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{record ? 'Editar Conta a Receber' : 'Nova Conta a Receber'}</DialogTitle>
         </DialogHeader>

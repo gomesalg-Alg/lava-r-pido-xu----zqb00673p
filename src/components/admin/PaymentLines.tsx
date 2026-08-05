@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import type { PaymentLine } from '@/services/order-payments'
 import type { CardRate } from '@/services/card-rates'
 import { getRateForPayment } from '@/services/card-rates'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const PAYMENT_METHODS = [
   'Dinheiro',
@@ -35,6 +36,7 @@ export function PaymentLines({
   onLinesChange: (lines: PaymentLine[]) => void
   cardRates: CardRate[]
 }) {
+  const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const activeFlags = cardRates.filter((r) => r.is_active)
 
   const updateLine = (id: string, patch: Partial<PaymentLine>) =>
@@ -75,7 +77,7 @@ export function PaymentLines({
     activeFlags.find((r) => r.flag === flag)?.max_installments || 4
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" ref={keyboardRef}>
       {lines.map((line) => {
         const rate =
           isCardMethod(line.method) && line.card_flag

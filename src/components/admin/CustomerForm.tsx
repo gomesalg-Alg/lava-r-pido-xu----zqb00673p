@@ -25,6 +25,7 @@ import {
 import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
+import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const UFS = [
   'AC',
@@ -65,6 +66,7 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
   const navigate = useNavigate()
   const isEditMode = !!initialCustomer
   const existingVehicleIds = useRef<string[]>(initialVehicles?.map((v) => v.id) || [])
+  const keyboardRef = useFormKeyboard<HTMLFormElement>()
 
   const [form, setForm] = useState({
     name: initialCustomer?.name || '',
@@ -229,7 +231,7 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form ref={keyboardRef} onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white rounded-lg border p-6">
         <h2 className="font-bold text-lg mb-4">Dados Pessoais</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
