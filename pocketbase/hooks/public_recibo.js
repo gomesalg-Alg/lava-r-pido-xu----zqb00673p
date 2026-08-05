@@ -56,77 +56,90 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
     return e.json(404, { error: 'Recibo não encontrado', code: 'NOT_FOUND' })
   }
 
-  if (ar) {
-    try {
-      $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
-    } catch (_) {}
-    if (!order) {
-      try {
-        order = ar.expandedOne('order_id')
-      } catch (_) {}
-    }
-    if (!venda) {
-      try {
-        venda = ar.expandedOne('venda_avulsa_id')
-      } catch (_) {}
-    }
-  }
-  if (order) {
-    try {
-      $app.expandRecord(order, ['customer_id', 'vehicle_id'])
-    } catch (_) {}
+  var result = {
+    id: ar ? ar.id : order ? order.id : venda ? venda.id : id,
+    amount: 0,
+    status: '',
+    description: '',
+    payment_method: '',
+    received_at: '',
+    created: '',
+    customer: null,
+    vehicle: null,
+    order: null,
+    venda_avulsa: null,
+    payments: [],
+    items: [],
+    company: null,
+    service_subtotal: 0,
+    product_subtotal: 0,
+    troco: 0,
+    total_paid: 0,
   }
 
   try {
-    var result = {
-      id: ar ? ar.id : order ? order.id : venda ? venda.id : id,
-      amount: ar ? ar.getDouble('amount') : venda ? venda.getDouble('total_amount') : 0,
-      status: ar ? ar.getString('status') : order ? order.getString('status') : 'Recebido',
-      description: ar ? ar.getString('description') : '',
-      payment_method: ar
-        ? ar.getString('payment_method')
-        : venda
-          ? venda.getString('payment_method')
-          : '',
-      received_at: ar ? ar.getString('received_at') : '',
-      created: ar
-        ? ar.getString('created')
-        : order
-          ? order.getString('created')
-          : venda
-            ? venda.getString('created')
-            : '',
-      customer: null,
-      vehicle: null,
-      order: null,
-      venda_avulsa: null,
-      payments: [],
-      items: [],
-      company: null,
-      service_subtotal: 0,
-      product_subtotal: 0,
+    if (ar) {
+      result.amount = ar.getDouble('amount')
+      result.status = ar.getString('status')
+      result.description = ar.getString('description')
+      result.payment_method = ar.getString('payment_method')
+      result.received_at = ar.getString('received_at')
+      result.created = ar.getString('created')
+    } else if (order) {
+      result.status = order.getString('status')
+      result.created = order.getString('created')
+    } else if (venda) {
+      result.status = 'Recebido'
+      result.created = venda.getString('created')
+      result.amount = venda.getDouble('total_amount')
+      result.payment_method = venda.getString('payment_method')
     }
 
     var customer = null
+    var vehicle = null
+
+    if (ar && !order) {
+      try {
+        var orderId = ar.getString('order_id')
+        if (orderId) order = $app.findRecordById('service_orders', orderId)
+      } catch (_) {}
+    }
+
+    if (ar && !venda) {
+      try {
+        var vendaId = ar.getString('venda_avulsa_id')
+        if (vendaId) venda = $app.findRecordById('vendas_avulsas', vendaId)
+      } catch (_) {}
+    }
+
     if (ar) {
       try {
-        customer = ar.expandedOne('customer_id')
+        var custId = ar.getString('customer_id')
+        if (custId) customer = $app.findRecordById('customers', custId)
       } catch (_) {}
     }
+
     if (!customer && order) {
       try {
-        customer = order.expandedOne('customer_id')
+        var ordCustId = order.getString('customer_id')
+        if (ordCustId) customer = $app.findRecordById('customers', ordCustId)
       } catch (_) {}
     }
+
     if (!customer && venda) {
       try {
-        var vcId = venda.getString('customer_id')
-        if (vcId) {
-          $app.expandRecord(venda, ['customer_id'])
-          customer = venda.expandedOne('customer_id')
-        }
+        var vendCustId = venda.getString('customer_id')
+        if (vendCustId) customer = $app.findRecordById('customers', vendCustId)
       } catch (_) {}
     }
+
+    if (order) {
+      try {
+        var vehId = order.getString('vehicle_id')
+        if (vehId) vehicle = $app.findRecordById('vehicles', vehId)
+      } catch (_) {}
+    }
+
     if (customer) {
       result.customer = {
         name: customer.getString('name'),
@@ -135,20 +148,17 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
       }
     }
 
-    if (order) {
-      try {
-        var vehicle = order.expandedOne('vehicle_id')
-        if (vehicle) {
-          result.vehicle = {
-            brand: vehicle.getString('brand'),
-            model: vehicle.getString('model'),
-            year: vehicle.getInt('year'),
-            placa: vehicle.getString('placa'),
-            type: vehicle.getString('type'),
-          }
-        }
-      } catch (_) {}
+    if (vehicle) {
+      result.vehicle = {
+        brand: vehicle.getString('brand'),
+        model: vehicle.getString('model'),
+        year: vehicle.getInt('year'),
+        placa: vehicle.getString('placa'),
+        type: vehicle.getString('type'),
+      }
+    }
 
+    if (order) {
       result.order = {
         ticket_number: order.getInt('ticket_number'),
         total_discount: order.getDouble('total_discount'),
@@ -165,16 +175,15 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
           0,
         )
         for (var i = 0; i < orderItems.length; i++) {
+          var svcRef = null
+          var prodRef = null
           try {
-            $app.expandRecord(orderItems[i], ['service_id', 'product_id'])
-          } catch (_) {}
-          var svcRef = null,
-            prodRef = null
-          try {
-            svcRef = orderItems[i].expandedOne('service_id')
+            var svcId = orderItems[i].getString('service_id')
+            if (svcId) svcRef = $app.findRecordById('services', svcId)
           } catch (_) {}
           try {
-            prodRef = orderItems[i].expandedOne('product_id')
+            var prodId = orderItems[i].getString('product_id')
+            if (prodId) prodRef = $app.findRecordById('products', prodId)
           } catch (_) {}
           var iTotal = orderItems[i].getDouble('total_price')
           if (svcRef) result.service_subtotal += iTotal
@@ -262,6 +271,15 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
       }
       result.amount = calcTotal
     }
+
+    var paymentSum = 0
+    for (var p = 0; p < result.payments.length; p++) {
+      paymentSum += result.payments[p].amount || 0
+    }
+    var changeAmount = venda ? venda.getDouble('change_amount') : 0
+    result.troco =
+      changeAmount > 0 ? changeAmount : paymentSum > result.amount ? paymentSum - result.amount : 0
+    result.total_paid = result.troco > 0 ? paymentSum - result.troco : paymentSum
 
     try {
       var company = $app.findFirstRecordByFilter('company', "id != ''")
