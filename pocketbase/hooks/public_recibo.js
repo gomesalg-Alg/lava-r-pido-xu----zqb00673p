@@ -71,7 +71,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
 
   try {
     if (ar) {
-      result.amount = ar.getDouble('amount')
+      result.amount = ar.getFloat('amount')
       result.status = ar.getString('status')
       result.description = ar.getString('description')
       result.payment_method = ar.getString('payment_method')
@@ -83,7 +83,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
     } else if (venda) {
       result.status = 'Recebido'
       result.created = venda.getString('created')
-      result.amount = venda.getDouble('total_amount')
+      result.amount = venda.getFloat('total_amount')
       result.payment_method = venda.getString('payment_method')
     }
   } catch (err) {
@@ -161,9 +161,9 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
     try {
       result.order = {
         ticket_number: order.getInt('ticket_number'),
-        total_discount: order.getDouble('total_discount'),
-        total_surcharge: order.getDouble('total_surcharge'),
-        amount_paid: order.getDouble('amount_paid'),
+        total_discount: order.getFloat('total_discount'),
+        total_surcharge: order.getFloat('total_surcharge'),
+        amount_paid: order.getFloat('amount_paid'),
       }
     } catch (_) {}
 
@@ -186,17 +186,17 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
           var prodId = orderItems[i].getString('product_id')
           if (prodId) prodRef = $app.findRecordById('products', prodId)
         } catch (_) {}
-        var iTotal = orderItems[i].getDouble('total_price')
+        var iTotal = orderItems[i].getFloat('total_price')
         if (svcRef) result.service_subtotal += iTotal
         if (prodRef) result.product_subtotal += iTotal
         result.items.push({
           name: svcRef ? svcRef.getString('name') : prodRef ? prodRef.getString('name') : '',
           type: svcRef ? 'service' : 'product',
           quantity: orderItems[i].getInt('quantity'),
-          unit_price: orderItems[i].getDouble('unit_price'),
+          unit_price: orderItems[i].getFloat('unit_price'),
           total_price: iTotal,
-          discount_amount: orderItems[i].getDouble('discount_amount'),
-          surcharge_amount: orderItems[i].getDouble('surcharge_amount'),
+          discount_amount: orderItems[i].getFloat('discount_amount'),
+          surcharge_amount: orderItems[i].getFloat('surcharge_amount'),
         })
       }
     } catch (_) {}
@@ -212,7 +212,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
       for (var j = 0; j < ordPays.length; j++) {
         result.payments.push({
           method: ordPays[j].getString('method'),
-          amount: ordPays[j].getDouble('amount'),
+          amount: ordPays[j].getFloat('amount'),
           card_flag: ordPays[j].getString('card_flag'),
           installments: ordPays[j].getInt('installments'),
         })
@@ -244,9 +244,9 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
     try {
       result.venda_avulsa = {
         items: rawItems,
-        total_amount: venda.getDouble('total_amount'),
+        total_amount: venda.getFloat('total_amount'),
         payment_method: venda.getString('payment_method'),
-        change_amount: venda.getDouble('change_amount'),
+        change_amount: venda.getFloat('change_amount'),
       }
     } catch (_) {}
 
@@ -262,7 +262,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         for (var k = 0; k < vendPays.length; k++) {
           result.payments.push({
             method: vendPays[k].getString('method'),
-            amount: vendPays[k].getDouble('amount'),
+            amount: vendPays[k].getFloat('amount'),
             card_flag: vendPays[k].getString('card_flag'),
             installments: vendPays[k].getInt('installments'),
           })
@@ -272,7 +272,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
 
     if (!ar) {
       try {
-        result.amount = venda.getDouble('total_amount')
+        result.amount = venda.getFloat('total_amount')
       } catch (_) {}
     }
   }
@@ -288,13 +288,23 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
   } catch (_) {}
 
   try {
+    if (result.amount === 0 && result.items.length > 0) {
+      var fallbackTotal = 0
+      for (var n = 0; n < result.items.length; n++) {
+        fallbackTotal += result.items[n].total_price || 0
+      }
+      if (fallbackTotal > 0) result.amount = fallbackTotal
+    }
+  } catch (_) {}
+
+  try {
     var paymentSum = 0
     for (var p = 0; p < result.payments.length; p++) {
       paymentSum += result.payments[p].amount || 0
     }
     var changeAmount = 0
     try {
-      if (venda) changeAmount = venda.getDouble('change_amount') || 0
+      if (venda) changeAmount = venda.getFloat('change_amount') || 0
     } catch (_) {}
     result.troco =
       changeAmount > 0 ? changeAmount : paymentSum > result.amount ? paymentSum - result.amount : 0

@@ -217,8 +217,17 @@ export default function PublicReceipt() {
           RECIBO
         </h1>
         <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4">
-          <div className="flex items-start gap-4">
-            {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 object-contain" />}
+          <div>
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt="Logo"
+                className="h-20 object-contain mb-3"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+            )}
             <div>
               <h2 className="text-xl font-bold">{companyName}</h2>
               {data.company?.phone && (
