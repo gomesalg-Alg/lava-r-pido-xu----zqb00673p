@@ -13,13 +13,15 @@ export default function PublicReceipt() {
   const { id } = useParams<{ id: string }>()
   const [data, setData] = useState<PublicReceiptData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
     getPublicReceipt(id)
       .then(setData)
-      .catch(() => setError(true))
+      .catch((err: any) => {
+        setError(err?.status === 404 ? 'not_found' : 'error')
+      })
       .finally(() => setLoading(false))
   }, [id])
 
@@ -30,10 +32,24 @@ export default function PublicReceipt() {
       </div>
     )
   }
+  if (error === 'not_found') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-slate-500 gap-2 p-4">
+        <p className="text-lg font-semibold">Recibo não encontrado</p>
+        <p className="text-sm text-center">
+          Este recibo pode ter sido removido ou o link pode estar incorreto. Verifique se o link
+          está correto ou entre em contato com o estabelecimento.
+        </p>
+      </div>
+    )
+  }
   if (error || !data) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-slate-500">
-        Recibo não encontrado.
+      <div className="flex flex-col items-center justify-center min-h-screen text-slate-500 gap-2 p-4">
+        <p className="text-lg font-semibold">Erro ao carregar recibo</p>
+        <p className="text-sm text-center">
+          Não foi possível carregar o recibo no momento. Tente novamente em alguns instantes.
+        </p>
       </div>
     )
   }

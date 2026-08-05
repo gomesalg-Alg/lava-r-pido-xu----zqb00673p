@@ -44,10 +44,7 @@ export function WhatsAppReceiptButton({
     )
   }
 
-  const publicUrl =
-    typeof window !== 'undefined' && window.location.origin
-      ? window.location.origin
-      : 'https://www.lavarapidoxua.com.br'
+  const publicUrl = 'https://www.lavarapidoxua.com.br'
   const receiptUrl = `${publicUrl}/recibo/${receiptId}`
   const descText = description || 'pagamento'
   const amountText = amount != null ? formatCurrency(amount) : ''
