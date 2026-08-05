@@ -235,13 +235,13 @@ export default function ReceiptPage() {
         {record.expand?.customer_id && (record.order_id || record.id) && (
           <>
             <WhatsAppReceiptButton
-              customerName={record.expand.customer_id.name || ''}
-              customerPhone={record.expand.customer_id.phone || ''}
-              receiptId={record.order_id || record.id}
+              customerName={record.expand?.customer_id?.name || ''}
+              customerPhone={record.expand?.customer_id?.phone || ''}
+              receiptId={record.id}
               description={record.description}
               amount={record.amount}
               showLabel
-            />
+            />{' '}
             <p className="text-xs text-slate-500 max-w-xs">
               💡 Após abrir o WhatsApp, faça o download do PDF e anexe manualmente à conversa para
               enviar o documento completo.

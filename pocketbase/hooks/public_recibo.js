@@ -5,42 +5,99 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
   try {
     let ar = null
     let order = null
+    let venda = null
 
     try {
-      order = $app.findRecordById('service_orders', id)
-      $app.expandRecord(order, ['customer_id', 'vehicle_id'])
+      ar = $app.findRecordById('accounts_receivable', id)
+      $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
     } catch (_) {
-      order = null
+      ar = null
     }
 
-    if (order) {
-      try {
-        ar = $app.findFirstRecordByFilter('accounts_receivable', 'order_id = "' + id + '"')
-        $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
-      } catch (_) {
-        ar = null
+    if (ar) {
+      order = ar.expandedOne('order_id')
+      if (order) {
+        try {
+          $app.expandRecord(order, ['customer_id', 'vehicle_id'])
+        } catch (_) {}
       }
+      venda = ar.expandedOne('venda_avulsa_id')
     } else {
       try {
-        ar = $app.findRecordById('accounts_receivable', id)
-        $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
-        order = ar.expandedOne('order_id')
-        if (order) {
-          $app.expandRecord(order, ['customer_id', 'vehicle_id'])
-        }
+        order = $app.findRecordById('service_orders', id)
+        $app.expandRecord(order, ['customer_id', 'vehicle_id'])
       } catch (_) {
-        return e.notFoundError('Recibo não encontrado')
+        order = null
+      }
+
+      if (order) {
+        try {
+          ar = $app.findFirstRecordByFilter(
+            'accounts_receivable',
+            'order_id = {:oid}',
+            undefined,
+            0,
+            0,
+            { oid: id },
+          )
+          $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+          venda = ar.expandedOne('venda_avulsa_id')
+        } catch (_) {
+          ar = null
+        }
+      } else {
+        try {
+          venda = $app.findRecordById('vendas_avulsas', id)
+        } catch (_) {
+          venda = null
+        }
+
+        if (venda) {
+          try {
+            ar = $app.findFirstRecordByFilter(
+              'accounts_receivable',
+              'venda_avulsa_id = {:vid}',
+              undefined,
+              0,
+              0,
+              { vid: id },
+            )
+            $app.expandRecord(ar, ['customer_id', 'order_id', 'venda_avulsa_id'])
+            order = ar.expandedOne('order_id')
+            if (order) {
+              try {
+                $app.expandRecord(order, ['customer_id', 'vehicle_id'])
+              } catch (_) {}
+            }
+          } catch (_) {
+            ar = null
+          }
+        }
       }
     }
 
-    const result = {
-      id: ar ? ar.id : order ? order.id : id,
-      amount: ar ? ar.getDouble('amount') : 0,
-      status: ar ? ar.getString('status') : order ? order.getString('status') : '',
+    if (!ar && !order && !venda) {
+      return e.notFoundError('Recibo não encontrado')
+    }
+
+    var result = {
+      id: ar ? ar.id : order ? order.id : venda ? venda.id : id,
+      amount: ar ? ar.getDouble('amount') : venda ? venda.getDouble('total_amount') : 0,
+      status: ar ? ar.getString('status') : order ? order.getString('status') : 'Recebido',
       description: ar ? ar.getString('description') : '',
-      payment_method: ar ? ar.getString('payment_method') : '',
+      payment_method: ar
+        ? ar.getString('payment_method')
+        : venda
+          ? venda.getString('payment_method')
+          : '',
       received_at: ar ? ar.getString('received_at') : '',
-      created: ar ? ar.getString('created') : order ? order.getString('created') : '',
+      created: ar
+        ? ar.getString('created')
+        : order
+          ? order.getString('created')
+          : venda
+            ? venda.getString('created')
+            : '',
       customer: null,
       vehicle: null,
       order: null,
@@ -52,11 +109,20 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
       product_subtotal: 0,
     }
 
-    var customer = order
-      ? order.expandedOne('customer_id')
-      : ar
-        ? ar.expandedOne('customer_id')
-        : null
+    var customer = null
+    if (ar && ar.expandedOne('customer_id')) {
+      customer = ar.expandedOne('customer_id')
+    } else if (order && order.expandedOne('customer_id')) {
+      customer = order.expandedOne('customer_id')
+    } else if (venda) {
+      try {
+        var vendaCustomerId = venda.getString('customer_id')
+        if (vendaCustomerId) {
+          $app.expandRecord(venda, ['customer_id'])
+          customer = venda.expandedOne('customer_id')
+        }
+      } catch (_) {}
+    }
     if (customer) {
       result.customer = {
         name: customer.getString('name'),
@@ -85,13 +151,16 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
 
       var orderItems = $app.findRecordsByFilter(
         'service_order_items',
-        'order_id = "' + order.id + '"',
+        'order_id = {:oid}',
         'created',
         0,
         0,
+        { oid: order.id },
       )
       for (var i = 0; i < orderItems.length; i++) {
-        $app.expandRecord(orderItems[i], ['service_id', 'product_id'])
+        try {
+          $app.expandRecord(orderItems[i], ['service_id', 'product_id'])
+        } catch (_) {}
         var serviceRef = orderItems[i].expandedOne('service_id')
         var productRef = orderItems[i].expandedOne('product_id')
         var itemTotal = orderItems[i].getDouble('total_price')
@@ -114,10 +183,11 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
 
       var rawPayments = $app.findRecordsByFilter(
         'order_payments',
-        'order_id = "' + order.id + '"',
+        'order_id = {:oid}',
         'created',
         0,
         0,
+        { oid: order.id },
       )
       for (var j = 0; j < rawPayments.length; j++) {
         result.payments.push({
@@ -129,7 +199,10 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
       }
     }
 
-    var venda = ar ? ar.expandedOne('venda_avulsa_id') : null
+    if (!venda && ar && ar.expandedOne('venda_avulsa_id')) {
+      venda = ar.expandedOne('venda_avulsa_id')
+    }
+
     if (venda) {
       result.venda_avulsa = {
         items: venda.get('items'),
@@ -137,13 +210,14 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         payment_method: venda.getString('payment_method'),
         change_amount: venda.getDouble('change_amount'),
       }
-      if (!order) {
+      if (!order && result.payments.length === 0) {
         var vendaPayments = $app.findRecordsByFilter(
           'order_payments',
-          'venda_avulsa_id = "' + venda.id + '"',
+          'venda_avulsa_id = {:vid}',
           'created',
           0,
           0,
+          { vid: venda.id },
         )
         for (var k = 0; k < vendaPayments.length; k++) {
           result.payments.push({
@@ -154,14 +228,18 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
           })
         }
       }
+      if (!order && (!ar || result.amount === 0)) {
+        var calcTotal = venda.getDouble('total_amount')
+        result.amount = calcTotal
+      }
     }
 
     if (!ar && order && result.items.length > 0) {
-      var calcTotal = 0
+      var calcTotal2 = 0
       for (var m = 0; m < result.items.length; m++) {
-        calcTotal += result.items[m].total_price || 0
+        calcTotal2 += result.items[m].total_price || 0
       }
-      result.amount = calcTotal
+      result.amount = calcTotal2
     }
 
     try {
