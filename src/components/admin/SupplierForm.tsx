@@ -23,6 +23,7 @@ import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
+import { extractFieldErrors } from '@/lib/pocketbase/errors'
 
 const UFS = [
   'AC',
@@ -160,8 +161,14 @@ export function SupplierForm({ initialSupplier }: SupplierFormProps) {
         toast.success('Fornecedor cadastrado com sucesso!')
       }
       navigate('/admin/fornecedores')
-    } catch {
-      toast.error(isEditMode ? 'Erro ao atualizar fornecedor' : 'Erro ao cadastrar fornecedor')
+    } catch (err) {
+      const fieldErrs = extractFieldErrors(err)
+      if (Object.keys(fieldErrs).length > 0) {
+        setErrors((p) => ({ ...p, ...fieldErrs }))
+        toast.error('Verifique os campos do formulário')
+      } else {
+        toast.error(isEditMode ? 'Erro ao atualizar fornecedor' : 'Erro ao cadastrar fornecedor')
+      }
     } finally {
       setSaving(false)
     }

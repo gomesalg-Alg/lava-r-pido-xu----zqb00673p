@@ -26,6 +26,7 @@ import { fetchCep } from '@/lib/cep'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
+import { extractFieldErrors } from '@/lib/pocketbase/errors'
 
 const UFS = [
   'AC',
@@ -223,8 +224,14 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
         toast.success('Cliente cadastrado com sucesso!')
         navigate('/admin/clientes')
       }
-    } catch {
-      toast.error(isEditMode ? 'Erro ao atualizar cliente' : 'Erro ao cadastrar cliente')
+    } catch (err) {
+      const fieldErrs = extractFieldErrors(err)
+      if (Object.keys(fieldErrs).length > 0) {
+        setErrors((p) => ({ ...p, ...fieldErrs }))
+        toast.error('Verifique os campos do formulário')
+      } else {
+        toast.error(isEditMode ? 'Erro ao atualizar cliente' : 'Erro ao cadastrar cliente')
+      }
     } finally {
       setSaving(false)
     }
