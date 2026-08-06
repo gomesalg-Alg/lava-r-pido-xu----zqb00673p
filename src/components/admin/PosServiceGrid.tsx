@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getServices, type Service } from '@/services/services'
 import { formatCurrency } from '@/lib/format'
@@ -35,21 +34,38 @@ export function PosServiceGrid({ onAdd }: PosServiceGridProps) {
       {filtered.length === 0 ? (
         <p className="text-center text-slate-400 py-8 text-sm">Nenhum serviço encontrado.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[400px] overflow-y-auto">
-          {filtered.map((s) => (
-            <Button
-              key={s.id}
-              variant="outline"
-              className="flex flex-col items-center justify-center h-20 p-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
-              onClick={() => onAdd({ id: s.id, name: s.name, price: s.price || 0 })}
-            >
-              <span className="text-sm font-medium text-center line-clamp-2">{s.name}</span>
-              <span className="text-xs text-slate-500 mt-1">
-                {s.is_starting_price ? 'a partir de ' : ''}
-                {formatCurrency(s.price || 0)}
-              </span>
-            </Button>
-          ))}
+        <div className="border rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-slate-100 z-10">
+              <tr>
+                <th className="text-left px-3 py-2 font-semibold text-slate-600">Serviço</th>
+                <th className="text-left px-3 py-2 font-semibold text-slate-600 hidden sm:table-cell">
+                  Descrição
+                </th>
+                <th className="text-right px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">
+                  Preço
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((s) => (
+                <tr
+                  key={s.id}
+                  className="border-t cursor-pointer hover:bg-blue-50 transition-colors"
+                  onClick={() => onAdd({ id: s.id, name: s.name, price: s.price || 0 })}
+                >
+                  <td className="px-3 py-2 font-medium align-top">{s.name}</td>
+                  <td className="px-3 py-2 text-slate-500 text-xs hidden sm:table-cell align-top max-w-[200px]">
+                    <span className="block line-clamp-2">{s.description || '—'}</span>
+                  </td>
+                  <td className="px-3 py-2 text-right font-semibold text-blue-600 whitespace-nowrap align-top">
+                    {s.is_starting_price ? 'a partir de ' : ''}
+                    {formatCurrency(s.price || 0)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
