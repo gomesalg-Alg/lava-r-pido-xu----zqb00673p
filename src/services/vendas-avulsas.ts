@@ -2,7 +2,9 @@ import pb from '@/lib/pocketbase/client'
 import type { Customer } from './customers'
 
 export type VendaAvulsaItem = {
-  product_id: string
+  product_id?: string
+  service_id?: string
+  type?: 'product' | 'service'
   name: string
   quantity: number
   unit_price: number

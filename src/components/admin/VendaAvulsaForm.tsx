@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PosProductGrid } from '@/components/admin/PosProductGrid'
+import { PosServiceGrid } from '@/components/admin/PosServiceGrid'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { getCustomers, type Customer } from '@/services/customers'
 import { createVendaAvulsa } from '@/services/vendas-avulsas'
 import { createOrderPayment, buildPaymentData } from '@/services/order-payments'
@@ -26,7 +28,14 @@ import { getActiveBankAccounts, type BankAccount } from '@/services/bank-account
 import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
-type CartItem = { product_id: string; name: string; quantity: number; unit_price: number }
+type CartItem = {
+  product_id?: string
+  service_id?: string
+  type: 'product' | 'service'
+  name: string
+  quantity: number
+  unit_price: number
+}
 const PAYMENTS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix', 'Cortesia', 'Outros']
 const FLAGS = ['Visa', 'Mastercard', 'Elo']
 const isCard = (m: string) => m === 'Cartão de Crédito' || m === 'Cartão de Débito'
@@ -85,9 +94,39 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
       const ex = prev.find((i) => i.product_id === p.id)
       if (ex)
         return prev.map((i) => (i.product_id === p.id ? { ...i, quantity: i.quantity + 1 } : i))
-      return [...prev, { product_id: p.id, name: p.name, quantity: 1, unit_price: p.price }]
+      return [
+        ...prev,
+        {
+          type: 'product' as const,
+          product_id: p.id,
+          name: p.name,
+          quantity: 1,
+          unit_price: p.price,
+        },
+      ]
     })
   }
+
+  const addService = (s: { id: string; name: string; price: number }) => {
+    setCart((prev) => {
+      const ex = prev.find((i) => i.service_id === s.id)
+      if (ex)
+        return prev.map((i) => (i.service_id === s.id ? { ...i, quantity: i.quantity + 1 } : i))
+      return [
+        ...prev,
+        {
+          type: 'service' as const,
+          service_id: s.id,
+          name: s.name,
+          quantity: 1,
+          unit_price: s.price,
+        },
+      ]
+    })
+  }
+
+  const itemKey = (i: CartItem) =>
+    i.type === 'service' ? `svc-${i.service_id}` : `prod-${i.product_id}`
 
   const subtotal = cart.reduce((s, i) => s + i.unit_price * i.quantity, 0)
   const total = subtotal - discount + surcharge
@@ -103,7 +142,10 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
     setFinalizing(true)
     try {
       const items = cart.map((i) => ({
-        product_id: i.product_id,
+        type: i.type,
+        product_id: i.product_id || undefined,
+        service_id: i.service_id || undefined,
+        name: i.name,
         quantity: i.quantity,
         unit_price: i.unit_price,
         total_price: i.quantity * i.unit_price,
@@ -225,7 +267,22 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-4">
-            <PosProductGrid onAdd={(p) => addProduct(p)} />
+            <Tabs defaultValue="products">
+              <TabsList className="w-full">
+                <TabsTrigger value="products" className="flex-1">
+                  Produtos
+                </TabsTrigger>
+                <TabsTrigger value="services" className="flex-1">
+                  Serviços
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="products" className="mt-3">
+                <PosProductGrid onAdd={(p) => addProduct(p)} />
+              </TabsContent>
+              <TabsContent value="services" className="mt-3">
+                <PosServiceGrid onAdd={(s) => addService(s)} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
@@ -240,7 +297,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
               )}
               {cart.map((item) => (
                 <div
-                  key={item.product_id}
+                  key={itemKey(item)}
                   className="flex items-center justify-between p-2 bg-slate-50 rounded-md"
                 >
                   <div>
@@ -255,7 +312,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
                       onClick={() =>
                         setCart((prev) =>
                           prev.map((i) =>
-                            i.product_id === item.product_id
+                            itemKey(i) === itemKey(item)
                               ? { ...i, quantity: Math.max(1, i.quantity - 1) }
                               : i,
                           ),
@@ -272,9 +329,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
                       onClick={() =>
                         setCart((prev) =>
                           prev.map((i) =>
-                            i.product_id === item.product_id
-                              ? { ...i, quantity: i.quantity + 1 }
-                              : i,
+                            itemKey(i) === itemKey(item) ? { ...i, quantity: i.quantity + 1 } : i,
                           ),
                         )
                       }
@@ -289,7 +344,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
                       size="sm"
                       className="text-red-600 p-1 h-auto"
                       onClick={() =>
-                        setCart((prev) => prev.filter((i) => i.product_id !== item.product_id))
+                        setCart((prev) => prev.filter((i) => itemKey(i) !== itemKey(item)))
                       }
                     >
                       <Trash2 className="w-3.5 h-3.5" />

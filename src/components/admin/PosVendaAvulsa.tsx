@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { PosProductGrid } from '@/components/admin/PosProductGrid'
+import { PosServiceGrid } from '@/components/admin/PosServiceGrid'
 import { PaymentLines } from '@/components/admin/PaymentLines'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,7 +22,9 @@ import { toast } from 'sonner'
 import type { Product } from '@/services/products'
 
 interface SaleItem {
-  product_id: string
+  product_id?: string
+  service_id?: string
+  type: 'product' | 'service'
   name: string
   unit_price: number
   quantity: number
@@ -68,6 +72,7 @@ export function PosVendaAvulsa() {
       return [
         ...prev,
         {
+          type: 'product' as const,
           product_id: product.id,
           name: product.name,
           unit_price: product.price || 0,
@@ -78,11 +83,38 @@ export function PosVendaAvulsa() {
     })
   }
 
-  const updateQty = (pid: string, delta: number) => {
+  const handleAddService = (svc: { id: string; name: string; price: number }) => {
+    setItems((prev) => {
+      const existing = prev.find((i) => i.service_id === svc.id)
+      if (existing) {
+        return prev.map((i) =>
+          i.service_id === svc.id
+            ? { ...i, quantity: i.quantity + 1, total_price: (i.quantity + 1) * i.unit_price }
+            : i,
+        )
+      }
+      return [
+        ...prev,
+        {
+          type: 'service' as const,
+          service_id: svc.id,
+          name: svc.name,
+          unit_price: svc.price || 0,
+          quantity: 1,
+          total_price: svc.price || 0,
+        },
+      ]
+    })
+  }
+
+  const itemKey = (i: SaleItem) =>
+    i.type === 'service' ? `svc-${i.service_id}` : `prod-${i.product_id}`
+
+  const updateQty = (key: string, delta: number) => {
     setItems((prev) =>
       prev
         .map((i) =>
-          i.product_id === pid
+          itemKey(i) === key
             ? {
                 ...i,
                 quantity: i.quantity + delta,
@@ -114,7 +146,9 @@ export function PosVendaAvulsa() {
 
       const vendaData: Record<string, unknown> = {
         items: items.map((i) => ({
-          product_id: i.product_id,
+          type: i.type,
+          product_id: i.product_id || undefined,
+          service_id: i.service_id || undefined,
           name: i.name,
           quantity: i.quantity,
           unit_price: i.unit_price,
@@ -182,7 +216,22 @@ export function PosVendaAvulsa() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <PosProductGrid onAdd={handleAddProduct} />
+      <Tabs defaultValue="products">
+        <TabsList className="w-full">
+          <TabsTrigger value="products" className="flex-1">
+            Produtos
+          </TabsTrigger>
+          <TabsTrigger value="services" className="flex-1">
+            Serviços
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="products" className="mt-3">
+          <PosProductGrid onAdd={handleAddProduct} />
+        </TabsContent>
+        <TabsContent value="services" className="mt-3">
+          <PosServiceGrid onAdd={handleAddService} />
+        </TabsContent>
+      </Tabs>
       <div className="space-y-4">
         <Card>
           <CardContent className="p-4 space-y-3">
@@ -218,7 +267,7 @@ export function PosVendaAvulsa() {
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {items.map((item) => (
                   <div
-                    key={item.product_id}
+                    key={itemKey(item)}
                     className="flex items-center gap-2 p-2 rounded-lg border"
                   >
                     <div className="flex-1">
@@ -231,7 +280,7 @@ export function PosVendaAvulsa() {
                       size="sm"
                       variant="outline"
                       className="h-7 w-7 p-0"
-                      onClick={() => updateQty(item.product_id, -1)}
+                      onClick={() => updateQty(itemKey(item), -1)}
                     >
                       <Minus className="w-3 h-3" />
                     </Button>
@@ -240,7 +289,7 @@ export function PosVendaAvulsa() {
                       size="sm"
                       variant="outline"
                       className="h-7 w-7 p-0"
-                      onClick={() => updateQty(item.product_id, 1)}
+                      onClick={() => updateQty(itemKey(item), 1)}
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
@@ -248,9 +297,7 @@ export function PosVendaAvulsa() {
                       size="sm"
                       variant="ghost"
                       className="h-7 w-7 p-0 text-red-600"
-                      onClick={() =>
-                        setItems((p) => p.filter((i) => i.product_id !== item.product_id))
-                      }
+                      onClick={() => setItems((p) => p.filter((i) => itemKey(i) !== itemKey(item)))}
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
