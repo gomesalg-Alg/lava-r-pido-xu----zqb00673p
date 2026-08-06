@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { Trash2, Minus, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
+import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
 import { createVendaAvulsa } from '@/services/vendas-avulsas'
 import { getCustomers } from '@/services/customers'
 import { createOrderPayment, buildPaymentData, type PaymentLine } from '@/services/order-payments'
@@ -41,6 +42,7 @@ export function PosVendaAvulsa() {
   const [cashRegisterBank, setCashRegisterBank] = useState<BankAccount | null>(null)
   const [selectedBankId, setSelectedBankId] = useState('')
   const [saving, setSaving] = useState(false)
+  const [docError, setDocError] = useState('')
 
   useEffect(() => {
     getCustomers()
@@ -132,6 +134,10 @@ export function PosVendaAvulsa() {
 
   const handleFinalize = async () => {
     if (!items.length || !selectedBankId || validLines.length === 0) return
+    if (customerDoc.trim() && !validateCPFCNPJ(customerDoc)) {
+      setDocError('CPF/CNPJ inválido')
+      return
+    }
     setSaving(true)
     try {
       const pmSummary = validLines
@@ -249,9 +255,25 @@ export function PosVendaAvulsa() {
               <Label>Documento</Label>
               <Input
                 value={customerDoc}
-                onChange={(e) => setCustomerDoc(e.target.value)}
+                onChange={(e) => {
+                  const masked = maskCPFCNPJ(e.target.value)
+                  setCustomerDoc(masked)
+                  if (masked.trim() && !validateCPFCNPJ(masked)) {
+                    setDocError('CPF/CNPJ inválido')
+                  } else {
+                    setDocError('')
+                  }
+                }}
+                onBlur={() => {
+                  if (!customerDoc.trim()) {
+                    setDocError('')
+                  } else if (!validateCPFCNPJ(customerDoc)) {
+                    setDocError('CPF/CNPJ inválido')
+                  }
+                }}
                 placeholder="CPF/CNPJ..."
               />
+              {docError && <p className="text-sm text-red-500">{docError}</p>}
             </div>
           </CardContent>
         </Card>

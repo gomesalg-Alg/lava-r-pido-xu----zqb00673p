@@ -112,6 +112,19 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
     })
   }
 
+  const validateFieldOnBlur = (field: string) => {
+    if (field === 'cpf' && form.tipo_pessoa === 'F') {
+      if (form.cpf.trim() && !validateCPF(form.cpf)) {
+        setErrors((p) => ({ ...p, cpf: 'CPF inválido' }))
+      }
+    }
+    if (field === 'cnpj' && form.tipo_pessoa === 'J') {
+      if (form.cnpj.trim() && !validateCNPJAlphanumeric(form.cnpj)) {
+        setErrors((p) => ({ ...p, cnpj: 'CNPJ inválido' }))
+      }
+    }
+  }
+
   const handleTipoPessoaChange = (value: string) => {
     setForm((p) => ({
       ...p,
@@ -275,7 +288,11 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
           {form.tipo_pessoa === 'F' && (
             <div className="space-y-1.5">
               <Label>CPF *</Label>
-              <Input value={form.cpf} onChange={(e) => set('cpf', maskCPF(e.target.value))} />
+              <Input
+                value={form.cpf}
+                onChange={(e) => set('cpf', maskCPF(e.target.value))}
+                onBlur={() => validateFieldOnBlur('cpf')}
+              />
               {errors.cpf && <p className="text-xs text-red-500">{errors.cpf}</p>}
             </div>
           )}
@@ -285,6 +302,7 @@ export function CustomerForm({ initialCustomer, initialVehicles }: CustomerFormP
               <Input
                 value={form.cnpj}
                 onChange={(e) => set('cnpj', maskCNPJAlphanumeric(e.target.value))}
+                onBlur={() => validateFieldOnBlur('cnpj')}
                 maxLength={18}
               />
               {errors.cnpj && <p className="text-xs text-red-500">{errors.cnpj}</p>}

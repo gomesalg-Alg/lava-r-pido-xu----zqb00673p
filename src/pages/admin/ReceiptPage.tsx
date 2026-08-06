@@ -83,6 +83,11 @@ export default function ReceiptPage() {
   const serviceItems = orderItems.filter((i) => i.service_id)
   const productItems = orderItems.filter((i) => i.product_id)
   const totals = orderItems.length > 0 ? calculateOrderTotals(orderItems) : null
+  const vendaSubtotal = vendaItems.reduce(
+    (s, i) => s + (i.total_price || (i.quantity || 1) * (i.unit_price || 0)),
+    0,
+  )
+  const computedSubtotal = totals?.subtotal ?? vendaSubtotal
   const paymentMethodLabel = record.payment_method || record.expand?.venda_avulsa_id?.payment_method
   const currentYear = new Date().getFullYear()
 
@@ -208,7 +213,7 @@ export default function ReceiptPage() {
             ]
           : []),
       ],
-      subtotal: totals?.subtotal ?? 0,
+      subtotal: computedSubtotal,
       discount: record.discount_amount ?? 0,
       surcharge: record.surcharge_amount ?? 0,
       total: record.amount,

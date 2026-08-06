@@ -67,5 +67,7 @@ export function validateCPFCNPJ(value: string): boolean {
   const d = value.replace(/\D/g, '')
   if (d.length === 11) return validateCPF(d)
   if (d.length === 14) return validateCNPJ(d)
+  const alpha = value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (alpha.length === 14) return validateCNPJAlphanumeric(alpha)
   return false
 }

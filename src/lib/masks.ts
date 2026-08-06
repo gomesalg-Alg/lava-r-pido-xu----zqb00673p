@@ -47,6 +47,9 @@ export function maskPlaca(value: string): string {
 }
 
 export function maskCPFCNPJ(value: string): string {
+  if (/[A-Za-z]/.test(value)) {
+    return maskCNPJAlphanumeric(value)
+  }
   const d = value.replace(/\D/g, '')
   if (d.length <= 11) return maskCPF(d)
   return maskCNPJ(d)

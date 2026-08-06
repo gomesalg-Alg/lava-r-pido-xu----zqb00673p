@@ -416,6 +416,13 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
                       setDocError('')
                     }
                   }}
+                  onBlur={() => {
+                    if (!customerDocument.trim()) {
+                      setDocError('')
+                    } else if (!validateCPFCNPJ(customerDocument)) {
+                      setDocError('CPF/CNPJ inválido')
+                    }
+                  }}
                   placeholder="000.000.000-00"
                 />
                 {docError && <p className="text-sm text-red-500">{docError}</p>}
