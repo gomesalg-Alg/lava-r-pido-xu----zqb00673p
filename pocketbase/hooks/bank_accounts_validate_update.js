@@ -6,7 +6,7 @@ onRecordUpdateRequest((e) => {
     } catch (_) {}
     if (existing && existing.id !== e.record.id) {
       var message =
-        "Apenas uma conta bancária pode estar com 'Registra movimentos do Frente de Caixa' marcado como Sim."
+        "Apenas uma conta bancária pode estar com 'Registra movimentos do Frente de Caixa' marcado como Sim. Desmarque a opção na conta atual para configurar esta."
       throw new BadRequestError('Dados inválidos', {
         registers_cash_register: message,
       })
