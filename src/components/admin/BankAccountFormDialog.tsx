@@ -43,6 +43,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
     account_number: '',
     account_type: 'Corrente',
     is_active: true,
+    registers_cash_register: false,
   })
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
         account_number: record.account_number || '',
         account_type: record.account_type || 'Corrente',
         is_active: record.is_active ?? true,
+        registers_cash_register: record.registers_cash_register ?? false,
       })
     } else {
       setForm({
@@ -63,6 +65,7 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
         account_number: '',
         account_type: 'Corrente',
         is_active: true,
+        registers_cash_register: false,
       })
     }
     setErrors({})
@@ -161,6 +164,21 @@ export function BankAccountFormDialog({ open, onOpenChange, record, onSuccess }:
                 <Switch checked={form.is_active} onCheckedChange={(v) => set('is_active', v)} />
               </div>
             </div>
+          </div>
+          <div className="space-y-1">
+            <Label>Registra movimentos do Frente de Caixa</Label>
+            <div className="flex items-center h-9">
+              <Switch
+                checked={form.registers_cash_register}
+                onCheckedChange={(v) => set('registers_cash_register', v)}
+              />
+              <span className="ml-2 text-sm text-slate-500">
+                {form.registers_cash_register ? 'Sim' : 'Não'}
+              </span>
+            </div>
+            {errors.registers_cash_register && (
+              <p className="text-sm text-red-500">{errors.registers_cash_register}</p>
+            )}
           </div>
         </div>
         <DialogFooter>

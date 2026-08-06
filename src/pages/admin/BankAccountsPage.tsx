@@ -132,19 +132,20 @@ export default function BankAccountsPage() {
               <SortableHeader columnKey="is_active" sortState={sortState} onSort={toggleSort}>
                 Ativo
               </SortableHeader>
+              <StaticHeader className="text-center">Frente de Caixa</StaticHeader>
               <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : sortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Nenhuma conta bancária encontrada.
                 </TableCell>
               </TableRow>

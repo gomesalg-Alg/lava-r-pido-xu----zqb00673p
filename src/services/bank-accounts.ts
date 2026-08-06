@@ -10,6 +10,7 @@ export interface BankAccount {
   account_number: string
   account_type: AccountType
   is_active: boolean
+  registers_cash_register: boolean
   created: string
   updated: string
 }
@@ -32,3 +33,13 @@ export const updateBankAccount = (id: string, data: Partial<BankAccount>) =>
   pb.collection('bank_accounts').update<BankAccount>(id, data)
 
 export const deleteBankAccount = (id: string) => pb.collection('bank_accounts').delete(id)
+
+export const getCashRegisterBankAccount = async (): Promise<BankAccount | null> => {
+  try {
+    return await pb
+      .collection('bank_accounts')
+      .getFirstListItem<BankAccount>('registers_cash_register = true')
+  } catch {
+    return null
+  }
+}

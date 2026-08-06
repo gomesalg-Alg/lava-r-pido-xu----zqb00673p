@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T21:59:37.204Z",
+  "generatedAt": "2026-08-06T17:53:10.594Z",
   "collections": [
     {
       "name": "users",
@@ -1446,6 +1446,12 @@
         {
           "name": "trading_name",
           "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "registers_cash_register",
+          "type": "bool",
           "required": false,
           "system": false
         }

@@ -14,7 +14,7 @@ import { getCustomers } from '@/services/customers'
 import { createOrderPayment, buildPaymentData, type PaymentLine } from '@/services/order-payments'
 import { createAccountsReceivable } from '@/services/accounts-receivable'
 import { getCardRates, type CardRate } from '@/services/card-rates'
-import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
+import { getCashRegisterBankAccount, type BankAccount } from '@/services/bank-accounts'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import type { Product } from '@/services/products'
@@ -34,7 +34,7 @@ export function PosVendaAvulsa() {
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([])
   const [paymentLines, setPaymentLines] = useState<PaymentLine[]>([])
   const [cardRates, setCardRates] = useState<CardRate[]>([])
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [cashRegisterBank, setCashRegisterBank] = useState<BankAccount | null>(null)
   const [selectedBankId, setSelectedBankId] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -45,8 +45,11 @@ export function PosVendaAvulsa() {
     getCardRates()
       .then(setCardRates)
       .catch(() => {})
-    getActiveBankAccounts()
-      .then(setBankAccounts)
+    getCashRegisterBankAccount()
+      .then((bank) => {
+        setCashRegisterBank(bank)
+        if (bank) setSelectedBankId(bank.id)
+      })
       .catch(() => {})
   }, [])
 
@@ -161,7 +164,6 @@ export function PosVendaAvulsa() {
       setCustomerId('')
       setCustomerDoc('')
       setPaymentLines([])
-      setSelectedBankId('')
     } catch (err) {
       toast.error(getErrorMessage(err) || 'Erro ao registrar venda')
     } finally {
@@ -269,22 +271,16 @@ export function PosVendaAvulsa() {
                 <span className="text-2xl font-bold text-blue-600">{formatCurrency(total)}</span>
               </div>
               <div className="space-y-1">
-                <Label>Conta Bancária *</Label>
-                <SearchableSelect
-                  options={bankAccounts
-                    .slice()
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((b) => ({
-                      value: b.id,
-                      label: `${b.name} - Ag ${b.agency} - CC ${b.account_number}`,
-                    }))}
-                  value={selectedBankId}
-                  onChange={setSelectedBankId}
-                  placeholder="Selecionar banco..."
-                  searchPlaceholder="Buscar banco..."
-                />
+                <Label>Banco (Frente de Caixa)</Label>
+                <div className="rounded-md border px-3 py-2 text-sm bg-slate-50">
+                  {cashRegisterBank
+                    ? `${cashRegisterBank.name} - Ag ${cashRegisterBank.agency} - CC ${cashRegisterBank.account_number}`
+                    : 'Nenhuma conta configurada'}
+                </div>
                 {!selectedBankId && (
-                  <p className="text-sm text-red-500">Selecione uma conta bancária</p>
+                  <p className="text-sm text-red-500">
+                    Configure uma conta bancária para o Frente de Caixa
+                  </p>
                 )}
               </div>
               <div className="space-y-1">
