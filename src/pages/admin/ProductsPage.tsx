@@ -6,11 +6,19 @@ import {
   deleteProduct,
   type Product,
 } from '@/services/products'
+import { getAnalyticalRevenueAccounts, type AccountCategory } from '@/services/account-categories'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -34,7 +42,14 @@ import { Plus, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/format'
 
-const emptyForm = { name: '', description: '', price: '', sku: '', stock_quantity: '' }
+const emptyForm = {
+  name: '',
+  description: '',
+  price: '',
+  sku: '',
+  stock_quantity: '',
+  account_category_id: '',
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -44,6 +59,8 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(emptyForm)
+  const [categories, setCategories] = useState<AccountCategory[]>([])
+  const [categoryError, setCategoryError] = useState('')
   const { sortedItems, sortState, toggleSort } = useSortableData(products)
 
   const loadData = async () => {
@@ -57,8 +74,18 @@ export default function ProductsPage() {
     }
   }
 
+  const loadCategories = async () => {
+    try {
+      const data = await getAnalyticalRevenueAccounts()
+      setCategories(data)
+    } catch {
+      setCategories([])
+    }
+  }
+
   useEffect(() => {
     loadData()
+    loadCategories()
   }, [])
   useRealtime('products', () => {
     loadData()
@@ -67,6 +94,7 @@ export default function ProductsPage() {
   const openCreate = () => {
     setEditing(null)
     setForm(emptyForm)
+    setCategoryError('')
     setSheetOpen(true)
   }
 
@@ -78,7 +106,9 @@ export default function ProductsPage() {
       price: p.price?.toString() || '',
       sku: p.sku || '',
       stock_quantity: p.stock_quantity?.toString() || '',
+      account_category_id: p.account_category_id || '',
     })
+    setCategoryError('')
     setSheetOpen(true)
   }
 
@@ -87,6 +117,11 @@ export default function ProductsPage() {
       toast.error('Nome é obrigatório')
       return
     }
+    if (!form.account_category_id) {
+      setCategoryError('A conta contábil é obrigatória')
+      return
+    }
+    setCategoryError('')
     setSaving(true)
     try {
       const data = {
@@ -95,6 +130,7 @@ export default function ProductsPage() {
         price: form.price ? parseFloat(form.price) : null,
         sku: form.sku,
         stock_quantity: form.stock_quantity ? parseInt(form.stock_quantity) : null,
+        account_category_id: form.account_category_id,
       }
       if (editing) {
         await updateProduct(editing.id, data)
@@ -124,6 +160,8 @@ export default function ProductsPage() {
     }
   }
 
+  const categoryName = (p: Product) => p.expand?.account_category_id?.name || '-'
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -136,23 +174,32 @@ export default function ProductsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Estoque</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <SortableHeader columnKey="name" sortState={sortState} onSort={toggleSort}>
+                Nome
+              </SortableHeader>
+              <SortableHeader columnKey="sku" sortState={sortState} onSort={toggleSort}>
+                SKU
+              </SortableHeader>
+              <SortableHeader columnKey="price" sortState={sortState} onSort={toggleSort}>
+                Preço
+              </SortableHeader>
+              <SortableHeader columnKey="stock_quantity" sortState={sortState} onSort={toggleSort}>
+                Estoque
+              </SortableHeader>
+              <StaticHeader>Conta Contábil</StaticHeader>
+              <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : sortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Nenhum produto encontrado.
                 </TableCell>
               </TableRow>
@@ -163,6 +210,7 @@ export default function ProductsPage() {
                   <TableCell className="text-slate-600">{p.sku || '-'}</TableCell>
                   <TableCell className="text-slate-600">{formatCurrency(p.price)}</TableCell>
                   <TableCell className="text-slate-600">{p.stock_quantity ?? 0}</TableCell>
+                  <TableCell className="text-slate-600">{categoryName(p)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => openEdit(p)}>
@@ -234,6 +282,28 @@ export default function ProductsPage() {
                 value={form.sku}
                 onChange={(e) => setForm((p) => ({ ...p, sku: e.target.value }))}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Conta Contábil *</Label>
+              <Select
+                value={form.account_category_id || undefined}
+                onValueChange={(v) => {
+                  setForm((p) => ({ ...p, account_category_id: v }))
+                  setCategoryError('')
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma conta contábil" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code ? `${c.code} - ${c.name}` : c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {categoryError && <p className="text-sm text-red-500">{categoryError}</p>}
             </div>
           </div>
           <SheetFooter className="mt-8">

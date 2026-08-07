@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T02:49:54.936Z",
+  "generatedAt": "2026-08-07T22:43:15.098Z",
   "collections": [
     {
       "name": "users",
@@ -105,9 +105,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "account_category_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "account_categories"
         }
       ],
-      "indexes": []
+      "indexes": [
+        "CREATE INDEX `idx_services_account_category_id` ON `services` (account_category_id)"
+      ]
     },
     {
       "name": "page_views",
@@ -1037,9 +1046,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "account_category_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "account_categories"
         }
       ],
-      "indexes": []
+      "indexes": [
+        "CREATE INDEX `idx_products_account_category_id` ON `products` (account_category_id)"
+      ]
     },
     {
       "name": "card_rates",

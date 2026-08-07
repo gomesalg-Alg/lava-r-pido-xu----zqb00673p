@@ -7,9 +7,21 @@ export type Product = {
   price: number
   sku: string
   stock_quantity: number
+  account_category_id: string | null
+  expand?: {
+    account_category_id?: {
+      id: string
+      name: string
+      code: string
+    } | null
+  }
 }
 
-export const getProducts = () => pb.collection('products').getFullList<Product>({ sort: 'name' })
+export const getProducts = () =>
+  pb.collection('products').getFullList<Product>({
+    sort: 'name',
+    expand: 'account_category_id',
+  })
 
 export const getProduct = (id: string) => pb.collection('products').getOne<Product>(id)
 

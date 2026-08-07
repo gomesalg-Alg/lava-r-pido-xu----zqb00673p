@@ -6,12 +6,20 @@ import {
   deleteService,
   type Service,
 } from '@/services/services'
+import { getAnalyticalRevenueAccounts, type AccountCategory } from '@/services/account-categories'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -40,6 +48,7 @@ const emptyForm = {
   price: '',
   is_starting_price: false,
   sort_order: '0',
+  account_category_id: '',
 }
 
 export default function ServicesPage() {
@@ -50,6 +59,8 @@ export default function ServicesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(emptyForm)
+  const [categories, setCategories] = useState<AccountCategory[]>([])
+  const [categoryError, setCategoryError] = useState('')
   const { sortedItems, sortState, toggleSort } = useSortableData(services)
 
   const loadData = async () => {
@@ -63,8 +74,18 @@ export default function ServicesPage() {
     }
   }
 
+  const loadCategories = async () => {
+    try {
+      const data = await getAnalyticalRevenueAccounts()
+      setCategories(data)
+    } catch {
+      setCategories([])
+    }
+  }
+
   useEffect(() => {
     loadData()
+    loadCategories()
   }, [])
   useRealtime('services', () => {
     loadData()
@@ -73,6 +94,7 @@ export default function ServicesPage() {
   const openCreate = () => {
     setEditing(null)
     setForm(emptyForm)
+    setCategoryError('')
     setSheetOpen(true)
   }
 
@@ -84,7 +106,9 @@ export default function ServicesPage() {
       price: s.price?.toString() || '',
       is_starting_price: s.is_starting_price || false,
       sort_order: s.sort_order?.toString() || '0',
+      account_category_id: s.account_category_id || '',
     })
+    setCategoryError('')
     setSheetOpen(true)
   }
 
@@ -93,6 +117,11 @@ export default function ServicesPage() {
       toast.error('Nome é obrigatório')
       return
     }
+    if (!form.account_category_id) {
+      setCategoryError('A conta contábil é obrigatória')
+      return
+    }
+    setCategoryError('')
     setSaving(true)
     try {
       const data = {
@@ -101,6 +130,7 @@ export default function ServicesPage() {
         price: form.price ? parseFloat(form.price) : null,
         is_starting_price: form.is_starting_price,
         sort_order: form.sort_order ? parseInt(form.sort_order) : 0,
+        account_category_id: form.account_category_id,
       }
       if (editing) {
         await updateService(editing.id, data)
@@ -135,6 +165,8 @@ export default function ServicesPage() {
     return starting ? `${f}*` : f
   }
 
+  const categoryName = (s: Service) => s.expand?.account_category_id?.name || '-'
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -159,19 +191,20 @@ export default function ServicesPage() {
               <SortableHeader columnKey="price" sortState={sortState} onSort={toggleSort}>
                 Preço
               </SortableHeader>
+              <StaticHeader>Conta Contábil</StaticHeader>
               <StaticHeader className="text-right">Ações</StaticHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : sortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={6} className="text-center py-8 text-slate-400">
                   Nenhum serviço encontrado.
                 </TableCell>
               </TableRow>
@@ -186,6 +219,7 @@ export default function ServicesPage() {
                   <TableCell className="text-slate-600">
                     {fmtPrice(s.price, s.is_starting_price)}
                   </TableCell>
+                  <TableCell className="text-slate-600">{categoryName(s)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => openEdit(s)}>
@@ -250,6 +284,28 @@ export default function ServicesPage() {
                   onChange={(e) => setForm((p) => ({ ...p, sort_order: e.target.value }))}
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Conta Contábil *</Label>
+              <Select
+                value={form.account_category_id || undefined}
+                onValueChange={(v) => {
+                  setForm((p) => ({ ...p, account_category_id: v }))
+                  setCategoryError('')
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma conta contábil" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code ? `${c.code} - ${c.name}` : c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {categoryError && <p className="text-sm text-red-500">{categoryError}</p>}
             </div>
             <div className="flex items-center gap-2 pt-2">
               <Switch

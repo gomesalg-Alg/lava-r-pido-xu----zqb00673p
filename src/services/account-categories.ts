@@ -48,3 +48,9 @@ export const getSyntheticParents = (type?: AccountType) => {
     filter,
   })
 }
+
+export const getAnalyticalRevenueAccounts = () =>
+  pb.collection('account_categories').getFullList<AccountCategory>({
+    sort: 'code',
+    filter: "nature = 'Analítica' && type = 'Receita'",
+  })
