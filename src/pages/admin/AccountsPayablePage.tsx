@@ -35,11 +35,23 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { DigitalDocumentDialog } from '@/components/admin/DigitalDocumentDialog'
+import { AdobeReaderIcon } from '@/components/admin/AdobeReaderIcon'
 import { toast } from 'sonner'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { AccountsPayableFormDialog } from '@/components/admin/AccountsPayableFormDialog'
 import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
 import { useSortableData } from '@/hooks/use-sortable-data'
+
+const PDF_FIELDS: Array<{ key: keyof AccountsPayable; label: string }> = [
+  { key: 'nota_compra', label: 'Nota de Compra' },
+  { key: 'boleto_pagamento', label: 'Boleto de Pagamento' },
+  { key: 'comprovante_pagamento', label: 'Comprovante de Pagamento' },
+]
+
+function hasPdf(r: AccountsPayable) {
+  return PDF_FIELDS.some((f) => r[f.key])
+}
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
@@ -58,6 +70,7 @@ export default function AccountsPayablePage() {
   const [editingRecord, setEditingRecord] = useState<AccountsPayable | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AccountsPayable | null>(null)
   const [page, setPage] = useState(1)
+  const [docDialogRecord, setDocDialogRecord] = useState<AccountsPayable | null>(null)
 
   const loadData = async () => {
     try {
@@ -271,6 +284,17 @@ export default function AccountsPayablePage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      {hasPdf(r) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-slate-100"
+                          onClick={() => setDocDialogRecord(r)}
+                          title="Objeto Digitalizado"
+                        >
+                          <AdobeReaderIcon className="w-5 h-5" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -352,6 +376,12 @@ export default function AccountsPayablePage() {
         onOpenChange={(o) => !o && setDeleteTarget(null)}
         onConfirm={handleDelete}
         description="Tem certeza que deseja excluir esta conta a pagar? Esta ação não pode ser desfeita."
+      />
+      <DigitalDocumentDialog
+        open={!!docDialogRecord}
+        onOpenChange={(o) => !o && setDocDialogRecord(null)}
+        record={docDialogRecord}
+        readOnly
       />
     </div>
   )
