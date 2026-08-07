@@ -16,6 +16,9 @@ export interface AccountsPayable {
   bank_account_id: string | null
   discount_amount: number | null
   surcharge_amount: number | null
+  nota_compra: string
+  boleto_pagamento: string
+  comprovante_pagamento: string
   created: string
   updated: string
   expand?: {
@@ -30,10 +33,10 @@ export const getAccountsPayable = () =>
     expand: 'supplier_id,bank_account_id',
   })
 
-export const createAccountsPayable = (data: Record<string, unknown>) =>
+export const createAccountsPayable = (data: Record<string, unknown> | FormData) =>
   pb.collection('accounts_payable').create<AccountsPayable>(data)
 
-export const updateAccountsPayable = (id: string, data: Record<string, unknown>) =>
+export const updateAccountsPayable = (id: string, data: Record<string, unknown> | FormData) =>
   pb.collection('accounts_payable').update<AccountsPayable>(id, data)
 
 export const deleteAccountsPayable = (id: string) => pb.collection('accounts_payable').delete(id)

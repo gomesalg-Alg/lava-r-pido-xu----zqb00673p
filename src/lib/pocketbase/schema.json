@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T00:33:00.855Z",
+  "generatedAt": "2026-08-07T01:30:21.806Z",
   "collections": [
     {
       "name": "users",
@@ -1551,6 +1551,24 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "nota_compra",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "boleto_pagamento",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "comprovante_pagamento",
+          "type": "file",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [

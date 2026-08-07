@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
+import { PdfUploadField } from '@/components/admin/PdfUploadField'
 import { getSuppliers } from '@/services/suppliers'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
 import {
@@ -32,6 +33,8 @@ import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const STATUS_OPTIONS = ['Pendente', 'Pago', 'Cancelado']
 const NONE = { value: '', label: 'Nenhum' }
+const PDF_FIELDS = ['nota_compra', 'boleto_pagamento', 'comprovante_pagamento'] as const
+type PdfField = (typeof PDF_FIELDS)[number]
 
 interface Props {
   open: boolean
@@ -46,6 +49,16 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [pdfFiles, setPdfFiles] = useState<Record<PdfField, File | null>>({
+    nota_compra: null,
+    boleto_pagamento: null,
+    comprovante_pagamento: null,
+  })
+  const [removedFiles, setRemovedFiles] = useState<Record<PdfField, boolean>>({
+    nota_compra: false,
+    boleto_pagamento: false,
+    comprovante_pagamento: false,
+  })
   const [form, setForm] = useState({
     supplier_id: '',
     bank_account_id: '',
@@ -97,15 +110,30 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         surcharge_amount: 0,
       })
     }
+    setPdfFiles({ nota_compra: null, boleto_pagamento: null, comprovante_pagamento: null })
+    setRemovedFiles({ nota_compra: false, boleto_pagamento: false, comprovante_pagamento: false })
     setErrors({})
   }, [record, open])
 
   const set = (k: keyof typeof form, v: string | number) => setForm((p) => ({ ...p, [k]: v }))
 
+  const handlePdfChange = (field: PdfField, file: File | null, isRemoved: boolean) => {
+    setPdfFiles((prev) => ({ ...prev, [field]: file }))
+    setRemovedFiles((prev) => ({ ...prev, [field]: isRemoved }))
+  }
+
   const handleSubmit = async () => {
     setSaving(true)
     setErrors({})
-    const data: Record<string, unknown> = {
+    const hasFileChanges =
+      pdfFiles.nota_compra ||
+      pdfFiles.boleto_pagamento ||
+      pdfFiles.comprovante_pagamento ||
+      removedFiles.nota_compra ||
+      removedFiles.boleto_pagamento ||
+      removedFiles.comprovante_pagamento
+
+    const baseData: Record<string, unknown> = {
       supplier_id: form.supplier_id || null,
       bank_account_id: form.bank_account_id || null,
       description: form.description,
@@ -117,13 +145,35 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
       discount_amount: form.discount_amount || null,
       surcharge_amount: form.surcharge_amount || null,
     }
+
     try {
-      if (record) {
-        await updateAccountsPayable(record.id, data)
-        toast.success('Conta a pagar atualizada!')
+      if (hasFileChanges) {
+        const formData = new FormData()
+        for (const [key, val] of Object.entries(baseData)) {
+          formData.append(key, val === null || val === undefined ? '' : String(val))
+        }
+        for (const field of PDF_FIELDS) {
+          if (pdfFiles[field]) {
+            formData.append(field, pdfFiles[field]!)
+          } else if (removedFiles[field]) {
+            formData.append(field, '')
+          }
+        }
+        if (record) {
+          await updateAccountsPayable(record.id, formData)
+          toast.success('Conta a pagar atualizada!')
+        } else {
+          await createAccountsPayable(formData)
+          toast.success('Conta a pagar criada!')
+        }
       } else {
-        await createAccountsPayable(data)
-        toast.success('Conta a pagar criada!')
+        if (record) {
+          await updateAccountsPayable(record.id, baseData)
+          toast.success('Conta a pagar atualizada!')
+        } else {
+          await createAccountsPayable(baseData)
+          toast.success('Conta a pagar criada!')
+        }
       }
       onOpenChange(false)
       onSuccess()
@@ -143,7 +193,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent ref={keyboardRef} className="max-w-3xl">
+      <DialogContent ref={keyboardRef} className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{record ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}</DialogTitle>
         </DialogHeader>
@@ -243,6 +293,30 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
               />
             </div>
           )}
+          <div className="border-t pt-3 space-y-3">
+            <p className="text-sm font-medium text-slate-700">Documentos (PDF)</p>
+            <PdfUploadField
+              label="Nota de Compra"
+              value={record?.nota_compra || ''}
+              recordId={record?.id}
+              onChange={(file, removed) => handlePdfChange('nota_compra', file, removed)}
+              error={errors.nota_compra}
+            />
+            <PdfUploadField
+              label="Boleto para Pagamento"
+              value={record?.boleto_pagamento || ''}
+              recordId={record?.id}
+              onChange={(file, removed) => handlePdfChange('boleto_pagamento', file, removed)}
+              error={errors.boleto_pagamento}
+            />
+            <PdfUploadField
+              label="Comprovante de Pagamento"
+              value={record?.comprovante_pagamento || ''}
+              recordId={record?.id}
+              onChange={(file, removed) => handlePdfChange('comprovante_pagamento', file, removed)}
+              error={errors.comprovante_pagamento}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
