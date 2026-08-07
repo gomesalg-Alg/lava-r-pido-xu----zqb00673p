@@ -21,6 +21,9 @@ import { getCashRegisterBankAccount, type BankAccount } from '@/services/bank-ac
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import type { Product } from '@/services/products'
+import { getPublicReceipt } from '@/services/receipts'
+import { generateReceiptPdf } from '@/lib/receipt-pdf'
+import { consolidatePayments } from '@/lib/payment-utils'
 
 interface SaleItem {
   product_id?: string
@@ -196,7 +199,7 @@ export function PosVendaAvulsa() {
         received_at: new Date().toISOString(),
         bank_account_id: selectedBankId,
       }
-      if (customerId) arData.customer_id = customerId
+      arData.customer_id = venda.customer_id || customerId
       await createAccountsReceivable(arData)
 
       toast.success('Venda registrada!')

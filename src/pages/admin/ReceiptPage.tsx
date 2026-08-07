@@ -9,7 +9,7 @@ import { getOrderPayments, getOrderPaymentsByVendaAvulsa } from '@/services/orde
 import { calculateOrderTotals } from '@/lib/order-calculations'
 import { consolidatePayments } from '@/lib/payment-utils'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
-import { maskCPF, maskPhone } from '@/lib/masks'
+import { maskCPF, maskCPFCNPJ, maskPhone } from '@/lib/masks'
 import pb from '@/lib/pocketbase/client'
 import { generateReceiptPdf, formatPaymentLabel } from '@/lib/receipt-pdf'
 
@@ -158,6 +158,7 @@ export default function ReceiptPage() {
       customerName: record.expand?.customer_id?.name,
       customerPhone: record.expand?.customer_id?.phone,
       customerCpf: record.expand?.customer_id?.cpf,
+      customerDocument: record.expand?.venda_avulsa_id?.customer_document,
       itemGroups: [
         ...(vendaItems.length > 0
           ? [
@@ -299,7 +300,11 @@ export default function ReceiptPage() {
             Cliente: {record.expand?.customer_id?.name || '--'}
             {record.expand?.customer_id?.phone &&
               ` - Tel: ${maskPhone(record.expand.customer_id.phone)}`}
-            {record.expand?.customer_id?.cpf && ` - CPF: ${maskCPF(record.expand.customer_id.cpf)}`}
+            {record.expand?.customer_id?.cpf
+              ? ` - CPF: ${maskCPF(record.expand.customer_id.cpf)}`
+              : record.expand?.venda_avulsa_id?.customer_document
+                ? ` - CPF/CNPJ: ${maskCPFCNPJ(record.expand.venda_avulsa_id.customer_document)}`
+                : ''}
           </p>
         </div>
 

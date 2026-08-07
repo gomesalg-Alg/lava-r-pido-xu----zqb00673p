@@ -33,6 +33,7 @@ export interface PublicReceiptData {
     total_amount: number
     payment_method: string
     change_amount: number
+    customer_document?: string
   } | null
   payments: Array<{
     method: string

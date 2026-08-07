@@ -1,4 +1,5 @@
 import { MessageCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { sanitizePhone, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
@@ -35,11 +36,14 @@ export function WhatsAppReceiptButton({
       <Button
         variant="outline"
         size="sm"
-        disabled
+        asChild
         className={buttonClass}
-        title="Cliente sem telefone cadastrado"
+        title="Ver recibo / detalhes"
       >
-        <MessageCircle className="w-4 h-4" />
+        <Link to={`/admin/recibo/${receiptId}`}>
+          <MessageCircle className="w-4 h-4" />
+          {showLabel && <span className="ml-2">Ver Recibo</span>}
+        </Link>
       </Button>
     )
   }

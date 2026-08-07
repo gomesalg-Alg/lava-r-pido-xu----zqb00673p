@@ -85,6 +85,7 @@ routerAdd(
           total_amount: venda.getDouble('total_amount'),
           payment_method: venda.getString('payment_method'),
           change_amount: venda.getDouble('change_amount'),
+          customer_document: venda.getString('customer_document'),
         }
       }
 

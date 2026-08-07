@@ -1,5 +1,5 @@
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
-import { maskCPF, maskPhone } from '@/lib/masks'
+import { maskCPF, maskCPFCNPJ, maskPhone } from '@/lib/masks'
 
 export interface ReceiptPdfInput {
   companyName: string
@@ -15,6 +15,7 @@ export interface ReceiptPdfInput {
   customerName?: string
   customerPhone?: string
   customerCpf?: string
+  customerDocument?: string
   itemGroups: Array<{
     title: string
     items: Array<{ name: string; quantity: number; unit_price: number; total_price: number }>
@@ -64,6 +65,9 @@ function buildItemsHtml(groups: ReceiptPdfInput['itemGroups']): string {
 export function generateReceiptPdf(data: ReceiptPdfInput): void {
   const addr = [data.companyAddress, data.companyNumber].filter(Boolean).join(', ')
   const loc = [data.companyCity, data.companyState].filter(Boolean).join(' - ')
+  const docValue = data.customerDocument || data.customerCpf || ''
+  const docLabel = data.customerDocument ? 'CPF/CNPJ' : 'CPF'
+  const docMasked = data.customerDocument ? maskCPFCNPJ(docValue) : maskCPF(docValue)
   const itemsHtml = buildItemsHtml(data.itemGroups)
   const paymentsHtml = data.payments
     .map(
@@ -78,7 +82,7 @@ export function generateReceiptPdf(data: ReceiptPdfInput): void {
 </style></head><body><div class="page">
 <h1 class="t">RECIBO</h1>
 <div class="hd"><div class="hl">${data.logoUrl ? `<img src="${data.logoUrl}" alt="Logo"/>` : ''}<div><div class="cn">${data.companyName}</div>${data.companyPhone ? `<div class="ci">Tel: ${data.companyPhone}</div>` : ''}${addr ? `<div class="ci">${addr}</div>` : ''}${loc ? `<div class="ci">${loc}</div>` : ''}</div></div><div class="hr">${data.orderNumber ? `<div>OS Nº: <strong>${data.orderNumber}</strong></div>` : ''}${data.emissionDate ? `<div>Emissão: ${formatDateBR(data.emissionDate)}</div>` : ''}<div>Status: <strong>${data.status || '--'}</strong></div></div></div>
-${data.customerName ? `<div class="cust">Cliente: ${data.customerName}${data.customerPhone ? ` - Tel: ${maskPhone(data.customerPhone)}` : ''}${data.customerCpf ? ` - CPF: ${maskCPF(data.customerCpf)}` : ''}</div>` : ''}
+${data.customerName ? `<div class="cust">Cliente: ${data.customerName}${data.customerPhone ? ` - Tel: ${maskPhone(data.customerPhone)}` : ''}${docValue ? ` - ${docLabel}: ${docMasked}` : ''}</div>` : ''}
 ${itemsHtml}
 <div class="tot"><div class="tb"><div class="tr"><span>Subtotal:</span><span>${formatCurrency(data.subtotal)}</span></div>${data.discount && data.discount > 0 ? `<div class="tr" style="color:#b91c1c"><span>Desconto:</span><span>- ${formatCurrency(data.discount)}</span></div>` : ''}${data.surcharge && data.surcharge > 0 ? `<div class="tr" style="color:#15803d"><span>Acréscimo:</span><span>+ ${formatCurrency(data.surcharge)}</span></div>` : ''}<div class="tg"><span>Total:</span><span>${formatCurrency(data.total)}</span></div></div></div>
 ${data.payments.length > 0 ? `<div class="pay"><h3 class="st">FORMA DE PAGAMENTO</h3>${paymentsHtml}${data.troco > 0 ? `<div class="pr"><span>Troco:</span><span class="r">${formatCurrency(data.troco)}</span></div>` : ''}<div class="pt"><span>Total Pago:</span><span>${formatCurrency(data.totalPaid)}</span></div></div>` : ''}

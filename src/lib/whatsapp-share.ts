@@ -1,3 +1,5 @@
+import { formatCurrency } from './format'
+
 export function sanitizePhone(phone: string): string {
   const digits = (phone || '').replace(/\D/g, '')
   if (!digits) return ''
@@ -25,4 +27,20 @@ export function buildWhatsAppShareUrl(phone: string, message: string): string {
 export function buildPublicOsUrl(orderId: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
   return `${origin}/os/${orderId}`
+}
+
+export function buildVendaAvulsaShareMessage(
+  customerName: string,
+  amount: number,
+  companyName: string,
+  paymentMethod?: string,
+): string {
+  const greeting = customerName ? `Olá ${customerName}` : 'Olá'
+  const amountText = formatCurrency(amount)
+  let message = `${greeting}, sua venda de ${amountText} foi registrada com sucesso em ${companyName}.`
+  if (paymentMethod) {
+    message += ` Forma de pagamento: ${paymentMethod}.`
+  }
+  message += ' Obrigado!'
+  return message
 }

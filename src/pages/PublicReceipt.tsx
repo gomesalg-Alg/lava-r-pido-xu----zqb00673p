@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { getPublicReceipt, type PublicReceiptData } from '@/services/receipts'
 import { consolidatePayments } from '@/lib/payment-utils'
 import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
-import { maskCPF, maskPhone } from '@/lib/masks'
+import { maskCPF, maskCPFCNPJ, maskPhone } from '@/lib/masks'
 import { MetaTags } from '@/components/MetaTags'
 import { generateReceiptPdf, formatPaymentLabel } from '@/lib/receipt-pdf'
 
@@ -139,6 +139,7 @@ export default function PublicReceipt() {
       customerName: data.customer?.name,
       customerPhone: data.customer?.phone,
       customerCpf: data.customer?.cpf,
+      customerDocument: data.venda_avulsa?.customer_document,
       itemGroups: [
         ...(serviceItems.length > 0
           ? [
@@ -264,7 +265,11 @@ export default function PublicReceipt() {
             <p className="text-sm font-medium">
               Cliente: {data.customer.name}
               {data.customer.phone && ` - Tel: ${maskPhone(data.customer.phone)}`}
-              {data.customer.cpf && ` - CPF: ${maskCPF(data.customer.cpf)}`}
+              {data.customer.cpf
+                ? ` - CPF: ${maskCPF(data.customer.cpf)}`
+                : data.venda_avulsa?.customer_document
+                  ? ` - CPF/CNPJ: ${maskCPFCNPJ(data.venda_avulsa.customer_document)}`
+                  : ''}
             </p>
           </div>
         )}

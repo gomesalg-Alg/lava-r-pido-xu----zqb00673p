@@ -48,18 +48,17 @@ export function PosServiceGrid({ onAdd }: PosServiceGridProps) {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((s) => (
+              {filtered.map((s, index) => (
                 <tr
                   key={s.id}
-                  className="border-t cursor-pointer hover:bg-blue-50 transition-colors"
+                  className={`border-t cursor-pointer hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
                   onClick={() => onAdd({ id: s.id, name: s.name, price: s.price || 0 })}
                 >
                   <td className="px-3 py-2 font-medium align-top">{s.name}</td>
                   <td className="px-3 py-2 text-slate-500 text-xs hidden sm:table-cell align-top max-w-[200px]">
-                    <span className="block line-clamp-2">{s.description || '—'}</span>
+                    <span className="block">{s.description || '—'}</span>
                   </td>
                   <td className="px-3 py-2 text-right font-semibold text-blue-600 whitespace-nowrap align-top">
-                    {s.is_starting_price ? 'a partir de ' : ''}
                     {formatCurrency(s.price || 0)}
                   </td>
                 </tr>

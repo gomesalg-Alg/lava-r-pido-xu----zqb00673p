@@ -247,6 +247,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         total_amount: venda.getFloat('total_amount'),
         payment_method: venda.getString('payment_method'),
         change_amount: venda.getFloat('change_amount'),
+        customer_document: venda.getString('customer_document'),
       }
     } catch (_) {}
 
