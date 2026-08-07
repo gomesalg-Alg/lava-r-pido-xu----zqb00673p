@@ -10,21 +10,53 @@ export function useFormKeyboard<T extends HTMLElement = HTMLDivElement>() {
     }
     if (!el) return
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter') return
-      const target = e.target as HTMLElement
-      if (target.tagName === 'TEXTAREA') return
-      if (target.tagName === 'BUTTON') return
-      if (target.getAttribute('role') === 'combobox') return
+    const FOCUSABLE_SELECTOR =
+      'input:not([disabled]):not([type="hidden"]):not([readonly]), ' +
+      'select:not([disabled]):not([readonly]), ' +
+      'textarea:not([disabled]):not([readonly]), ' +
+      'button:not([disabled]):not([type="submit"]), ' +
+      '[tabindex]:not([tabindex="-1"])'
 
-      e.preventDefault()
-      const focusable = el.querySelectorAll<HTMLElement>(
-        'input:not([disabled]):not([type="hidden"]):not([readonly]), select:not([disabled]), button:not([disabled]):not([type="submit"]), [tabindex]:not([tabindex="-1"])',
+    const getFocusableList = (): HTMLElement[] => {
+      const focusable = el.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      return Array.from(focusable).filter(
+        (node) => node.offsetParent !== null || node.getClientRects().length > 0,
       )
-      const list = Array.from(focusable)
+    }
+
+    const focusRelative = (target: HTMLElement, direction: 1 | -1) => {
+      const list = getFocusableList()
       const index = list.indexOf(target)
-      if (index >= 0 && index < list.length - 1) {
-        list[index + 1].focus()
+      if (index === -1) return
+      const nextIndex = index + direction
+      if (nextIndex >= 0 && nextIndex < list.length) {
+        list[nextIndex].focus()
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      const isTextarea = target.tagName === 'TEXTAREA'
+      const isNativeSelect = target.tagName === 'SELECT'
+      const isCombobox = target.getAttribute('role') === 'combobox'
+      const comboboxOpen = target.getAttribute('aria-expanded') === 'true'
+      const isPlainButton = target.tagName === 'BUTTON' && !isCombobox
+
+      if (e.key === 'Enter') {
+        if (isTextarea || isPlainButton || comboboxOpen) return
+        e.preventDefault()
+        e.stopPropagation()
+        focusRelative(target, 1)
+      } else if (e.key === 'ArrowDown') {
+        if (isTextarea || comboboxOpen || isNativeSelect) return
+        e.preventDefault()
+        e.stopPropagation()
+        focusRelative(target, 1)
+      } else if (e.key === 'ArrowUp') {
+        if (isTextarea || comboboxOpen || isNativeSelect) return
+        e.preventDefault()
+        e.stopPropagation()
+        focusRelative(target, -1)
       }
     }
 
@@ -38,10 +70,10 @@ export function useFormKeyboard<T extends HTMLElement = HTMLDivElement>() {
       }
     }
 
-    el.addEventListener('keydown', handleKeyDown)
+    el.addEventListener('keydown', handleKeyDown, true)
     el.addEventListener('focusin', handleFocusIn)
     cleanupRef.current = () => {
-      el.removeEventListener('keydown', handleKeyDown)
+      el.removeEventListener('keydown', handleKeyDown, true)
       el.removeEventListener('focusin', handleFocusIn)
     }
   }, [])
