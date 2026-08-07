@@ -25,7 +25,8 @@ import { toast } from 'sonner'
 import { Trash2, CheckCircle, Search, ArrowLeft, Plus, Minus } from 'lucide-react'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
-import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
+import { maskCPFCNPJ, validateCPFCNPJ, maskPhone } from '@/lib/masks'
+import { sanitizePhone, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 type CartItem = {
@@ -58,6 +59,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
   const [selectedBankId, setSelectedBankId] = useState('')
   const [customerDocument, setCustomerDocument] = useState('')
   const [docError, setDocError] = useState('')
+  const [whatsappPhone, setWhatsappPhone] = useState('')
 
   useEffect(() => {
     getCardRates()
@@ -163,6 +165,7 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
       }
       if (customer?.id) vendaData.customer_id = customer.id
       if (customerDocument.trim()) vendaData.customer_document = customerDocument.trim()
+      if (whatsappPhone.trim()) vendaData.whatsapp_phone = whatsappPhone.trim()
       const venda = await createVendaAvulsa(vendaData)
 
       const appliedRate =
@@ -200,7 +203,19 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
       }
       if (customer?.id) arData.customer_id = customer.id
       arData.bank_account_id = selectedBankId
-      await createAccountsReceivable(arData)
+      const ar = await createAccountsReceivable(arData)
+
+      if (whatsappPhone.trim()) {
+        const cleanPhone = sanitizePhone(whatsappPhone)
+        if (cleanPhone) {
+          const publicUrl = 'https://www.lavarapidoxua.com.br'
+          const receiptUrl = `${publicUrl}/recibo/${ar.id}`
+          const customerName = customer?.name || 'Cliente'
+          const message = `Olá ${customerName}, segue o comprovante do seu pagamento referente a Venda Avulsa no valor de ${formatCurrency(total)} na Lava Rápido Xua. Você pode visualizar o recibo completo aqui: ${receiptUrl}`
+          const waUrl = buildWhatsAppShareUrl(whatsappPhone, message)
+          window.open(waUrl, '_blank')
+        }
+      }
 
       toast.success('Venda avulsa finalizada!')
       onBack()
@@ -428,6 +443,14 @@ export function VendaAvulsaForm({ onBack }: { onBack: () => void }) {
                 {docError && <p className="text-sm text-red-500">{docError}</p>}
               </div>
             )}
+            <div className="space-y-1">
+              <Label className="text-xs">WhatsApp (para envio do recibo)</Label>
+              <Input
+                value={whatsappPhone}
+                onChange={(e) => setWhatsappPhone(maskPhone(e.target.value))}
+                placeholder="(00) 00000-0000"
+              />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Pagamento *</Label>

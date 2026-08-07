@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T23:36:09.294Z",
+  "generatedAt": "2026-08-07T00:33:00.855Z",
   "collections": [
     {
       "name": "users",
@@ -1175,6 +1175,12 @@
         },
         {
           "name": "customer_document",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "whatsapp_phone",
           "type": "text",
           "required": false,
           "system": false

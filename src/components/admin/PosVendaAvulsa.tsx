@@ -11,7 +11,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { Trash2, Minus, Plus, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
-import { maskCPFCNPJ, validateCPFCNPJ } from '@/lib/masks'
+import { maskCPFCNPJ, validateCPFCNPJ, maskPhone } from '@/lib/masks'
+import { sanitizePhone, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
 import { createVendaAvulsa } from '@/services/vendas-avulsas'
 import { getCustomers } from '@/services/customers'
 import { createOrderPayment, buildPaymentData, type PaymentLine } from '@/services/order-payments'
@@ -46,6 +47,7 @@ export function PosVendaAvulsa() {
   const [selectedBankId, setSelectedBankId] = useState('')
   const [saving, setSaving] = useState(false)
   const [docError, setDocError] = useState('')
+  const [whatsappPhone, setWhatsappPhone] = useState('')
 
   useEffect(() => {
     getCustomers()
@@ -169,6 +171,7 @@ export function PosVendaAvulsa() {
       }
       if (customerId) vendaData.customer_id = customerId
       if (customerDoc) vendaData.customer_document = customerDoc
+      if (whatsappPhone.trim()) vendaData.whatsapp_phone = whatsappPhone.trim()
 
       const venda = await createVendaAvulsa(vendaData)
 
@@ -200,12 +203,26 @@ export function PosVendaAvulsa() {
         bank_account_id: selectedBankId,
       }
       arData.customer_id = venda.customer_id || customerId
-      await createAccountsReceivable(arData)
+      const ar = await createAccountsReceivable(arData)
+
+      if (whatsappPhone.trim()) {
+        const cleanPhone = sanitizePhone(whatsappPhone)
+        if (cleanPhone) {
+          const publicUrl = 'https://www.lavarapidoxua.com.br'
+          const receiptUrl = `${publicUrl}/recibo/${ar.id}`
+          const customerName =
+            customers.find((c) => c.id === customerId)?.name || 'Consumidor Final'
+          const message = `Olá ${customerName}, segue o comprovante do seu pagamento referente a Venda Avulsa no valor de ${formatCurrency(total)} na Lava Rápido Xua. Você pode visualizar o recibo completo aqui: ${receiptUrl}`
+          const waUrl = buildWhatsAppShareUrl(whatsappPhone, message)
+          window.open(waUrl, '_blank')
+        }
+      }
 
       toast.success('Venda registrada!')
       setItems([])
       setCustomerId('')
       setCustomerDoc('')
+      setWhatsappPhone('')
       setPaymentLines([])
     } catch (err) {
       toast.error(getErrorMessage(err) || 'Erro ao registrar venda')
@@ -277,6 +294,14 @@ export function PosVendaAvulsa() {
                 placeholder="CPF/CNPJ..."
               />
               {docError && <p className="text-sm text-red-500">{docError}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label>WhatsApp (para envio do recibo)</Label>
+              <Input
+                value={whatsappPhone}
+                onChange={(e) => setWhatsappPhone(maskPhone(e.target.value))}
+                placeholder="(00) 00000-0000"
+              />
             </div>
           </CardContent>
         </Card>

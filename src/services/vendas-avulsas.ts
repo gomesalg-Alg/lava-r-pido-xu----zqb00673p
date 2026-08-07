@@ -19,6 +19,7 @@ export type VendaAvulsa = {
   payment_method: string
   change_amount: number
   customer_document: string
+  whatsapp_phone: string
   created: string
   updated: string
   expand?: {

@@ -43,7 +43,7 @@ import { getCompany, type Company } from '@/services/company'
 import { AccountsReceivableFormDialog } from '@/components/admin/AccountsReceivableFormDialog'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
-import { WhatsAppVendaAvulsaButton } from '@/components/admin/WhatsAppVendaAvulsaButton'
+
 import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
 import { useSortableData } from '@/hooks/use-sortable-data'
 
@@ -339,28 +339,23 @@ export default function AccountsReceivablePage() {
                           <Printer className="w-4 h-4" />
                         </Link>
                       </Button>
-                      {r.venda_avulsa_id ? (
-                        <WhatsAppVendaAvulsaButton
-                          customerName={r.expand?.customer_id?.name || ''}
-                          customerPhone={r.expand?.customer_id?.phone || ''}
-                          hasWhatsApp={r.expand?.customer_id?.has_whatsapp ?? false}
-                          amount={r.amount}
-                          companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
-                          paymentMethod={
-                            r.payment_method || r.expand?.venda_avulsa_id?.payment_method
-                          }
-                          className="h-8 w-8 p-0"
-                        />
-                      ) : (
-                        <WhatsAppReceiptButton
-                          customerName={r.expand?.customer_id?.name || ''}
-                          customerPhone={r.expand?.customer_id?.phone || ''}
-                          receiptId={r.id}
-                          description={r.description}
-                          amount={r.amount}
-                          className="h-8 w-8 p-0"
-                        />
-                      )}
+                      {(() => {
+                        const isVendaAvulsa = !!r.venda_avulsa_id
+                        const waPhone = isVendaAvulsa
+                          ? r.expand?.venda_avulsa_id?.whatsapp_phone || ''
+                          : r.expand?.customer_id?.phone || ''
+                        if (isVendaAvulsa && !waPhone) return null
+                        return (
+                          <WhatsAppReceiptButton
+                            customerName={r.expand?.customer_id?.name || ''}
+                            customerPhone={waPhone}
+                            receiptId={r.id}
+                            description={r.description}
+                            amount={r.amount}
+                            className="h-8 w-8 p-0"
+                          />
+                        )
+                      })()}
                       {r.status === 'Pendente' && (
                         <Button
                           variant="outline"

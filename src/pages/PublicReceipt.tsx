@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Printer } from 'lucide-react'
+import { FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicReceipt, type PublicReceiptData } from '@/services/receipts'
 import { consolidatePayments } from '@/lib/payment-utils'
@@ -8,6 +8,7 @@ import { formatCurrency, formatDateBR, formatDateTimeBR } from '@/lib/format'
 import { maskCPF, maskCPFCNPJ, maskPhone } from '@/lib/masks'
 import { MetaTags } from '@/components/MetaTags'
 import { generateReceiptPdf, formatPaymentLabel } from '@/lib/receipt-pdf'
+import '@/styles/print.css'
 
 export default function PublicReceipt() {
   const { id } = useParams<{ id: string }>()
@@ -88,30 +89,32 @@ export default function PublicReceipt() {
         <h3 className="font-bold text-sm uppercase text-gray-500 mb-2 border-b-2 border-gray-300 pb-1">
           {title}
         </h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
-              <th className="text-left py-2 px-3 uppercase text-xs">Item</th>
-              <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
-              <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
-              <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, idx) => (
-              <tr key={idx} className="border-b border-gray-200 even:bg-slate-50">
-                <td className="py-2 px-3">{item.name || '--'}</td>
-                <td className="text-center py-2 px-3">{item.quantity || 1}</td>
-                <td className="text-right py-2 px-3">{formatCurrency(item.unit_price || 0)}</td>
-                <td className="text-right py-2 px-3 font-semibold">
-                  {formatCurrency(
-                    item.total_price || (item.quantity || 1) * (item.unit_price || 0),
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[400px]">
+            <thead>
+              <tr className="border-b-2 border-gray-300 bg-blue-800 text-white">
+                <th className="text-left py-2 px-3 uppercase text-xs">Item</th>
+                <th className="text-center py-2 px-3 uppercase text-xs">Qtd</th>
+                <th className="text-right py-2 px-3 uppercase text-xs">Valor Unit.</th>
+                <th className="text-right py-2 px-3 uppercase text-xs">Total</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items.map((item, idx) => (
+                <tr key={idx} className="border-b border-gray-200 even:bg-slate-50">
+                  <td className="py-2 px-3">{item.name || '--'}</td>
+                  <td className="text-center py-2 px-3">{item.quantity || 1}</td>
+                  <td className="text-right py-2 px-3">{formatCurrency(item.unit_price || 0)}</td>
+                  <td className="text-right py-2 px-3 font-semibold">
+                    {formatCurrency(
+                      item.total_price || (item.quantity || 1) * (item.unit_price || 0),
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         {groupSubtotal !== undefined && (
           <div className="flex justify-end mt-2">
             <div className="flex justify-between w-64 text-sm font-semibold border-t border-gray-300 pt-1">
@@ -208,16 +211,19 @@ export default function PublicReceipt() {
         image={logoUrl || undefined}
         url={window.location.href}
       />
-      <div className="no-print flex items-center gap-4 p-4 bg-white border-b sticky top-0 z-10">
-        <Button variant="outline" onClick={handlePrint}>
-          <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
+      <div className="no-print flex items-center gap-4 p-3 sm:p-4 bg-white border-b sticky top-0 z-10">
+        <Button
+          onClick={handlePrint}
+          className="w-full sm:w-auto h-11 text-sm font-semibold shadow-md"
+        >
+          <FileDown className="w-5 h-5 mr-2" /> Salvar como PDF
         </Button>
       </div>
-      <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
-        <h1 className="text-3xl font-bold text-center py-2 mb-4 border-b-2 border-gray-800">
+      <div className="print-container max-w-[800px] mx-auto bg-white p-4 sm:p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none print:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center py-2 mb-4 border-b-2 border-gray-800">
           RECIBO
         </h1>
-        <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start border-b-2 border-gray-800 pb-4 gap-4">
           <div>
             {logoUrl && (
               <img
@@ -247,7 +253,7 @@ export default function PublicReceipt() {
               )}
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             {data.order && (
               <p className="text-sm">
                 OS Nº: <strong>{data.order.ticket_number}</strong>
@@ -291,7 +297,7 @@ export default function PublicReceipt() {
         {vendaItems.length > 0 && renderItemsTable('Itens', vendaItems)}
 
         <div className="flex justify-end mt-4">
-          <div className="w-64 space-y-1">
+          <div className="w-full sm:w-64 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal:</span>
               <span>{formatCurrency(subtotal)}</span>
@@ -357,7 +363,7 @@ export default function PublicReceipt() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-8 mt-12">
+        <div className="grid grid-cols-2 gap-4 sm:gap-8 mt-8 sm:mt-12">
           <div className="text-center">
             <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Cliente</div>
           </div>
