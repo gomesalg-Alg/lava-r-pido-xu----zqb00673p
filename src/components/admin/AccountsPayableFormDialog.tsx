@@ -18,7 +18,11 @@ import {
 } from '@/components/ui/select'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { CurrencyInput } from '@/components/admin/CurrencyInput'
-import { PdfUploadField } from '@/components/admin/PdfUploadField'
+import {
+  DigitalDocumentDialog,
+  PDF_FIELDS,
+  type PdfField,
+} from '@/components/admin/DigitalDocumentDialog'
 import { getSuppliers } from '@/services/suppliers'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
 import {
@@ -28,13 +32,11 @@ import {
 } from '@/services/accounts-payable'
 import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, FileText } from 'lucide-react'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const STATUS_OPTIONS = ['Pendente', 'Pago', 'Cancelado']
 const NONE = { value: '', label: 'Nenhum' }
-const PDF_FIELDS = ['nota_compra', 'boleto_pagamento', 'comprovante_pagamento'] as const
-type PdfField = (typeof PDF_FIELDS)[number]
 
 interface Props {
   open: boolean
@@ -47,6 +49,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
   const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [suppliers, setSuppliers] = useState<{ id: string; name: string }[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [digitalDocOpen, setDigitalDocOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [pdfFiles, setPdfFiles] = useState<Record<PdfField, File | null>>({
@@ -295,26 +298,16 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
           )}
           <div className="border-t pt-3 space-y-3">
             <p className="text-sm font-medium text-slate-700">Documentos (PDF)</p>
-            <PdfUploadField
-              label="Nota de Compra"
-              value={record?.nota_compra || ''}
-              recordId={record?.id}
-              onChange={(file, removed) => handlePdfChange('nota_compra', file, removed)}
-              error={errors.nota_compra}
-            />
-            <PdfUploadField
-              label="Boleto para Pagamento"
-              value={record?.boleto_pagamento || ''}
-              recordId={record?.id}
-              onChange={(file, removed) => handlePdfChange('boleto_pagamento', file, removed)}
-              error={errors.boleto_pagamento}
-            />
-            <PdfUploadField
-              label="Comprovante de Pagamento"
-              value={record?.comprovante_pagamento || ''}
-              recordId={record?.id}
-              onChange={(file, removed) => handlePdfChange('comprovante_pagamento', file, removed)}
-              error={errors.comprovante_pagamento}
+            <Button type="button" variant="outline" onClick={() => setDigitalDocOpen(true)}>
+              <FileText className="w-4 h-4 mr-2" /> Objeto Digitalizado
+            </Button>
+            <DigitalDocumentDialog
+              open={digitalDocOpen}
+              onOpenChange={setDigitalDocOpen}
+              record={record}
+              pdfFiles={pdfFiles}
+              removedFiles={removedFiles}
+              onPdfChange={handlePdfChange}
             />
           </div>
         </div>
