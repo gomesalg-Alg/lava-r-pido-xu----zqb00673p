@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T01:09:41.605Z",
+  "generatedAt": "2026-08-08T15:21:47.662Z",
   "collections": [
     {
       "name": "users",
@@ -1585,6 +1585,12 @@
         {
           "name": "comprovante_pagamento",
           "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "emission_date",
+          "type": "date",
           "required": false,
           "system": false
         }

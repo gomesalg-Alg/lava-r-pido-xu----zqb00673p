@@ -67,6 +67,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
     bank_account_id: '',
     description: '',
     amount: 0,
+    emission_date: '',
     due_date: '',
     status: 'Pendente',
     payment_method: '',
@@ -92,6 +93,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         bank_account_id: record.bank_account_id || '',
         description: record.description || '',
         amount: record.amount || 0,
+        emission_date: record.emission_date ? record.emission_date.split('T')[0] : '',
         due_date: record.due_date ? record.due_date.split('T')[0] : '',
         status: record.status || 'Pendente',
         payment_method: record.payment_method || '',
@@ -105,6 +107,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         bank_account_id: '',
         description: '',
         amount: 0,
+        emission_date: '',
         due_date: '',
         status: 'Pendente',
         payment_method: '',
@@ -141,6 +144,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
       bank_account_id: form.bank_account_id || null,
       description: form.description,
       amount: form.amount,
+      emission_date: form.emission_date || null,
       due_date: form.due_date || null,
       status: form.status,
       payment_method: form.payment_method,
@@ -253,7 +257,15 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
               />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Data de Emissão</Label>
+              <Input
+                type="date"
+                value={form.emission_date}
+                onChange={(e) => set('emission_date', e.target.value)}
+              />
+            </div>
             <div className="space-y-1">
               <Label>Vencimento</Label>
               <Input
@@ -262,6 +274,8 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
                 onChange={(e) => set('due_date', e.target.value)}
               />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Status *</Label>
               <Select value={form.status} onValueChange={(v) => set('status', v)}>

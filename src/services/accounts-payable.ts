@@ -9,6 +9,7 @@ export interface AccountsPayable {
   supplier_id: string | null
   description: string
   amount: number
+  emission_date: string
   due_date: string
   status: AccountsPayableStatus | ''
   payment_method: string

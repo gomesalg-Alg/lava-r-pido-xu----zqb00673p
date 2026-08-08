@@ -236,6 +236,9 @@ export default function AccountsPayablePage() {
               >
                 Valor
               </SortableHeader>
+              <SortableHeader columnKey="emission_date" sortState={sortState} onSort={toggleSort}>
+                Data de Emissão
+              </SortableHeader>
               <SortableHeader columnKey="due_date" sortState={sortState} onSort={toggleSort}>
                 Vencimento
               </SortableHeader>
@@ -255,13 +258,13 @@ export default function AccountsPayablePage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Nenhuma conta encontrada.
                 </TableCell>
               </TableRow>
@@ -272,6 +275,9 @@ export default function AccountsPayablePage() {
                   <TableCell className="font-medium">{r.description || '-'}</TableCell>
                   <TableCell className="text-right font-medium tabular-nums">
                     {formatCurrency(r.amount)}
+                  </TableCell>
+                  <TableCell>
+                    {r.emission_date ? new Date(r.emission_date).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
                   <TableCell>
                     {r.due_date ? new Date(r.due_date).toLocaleDateString('pt-BR') : '-'}

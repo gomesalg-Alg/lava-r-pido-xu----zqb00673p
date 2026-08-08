@@ -12,6 +12,8 @@ export interface PurchaseOrderItem {
   received_quantity: number
   unit_price: number
   total_price: number
+  created: string
+  updated: string
   expand?: {
     product_id?: Product
   }
@@ -69,16 +71,12 @@ export const updatePurchaseOrderItem = (id: string, data: Record<string, unknown
 export const deletePurchaseOrderItem = (id: string) =>
   pb.collection('purchase_order_items').delete(id)
 
-export const receivePurchaseOrder = (
-  id: string,
-  data: {
-    items: Array<{ item_id: string; received_quantity: number }>
-    bank_account_id?: string
-    due_date?: string
-  },
+export const receivePurchaseOrderItems = (
+  orderId: string,
+  items: { id: string; received_quantity: number }[],
 ) =>
-  pb.send(`/backend/v1/purchase-orders/${id}/receive`, {
+  pb.send(`/backend/v1/purchase-orders/${orderId}/receive`, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ items }),
     headers: { 'Content-Type': 'application/json' },
   })
