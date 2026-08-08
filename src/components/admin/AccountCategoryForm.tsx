@@ -23,7 +23,10 @@ import {
   type AccountNature,
   type AccountCategoryFormData,
   getSyntheticParents,
+  createAccountCategory,
+  updateAccountCategory,
 } from '@/services/account-categories'
+import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
@@ -47,6 +50,7 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
   const [form, setForm] = useState<AccountCategoryFormData>(emptyForm)
   const [parents, setParents] = useState<AccountCategory[]>([])
   const [saving, setSaving] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   useEffect(() => {
     if (open) {
@@ -61,6 +65,7 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
       } else {
         setForm(emptyForm)
       }
+      setFieldErrors({})
     }
   }, [open, editing])
 
@@ -101,6 +106,7 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
     }
 
     setSaving(true)
+    setFieldErrors({})
     try {
       const payload: AccountCategoryFormData = {
         ...form,
@@ -115,8 +121,14 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
       }
       onSaved()
       onOpenChange(false)
-    } catch {
-      toast.error('Erro ao salvar categoria')
+    } catch (err) {
+      const errors = extractFieldErrors(err)
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors)
+        toast.error(Object.values(errors).join(' '))
+      } else {
+        toast.error('Erro ao salvar categoria')
+      }
     } finally {
       setSaving(false)
     }
@@ -141,6 +153,7 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
               onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))}
               placeholder="Ex: 1.1.01"
             />
+            {fieldErrors.code && <p className="text-sm text-red-500">{fieldErrors.code}</p>}
           </div>
           <div className="space-y-2">
             <Label>Nome *</Label>
@@ -149,6 +162,7 @@ export function AccountCategoryForm({ open, onOpenChange, editing, onSaved }: Pr
               onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
               placeholder="Ex: Lavagem Completa"
             />
+            {fieldErrors.name && <p className="text-sm text-red-500">{fieldErrors.name}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
