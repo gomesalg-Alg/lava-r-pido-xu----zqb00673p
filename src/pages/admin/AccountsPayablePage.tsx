@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { formatCurrency } from '@/lib/format'
+import { formatCurrency, formatDateOnlyBR } from '@/lib/format'
 import {
   Search,
   CheckCircle,
@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import { DigitalDocumentDialog } from '@/components/admin/DigitalDocumentDialog'
 import { AdobeReaderIcon } from '@/components/admin/AdobeReaderIcon'
+import { PayAccountDialog } from '@/components/admin/PayAccountDialog'
 import { toast } from 'sonner'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { AccountsPayableFormDialog } from '@/components/admin/AccountsPayableFormDialog'
@@ -71,6 +72,7 @@ export default function AccountsPayablePage() {
   const [deleteTarget, setDeleteTarget] = useState<AccountsPayable | null>(null)
   const [page, setPage] = useState(1)
   const [docDialogRecord, setDocDialogRecord] = useState<AccountsPayable | null>(null)
+  const [payTarget, setPayTarget] = useState<AccountsPayable | null>(null)
 
   const loadData = async () => {
     try {
@@ -120,12 +122,20 @@ export default function AccountsPayablePage() {
     if (page > totalPages) setPage(1)
   }, [totalPages, page])
 
-  const handleMarkPaid = async (id: string) => {
-    try {
-      await updateAccountsPayable(id, { status: 'Pago', paid_at: new Date().toISOString() })
-      toast.success('Conta marcada como paga!')
-    } catch {
-      toast.error('Erro ao atualizar conta')
+  const handleMarkPaid = async (r: AccountsPayable) => {
+    if (r.bank_account_id) {
+      try {
+        await updateAccountsPayable(r.id, {
+          status: 'Pago',
+          paid_at: new Date().toISOString(),
+          bank_account_id: r.bank_account_id,
+        })
+        toast.success('Conta marcada como paga!')
+      } catch {
+        toast.error('Erro ao atualizar conta')
+      }
+    } else {
+      setPayTarget(r)
     }
   }
 
@@ -276,12 +286,8 @@ export default function AccountsPayablePage() {
                   <TableCell className="text-right font-medium tabular-nums">
                     {formatCurrency(r.amount)}
                   </TableCell>
-                  <TableCell>
-                    {r.emission_date ? new Date(r.emission_date).toLocaleDateString('pt-BR') : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {r.due_date ? new Date(r.due_date).toLocaleDateString('pt-BR') : '-'}
-                  </TableCell>
+                  <TableCell>{r.emission_date ? formatDateOnlyBR(r.emission_date) : '-'}</TableCell>
+                  <TableCell>{r.due_date ? formatDateOnlyBR(r.due_date) : '-'}</TableCell>
                   <TableCell>{statusBadge(r.status)}</TableCell>
                   <TableCell className="text-sm text-slate-600">
                     {r.expand?.bank_account_id?.trading_name ||
@@ -322,10 +328,11 @@ export default function AccountsPayablePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleMarkPaid(r.id)}
+                          onClick={() => handleMarkPaid(r)}
                           className="text-green-600 hover:bg-green-50 hover:text-green-700"
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" /> Pagar
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          {r.bank_account_id ? 'Pagar' : 'Informar Banco'}
                         </Button>
                       )}
                       {(r.status === 'Pendente' || r.status === 'Pago') && (
@@ -388,6 +395,12 @@ export default function AccountsPayablePage() {
         onOpenChange={(o) => !o && setDocDialogRecord(null)}
         record={docDialogRecord}
         readOnly
+      />
+      <PayAccountDialog
+        open={!!payTarget}
+        onOpenChange={(o) => !o && setPayTarget(null)}
+        record={payTarget}
+        onSuccess={loadData}
       />
     </div>
   )

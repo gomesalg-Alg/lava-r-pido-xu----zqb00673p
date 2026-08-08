@@ -48,6 +48,14 @@ export function formatDateBR(dateStr: string): string {
   return `${day}/${month}/${year}`
 }
 
+export function formatDateOnlyBR(dateStr: string): string {
+  if (!dateStr) return ''
+  const datePart = dateStr.split(/[T ]/)[0]
+  const [year, month, day] = datePart.split('-')
+  if (!year || !month || !day) return ''
+  return `${day}/${month}/${year}`
+}
+
 export function formatDateTimeBR(dateStr: string): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
