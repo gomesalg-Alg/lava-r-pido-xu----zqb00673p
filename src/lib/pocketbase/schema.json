@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T00:14:55.816Z",
+  "generatedAt": "2026-08-08T01:09:41.605Z",
   "collections": [
     {
       "name": "users",
@@ -1594,6 +1594,158 @@
         "CREATE INDEX idx_accounts_payable_bank_account_id ON accounts_payable (bank_account_id)",
         "CREATE INDEX idx_accounts_payable_status ON accounts_payable (status)",
         "CREATE INDEX idx_accounts_payable_due_date ON accounts_payable (due_date)"
+      ]
+    },
+    {
+      "name": "purchase_orders",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "supplier_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "suppliers"
+        },
+        {
+          "name": "order_number",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Aberto", "Recebido", "Parcial", "Cancelado"]
+        },
+        {
+          "name": "emission_date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "expected_date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "observation",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "total_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created_by",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_purchase_orders_order_number ON purchase_orders (order_number)",
+        "CREATE INDEX idx_purchase_orders_supplier_id ON purchase_orders (supplier_id)",
+        "CREATE INDEX idx_purchase_orders_status ON purchase_orders (status)"
+      ]
+    },
+    {
+      "name": "purchase_order_items",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "purchase_order_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "purchase_orders"
+        },
+        {
+          "name": "product_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "products"
+        },
+        {
+          "name": "quantity",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "received_quantity",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "unit_price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "total_price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_purchase_order_items_purchase_order_id ON purchase_order_items (purchase_order_id)",
+        "CREATE INDEX idx_purchase_order_items_product_id ON purchase_order_items (product_id)"
       ]
     }
   ]

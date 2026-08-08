@@ -1,49 +1,71 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { useAuth } from '@/hooks/use-auth'
-import { useRealtime } from '@/hooks/use-realtime'
-import { getBankMap, formatMonthLabel, type BankMapData } from '@/services/bank-map'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableFooter,
-} from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, RefreshCw, Table2, CheckCircle2 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { AlertCircle, RefreshCw, Loader2 } from 'lucide-react'
+import { useRealtime } from '@/hooks/use-realtime'
+import { fetchBankMapData, type BankMapData } from '@/services/bank-map'
 import { formatCurrency } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-export default function BankMapPage() {
-  const { user } = useAuth()
-  const [startMonth, setStartMonth] = useState('')
-  const [endMonth, setEndMonth] = useState('')
-  const [data, setData] = useState<BankMapData | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const refreshTimer = useRef<ReturnType<typeof setTimeout>>()
+const MONTH_LABELS = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+]
 
-  useEffect(() => {
-    const now = new Date()
-    const year = now.getFullYear()
-    setStartMonth(`${year}-01`)
-    setEndMonth(`${year}-12`)
-  }, [])
+function formatMonthLabel(month: string): string {
+  const [year, m] = month.split('-')
+  const idx = parseInt(m, 10) - 1
+  return `${MONTH_LABELS[idx]}/${year.slice(2)}`
+}
+
+function getDefaultPeriod(): { start: string; end: string } {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const start = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+  return {
+    start: `${start.getFullYear()}-${pad(start.getMonth() + 1)}`,
+    end: `${now.getFullYear()}-${pad(now.getMonth() + 1)}`,
+  }
+}
+
+export default function BankMapPage() {
+  const defaults = getDefaultPeriod()
+  const [startMonth, setStartMonth] = useState(defaults.start)
+  const [endMonth, setEndMonth] = useState(defaults.end)
+  const [data, setData] = useState<BankMapData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const loadingRef = useRef(false)
 
   const loadData = useCallback(async () => {
-    if (!startMonth || !endMonth) return
+    if (loadingRef.current) return
+    loadingRef.current = true
     setLoading(true)
     setError(null)
     try {
-      const result = await getBankMap(startMonth, endMonth)
+      const result = await fetchBankMapData(startMonth, endMonth)
       setData(result)
-    } catch {
-      setError('Falha ao carregar os dados do mapa bancário.')
+    } catch (err: unknown) {
+      const e = err as { response?: { error?: string; message?: string }; message?: string }
+      const serverMsg =
+        e?.response?.error || e?.response?.message || e?.message || 'Erro desconhecido'
+      setError(serverMsg)
+      setData(null)
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
   }, [startMonth, endMonth])
 
@@ -51,285 +73,215 @@ export default function BankMapPage() {
     loadData()
   }, [loadData])
 
-  const debouncedRefresh = useCallback(() => {
-    if (refreshTimer.current) clearTimeout(refreshTimer.current)
-    refreshTimer.current = setTimeout(() => loadData(), 500)
+  const reloadTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const scheduleReload = useCallback(() => {
+    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current)
+    reloadTimerRef.current = setTimeout(() => loadData(), 500)
   }, [loadData])
 
-  useRealtime('service_orders', debouncedRefresh)
-  useRealtime('service_order_items', debouncedRefresh)
-  useRealtime('vendas_avulsas', debouncedRefresh)
-  useRealtime('accounts_receivable', debouncedRefresh)
-  useRealtime('account_categories', debouncedRefresh)
-
-  const { rowTotals, colTotals, grandTotal, billedPerMonth, totalReceived } = useMemo(() => {
-    if (!data)
-      return { rowTotals: {}, colTotals: {}, grandTotal: 0, billedPerMonth: {}, totalReceived: 0 }
-    const rT: Record<string, number> = {}
-    const cT: Record<string, number> = {}
-    const bM: Record<string, number> = {}
-    let grand = 0
-    for (const acc of data.accounts) {
-      let rowSum = 0
-      for (const month of data.months) {
-        const val = data.revenue[acc.id]?.[month] || 0
-        rowSum += val
-        cT[month] = (cT[month] || 0) + val
-        bM[month] = (bM[month] || 0) + val
-        grand += val
-      }
-      rT[acc.id] = rowSum
-    }
-    let tRec = 0
-    for (const month of data.months) tRec += data.received[month] || 0
-    return {
-      rowTotals: rT,
-      colTotals: cT,
-      grandTotal: grand,
-      billedPerMonth: bM,
-      totalReceived: tRec,
-    }
-  }, [data])
-
-  if (user && user.role !== 'Administrador') {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-2">
-          <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
-          <p className="text-lg font-medium">Acesso negado</p>
-          <p className="text-sm text-muted-foreground">
-            Apenas administradores podem acessar esta página.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  if (loading && !data) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-4">
-          <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
-          <p className="text-lg font-medium">{error}</p>
-          <Button onClick={loadData} variant="outline">
-            <RefreshCw className="w-4 h-4 mr-2" /> Tentar novamente
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  const isEmpty = !data || data.accounts.length === 0 || grandTotal === 0
+  useRealtime('service_orders', () => scheduleReload())
+  useRealtime('vendas_avulsas', () => scheduleReload())
+  useRealtime('accounts_receivable', () => scheduleReload())
+  useRealtime('account_categories', () => scheduleReload())
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            Mapa Bancário (Receitas)
-            {loading && <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />}
-          </h1>
-          <p className="text-sm text-muted-foreground">Receitas por conta analítica e mês</p>
+          <h1 className="text-2xl font-bold">Mapa Bancário</h1>
+          <p className="text-sm text-muted-foreground">
+            Receita consolidada por conta analítica e mês
+          </p>
         </div>
-        <div className="flex items-end gap-2">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground">De</label>
-            <input
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="startMonth" className="text-xs">
+              De
+            </Label>
+            <Input
+              id="startMonth"
               type="month"
               value={startMonth}
               onChange={(e) => setStartMonth(e.target.value)}
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="w-[150px]"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground">Até</label>
-            <input
+          <div className="space-y-1">
+            <Label htmlFor="endMonth" className="text-xs">
+              Até
+            </Label>
+            <Input
+              id="endMonth"
               type="month"
               value={endMonth}
               onChange={(e) => setEndMonth(e.target.value)}
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="w-[150px]"
             />
           </div>
+          <Button onClick={() => loadData()} variant="outline" size="sm" disabled={loading}>
+            <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} /> Atualizar
+          </Button>
         </div>
       </div>
 
-      {!isEmpty && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Total Faturado</p>
-              <p className="text-2xl font-bold">{formatCurrency(grandTotal)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Total Recebido</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalReceived)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Saldo</p>
-              <p
-                className={cn(
-                  'text-2xl font-bold',
-                  grandTotal - totalReceived >= 0 ? 'text-amber-600' : 'text-green-600',
-                )}
-              >
-                {formatCurrency(grandTotal - totalReceived)}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+      {loading && !data && (
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </CardContent>
+        </Card>
       )}
 
-      {isEmpty ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <div className="text-center space-y-2">
-            <Table2 className="w-12 h-12 mx-auto text-muted-foreground" />
-            <p className="text-lg font-medium">Nenhuma receita encontrada</p>
-            <p className="text-sm text-muted-foreground">
-              Não há receitas registradas para o período selecionado.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="flex flex-col items-center gap-4 py-12">
+            <AlertCircle className="h-10 w-10 text-destructive" />
+            <div className="text-center">
+              <p className="font-medium text-destructive">
+                Falha ao carregar os dados do mapa bancário
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+            </div>
+            <Button onClick={() => loadData()} variant="outline">
+              <RefreshCw className="h-4 w-4" /> Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {data && !error && (
+        <div className={cn('space-y-6', loading && 'opacity-50 pointer-events-none')}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Table2 className="w-5 h-5" /> Mapa de Receitas
-              </CardTitle>
+              <CardTitle>Faturamento por Conta Analítica</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="sticky left-0 bg-background min-w-[200px]">
-                        Conta
-                      </TableHead>
-                      {data!.months.map((month) => (
-                        <TableHead key={month} className="text-right min-w-[120px]">
-                          {formatMonthLabel(month)}
-                        </TableHead>
-                      ))}
-                      <TableHead className="text-right min-w-[120px] font-bold">Total</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data!.accounts.map((acc) => (
-                      <TableRow key={acc.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium sticky left-0 bg-background">
-                          {acc.code} - {acc.name}
-                        </TableCell>
-                        {data!.months.map((month) => {
-                          const val = data!.revenue[acc.id]?.[month] || 0
-                          return (
-                            <TableCell key={month} className="text-right">
-                              {val ? (
-                                formatCurrency(val)
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </TableCell>
-                          )
-                        })}
-                        <TableCell className="text-right font-bold">
-                          {formatCurrency(rowTotals[acc.id] || 0)}
-                        </TableCell>
-                      </TableRow>
+            <CardContent className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="sticky left-0 z-10 bg-background px-3 py-2 text-left font-medium">
+                      Conta
+                    </th>
+                    {data.months.map((mo) => (
+                      <th key={mo} className="whitespace-nowrap px-3 py-2 text-right font-medium">
+                        {formatMonthLabel(mo)}
+                      </th>
                     ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell className="font-bold sticky left-0 bg-muted">Total</TableCell>
-                      {data!.months.map((month) => (
-                        <TableCell key={month} className="text-right font-bold">
-                          {formatCurrency(colTotals[month] || 0)}
-                        </TableCell>
+                    <th className="px-3 py-2 text-right font-medium">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.rows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={data.months.length + 2}
+                        className="px-3 py-8 text-center text-muted-foreground"
+                      >
+                        Nenhuma conta analítica de receita encontrada
+                      </td>
+                    </tr>
+                  ) : (
+                    data.rows.map((row) => (
+                      <tr key={row.accountId} className="border-b hover:bg-muted/50">
+                        <td className="sticky left-0 z-10 bg-background whitespace-nowrap px-3 py-2 font-medium">
+                          {row.accountCode && (
+                            <span className="text-muted-foreground">{row.accountCode} - </span>
+                          )}
+                          {row.accountName}
+                        </td>
+                        {data.months.map((mo) => (
+                          <td key={mo} className="px-3 py-2 text-right tabular-nums">
+                            {row.values[mo] ? formatCurrency(row.values[mo]) : '—'}
+                          </td>
+                        ))}
+                        <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                          {formatCurrency(row.total)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+                {data.rows.length > 0 && (
+                  <tfoot>
+                    <tr className="border-t-2 font-semibold">
+                      <td className="sticky left-0 z-10 bg-background px-3 py-2">Total</td>
+                      {data.months.map((mo) => (
+                        <td key={mo} className="px-3 py-2 text-right tabular-nums">
+                          {formatCurrency(data.columnTotals[mo] || 0)}
+                        </td>
                       ))}
-                      <TableCell className="text-right font-bold">
-                        {formatCurrency(grandTotal)}
-                      </TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </div>
+                      <td className="px-3 py-2 text-right tabular-nums">
+                        {formatCurrency(data.grandTotal)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Reconciliação: Faturado × Recebido
-              </CardTitle>
+              <CardTitle>Faturado × Recebido</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Mês</TableHead>
-                      <TableHead className="text-right">Faturado</TableHead>
-                      <TableHead className="text-right">Recebido</TableHead>
-                      <TableHead className="text-right">Saldo</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data!.months.map((month) => {
-                      const billed = billedPerMonth[month] || 0
-                      const received = data!.received[month] || 0
-                      const diff = billed - received
-                      return (
-                        <TableRow key={month} className="hover:bg-muted/50">
-                          <TableCell className="font-medium">{formatMonthLabel(month)}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(billed)}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(received)}</TableCell>
-                          <TableCell
-                            className={cn(
-                              'text-right font-medium',
-                              diff >= 0 ? 'text-amber-600' : 'text-green-600',
-                            )}
-                          >
-                            {formatCurrency(diff)}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell className="font-bold">Total</TableCell>
-                      <TableCell className="text-right font-bold">
-                        {formatCurrency(grandTotal)}
-                      </TableCell>
-                      <TableCell className="text-right font-bold">
-                        {formatCurrency(totalReceived)}
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          'text-right font-bold',
-                          grandTotal - totalReceived >= 0 ? 'text-amber-600' : 'text-green-600',
-                        )}
-                      >
-                        {formatCurrency(grandTotal - totalReceived)}
-                      </TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </div>
+            <CardContent className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="px-3 py-2 text-left font-medium">Mês</th>
+                    <th className="px-3 py-2 text-right font-medium">Faturado</th>
+                    <th className="px-3 py-2 text-right font-medium">Recebido</th>
+                    <th className="px-3 py-2 text-right font-medium">Diferença</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.months.map((mo) => {
+                    const faturado = data.columnTotals[mo] || 0
+                    const recebido = data.received[mo] || 0
+                    const diff = faturado - recebido
+                    return (
+                      <tr key={mo} className="border-b hover:bg-muted/50">
+                        <td className="px-3 py-2 font-medium">{formatMonthLabel(mo)}</td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {formatCurrency(faturado)}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {formatCurrency(recebido)}
+                        </td>
+                        <td
+                          className={cn(
+                            'px-3 py-2 text-right tabular-nums',
+                            diff > 0
+                              ? 'text-amber-600'
+                              : diff < 0
+                                ? 'text-red-600'
+                                : 'text-green-600',
+                          )}
+                        >
+                          {formatCurrency(diff)}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 font-semibold">
+                    <td className="px-3 py-2">Total</td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {formatCurrency(data.grandTotal)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {formatCurrency(data.receivedTotal)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {formatCurrency(data.grandTotal - data.receivedTotal)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </CardContent>
           </Card>
-        </>
+        </div>
       )}
     </div>
   )

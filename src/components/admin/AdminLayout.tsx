@@ -34,6 +34,7 @@ import {
   Landmark,
   ReceiptText,
   Table2,
+  PackageCheck,
 } from 'lucide-react'
 import { APP_VERSION } from '@/lib/version'
 
@@ -76,6 +77,7 @@ const menuGroups: MenuGroup[] = [
       { label: 'Frente de Caixa', to: '/admin/frente-caixa', icon: ShoppingCart },
       { label: 'Contas a Receber', to: '/admin/contas-receber', icon: Receipt },
       { label: 'Contas a Pagar', to: '/admin/contas-pagar', icon: ReceiptText },
+      { label: 'Pedidos de Compra', to: '/admin/pedidos-compra', icon: PackageCheck },
     ],
   },
   {

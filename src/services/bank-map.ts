@@ -1,27 +1,30 @@
 import pb from '@/lib/pocketbase/client'
 
-export interface BankMapAccount {
-  id: string
-  name: string
-  code: string
+export interface BankMapRow {
+  accountId: string
+  accountName: string
+  accountCode: string
+  values: Record<string, number>
+  total: number
 }
 
 export interface BankMapData {
-  accounts: BankMapAccount[]
   months: string[]
-  revenue: Record<string, Record<string, number>>
+  rows: BankMapRow[]
+  columnTotals: Record<string, number>
+  grandTotal: number
   received: Record<string, number>
+  receivedTotal: number
 }
 
-export function formatMonthLabel(month: string): string {
-  const [year, monthNum] = month.split('-')
-  const names = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-  const idx = parseInt(monthNum, 10) - 1
-  return `${names[idx]}/${year.slice(2)}`
+export async function fetchBankMapData(
+  startMonth?: string,
+  endMonth?: string,
+): Promise<BankMapData> {
+  const params = new URLSearchParams()
+  if (startMonth) params.set('startMonth', startMonth)
+  if (endMonth) params.set('endMonth', endMonth)
+  const qs = params.toString()
+  const path = `/backend/v1/bank-map${qs ? '?' + qs : ''}`
+  return pb.send(path, { method: 'GET' })
 }
-
-export const getBankMap = (start: string, end: string) =>
-  pb.send(
-    `/backend/v1/bank-map?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
-    { method: 'GET' },
-  ) as Promise<BankMapData>
