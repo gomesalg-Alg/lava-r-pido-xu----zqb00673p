@@ -33,6 +33,7 @@ import {
   Receipt,
   Landmark,
   ReceiptText,
+  Table2,
 } from 'lucide-react'
 import { APP_VERSION } from '@/lib/version'
 
@@ -82,6 +83,7 @@ const menuGroups: MenuGroup[] = [
     icon: BarChart3,
     items: [
       { label: 'Dashboard de Vendas', to: '/admin/dashboard', icon: TrendingUp },
+      { label: 'Mapa Bancário', to: '/admin/mapa-bancario', icon: Table2 },
       { label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity },
     ],
   },
