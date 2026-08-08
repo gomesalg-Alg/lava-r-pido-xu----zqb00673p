@@ -46,3 +46,6 @@ export const deleteAccountsPayable = (id: string) => pb.collection('accounts_pay
 
 export const cancelAccountsPayable = (id: string) =>
   pb.send(`/backend/v1/accounts-payable/${id}/cancel`, { method: 'POST' })
+
+export const cancelGestorAccountsPayable = (id: string) =>
+  pb.send(`/backend/v1/accounts-payable/${id}/cancel-gestor`, { method: 'POST' })

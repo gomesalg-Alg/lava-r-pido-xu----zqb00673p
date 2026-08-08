@@ -149,6 +149,7 @@ export function UserCreateSheet({ onCreated }: UserCreateSheetProps) {
               <SelectContent>
                 <SelectItem value="Administrador">Administrador</SelectItem>
                 <SelectItem value="Operador">Operador</SelectItem>
+                <SelectItem value="Gestor de Compras">Gestor de Compras</SelectItem>
               </SelectContent>
             </Select>
             {fieldErrors.role && <p className="text-sm text-red-500">{fieldErrors.role}</p>}

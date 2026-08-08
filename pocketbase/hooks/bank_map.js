@@ -4,176 +4,232 @@ routerAdd(
   (e) => {
     try {
       const query = e.requestInfo().query || {}
-      let startMonth = query.startMonth || ''
-      let endMonth = query.endMonth || ''
+      let month = query.month || ''
+      const bankAccountId = query.bankAccountId || ''
+      const statusFilter = query.status || 'all'
 
-      if (!startMonth || !endMonth) {
+      if (!month) {
         const now = new Date()
-        const pad = (n) => String(n).padStart(2, '0')
-        const startY = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
-        const startM = now.getMonth() === 0 ? 12 : now.getMonth()
-        startMonth = startY + '-' + pad(startM)
-        endMonth = now.getFullYear() + '-' + pad(now.getMonth() + 1)
+        const pad = function (n) {
+          return String(n).padStart(2, '0')
+        }
+        month = now.getFullYear() + '-' + pad(now.getMonth() + 1)
       }
 
-      const months = []
+      var bankAccountRecs = $app.findRecordsByFilter('bank_accounts', '', 'name', 0, 0)
+      var bankAccounts = []
+      var bankAccountMap = {}
+      for (var i = 0; i < bankAccountRecs.length; i++) {
+        var ba = bankAccountRecs[i]
+        var baId = ba.id
+        var baName = ba.getString('name')
+        var baTrading = ba.getString('trading_name') || baName
+        bankAccounts.push({ id: baId, name: baName, tradingName: baTrading })
+        bankAccountMap[baId] = { name: baName, tradingName: baTrading }
+      }
+
+      var customerMap = {}
       {
-        const sp = startMonth.split('-')
-        const ep = endMonth.split('-')
-        let y = parseInt(sp[0], 10)
-        let m = parseInt(sp[1], 10)
-        const ey = parseInt(ep[0], 10)
-        const em = parseInt(ep[1], 10)
-        while (y < ey || (y === ey && m <= em)) {
-          months.push(y + '-' + String(m).padStart(2, '0'))
-          m++
-          if (m > 12) {
-            m = 1
-            y++
-          }
+        var recs = $app.findRecordsByFilter('customers', '', '', 0, 0)
+        for (var j = 0; j < recs.length; j++) {
+          customerMap[recs[j].id] = recs[j].getString('name') || ''
+        }
+      }
+      var supplierMap = {}
+      {
+        var sRecs = $app.findRecordsByFilter('suppliers', '', '', 0, 0)
+        for (var k = 0; k < sRecs.length; k++) {
+          supplierMap[sRecs[k].id] = sRecs[k].getString('name') || ''
         }
       }
 
-      const accountRecs = $app.findRecordsByFilter(
-        'account_categories',
-        "type = 'Receita' && nature = 'Analítica'",
-        'code',
-        0,
-        0,
-      )
-      const accountMap = {}
-      const accounts = []
-      for (const a of accountRecs) {
-        accountMap[a.id] = { values: {} }
-        for (const mo of months) accountMap[a.id].values[mo] = 0
-        accounts.push({ id: a.id, name: a.getString('name'), code: a.getString('code') || '' })
-      }
-
-      const serviceAccount = {}
-      {
-        const recs = $app.findRecordsByFilter('services', '', '', 0, 0)
-        for (const r of recs) serviceAccount[r.id] = r.getString('account_category_id') || ''
-      }
-      const productAccount = {}
-      {
-        const recs = $app.findRecordsByFilter('products', '', '', 0, 0)
-        for (const r of recs) productAccount[r.id] = r.getString('account_category_id') || ''
-      }
-
-      const orderMonth = {}
-      {
-        const recs = $app.findRecordsByFilter('service_orders', "status != 'Cancelado'", '', 0, 0)
-        for (const r of recs) {
-          const d = r.getString('emission_date') || ''
-          orderMonth[r.id] = d.length >= 7 ? d.substring(0, 7) : ''
+      function statusMatches(recordStatus, isReceita) {
+        if (statusFilter === 'all') return true
+        if (statusFilter === 'settled') {
+          return isReceita ? recordStatus === 'Recebido' : recordStatus === 'Pago'
         }
+        return recordStatus === statusFilter
       }
 
-      {
-        const recs = $app.findRecordsByFilter('service_order_items', '', '', 0, 0)
-        for (const item of recs) {
-          const orderId = item.getString('order_id')
-          const month = orderMonth[orderId] || ''
-          if (!month) continue
-          const svcId = item.getString('service_id')
-          const prodId = item.getString('product_id')
-          const accId = (svcId && serviceAccount[svcId]) || (prodId && productAccount[prodId]) || ''
-          if (!accId || !accountMap[accId]) continue
-          if (accountMap[accId].values[month] === undefined) continue
-          accountMap[accId].values[month] += item.getFloat('total_price') || 0
-        }
+      function matchesMonth(dateStr) {
+        if (!dateStr) return false
+        return dateStr.substring(0, 7) === month
       }
 
-      {
-        const recs = $app.findRecordsByFilter('vendas_avulsas', '', '', 0, 0)
-        for (const va of recs) {
-          const d = va.getString('created') || ''
-          const month = d.length >= 7 ? d.substring(0, 7) : ''
-          if (!month) continue
-          let items = []
-          try {
-            const raw = va.get('items')
-            if (Array.isArray(raw)) items = raw
-            else if (typeof raw === 'string') items = JSON.parse(raw || '[]')
-          } catch (_) {
-            try {
-              items = JSON.parse(va.getString('items') || '[]')
-            } catch (__) {
-              items = []
-            }
-          }
-          if (!Array.isArray(items)) continue
-          for (const it of items) {
-            const pid = it.product_id || ''
-            const sid = it.service_id || ''
-            const iid = it.id || ''
-            const accId =
-              (pid && productAccount[pid]) ||
-              (sid && serviceAccount[sid]) ||
-              (iid && (productAccount[iid] || serviceAccount[iid])) ||
-              ''
-            if (!accId || !accountMap[accId]) continue
-            if (accountMap[accId].values[month] === undefined) continue
-            const price = Number(
-              it.total_price || Number(it.unit_price || 0) * Number(it.quantity || 1),
-            )
-            accountMap[accId].values[month] += price
-          }
-        }
+      function getRelevantDate(status, settledDate, dueDate) {
+        if ((status === 'Recebido' || status === 'Pago') && settledDate) return settledDate
+        return dueDate || ''
       }
 
-      const receivedByMonth = {}
-      for (const mo of months) receivedByMonth[mo] = 0
-      {
-        const recs = $app.findRecordsByFilter(
-          'accounts_receivable',
-          "status = 'Recebido'",
-          '',
-          0,
-          0,
+      function getEffectiveAmount(record) {
+        return (
+          (record.getFloat('amount') || 0) -
+          (record.getFloat('discount_amount') || 0) +
+          (record.getFloat('surcharge_amount') || 0)
         )
-        for (const ar of recs) {
-          const d = ar.getString('received_at') || ''
-          const month = d.length >= 7 ? d.substring(0, 7) : ''
-          if (!month || receivedByMonth[month] === undefined) continue
-          const amt =
-            (ar.getFloat('amount') || 0) -
-            (ar.getFloat('discount_amount') || 0) +
-            (ar.getFloat('surcharge_amount') || 0)
-          receivedByMonth[month] += amt
+      }
+
+      function getBankAccountName(baId) {
+        var info = bankAccountMap[baId]
+        if (!info) return '—'
+        return info.tradingName || info.name || '—'
+      }
+
+      var receitas = []
+      {
+        var arRecs = $app.findRecordsByFilter('accounts_receivable', '', '-created', 0, 0)
+        for (var x = 0; x < arRecs.length; x++) {
+          var ar = arRecs[x]
+          var arStatus = ar.getString('status') || ''
+          if (!statusMatches(arStatus, true)) continue
+          var arBaId = ar.getString('bank_account_id') || ''
+          if (bankAccountId && arBaId !== bankAccountId) continue
+          var arReceivedAt = ar.getString('received_at') || ''
+          var arDueDate = ar.getString('due_date') || ''
+          var arRelevant = getRelevantDate(arStatus, arReceivedAt, arDueDate)
+          if (!matchesMonth(arRelevant)) continue
+          var arCustId = ar.getString('customer_id') || ''
+          receitas.push({
+            id: ar.id,
+            description: ar.getString('description') || '',
+            customerName: customerMap[arCustId] || '',
+            amount: getEffectiveAmount(ar),
+            dueDate: arDueDate,
+            receivedAt: arReceivedAt,
+            paymentMethod: ar.getString('payment_method') || '',
+            status: arStatus,
+            bankAccountId: arBaId,
+            bankAccountName: getBankAccountName(arBaId),
+          })
         }
       }
 
-      const rows = []
-      const columnTotals = {}
-      for (const mo of months) columnTotals[mo] = 0
-      let grandTotal = 0
-      for (const acc of accounts) {
-        const vals = accountMap[acc.id].values
-        let rowTotal = 0
-        for (const mo of months) {
-          rowTotal += vals[mo] || 0
-          columnTotals[mo] += vals[mo] || 0
+      var despesas = []
+      {
+        var apRecs = $app.findRecordsByFilter('accounts_payable', '', '-created', 0, 0)
+        for (var y = 0; y < apRecs.length; y++) {
+          var ap = apRecs[y]
+          var apStatus = ap.getString('status') || ''
+          if (!statusMatches(apStatus, false)) continue
+          var apBaId = ap.getString('bank_account_id') || ''
+          if (bankAccountId && apBaId !== bankAccountId) continue
+          var apPaidAt = ap.getString('paid_at') || ''
+          var apDueDate = ap.getString('due_date') || ''
+          var apRelevant = getRelevantDate(apStatus, apPaidAt, apDueDate)
+          if (!matchesMonth(apRelevant)) continue
+          var apSupId = ap.getString('supplier_id') || ''
+          despesas.push({
+            id: ap.id,
+            description: ap.getString('description') || '',
+            supplierName: supplierMap[apSupId] || '',
+            amount: getEffectiveAmount(ap),
+            dueDate: apDueDate,
+            paidAt: apPaidAt,
+            paymentMethod: ap.getString('payment_method') || '',
+            status: apStatus,
+            bankAccountId: apBaId,
+            bankAccountName: getBankAccountName(apBaId),
+          })
         }
-        grandTotal += rowTotal
-        rows.push({
-          accountId: acc.id,
-          accountName: acc.name,
-          accountCode: acc.code,
-          values: vals,
-          total: rowTotal,
+      }
+
+      var accountStats = {}
+      for (var a = 0; a < bankAccounts.length; a++) {
+        accountStats[bankAccounts[a].id] = {
+          totalReceitas: 0,
+          totalDespesas: 0,
+          receitasCount: 0,
+          despesasCount: 0,
+        }
+      }
+      accountStats[''] = { totalReceitas: 0, totalDespesas: 0, receitasCount: 0, despesasCount: 0 }
+
+      for (var r = 0; r < receitas.length; r++) {
+        var rKey = receitas[r].bankAccountId || ''
+        if (!accountStats[rKey])
+          accountStats[rKey] = {
+            totalReceitas: 0,
+            totalDespesas: 0,
+            receitasCount: 0,
+            despesasCount: 0,
+          }
+        accountStats[rKey].receitasCount++
+        if (receitas[r].status === 'Recebido')
+          accountStats[rKey].totalReceitas += receitas[r].amount
+      }
+      for (var d = 0; d < despesas.length; d++) {
+        var dKey = despesas[d].bankAccountId || ''
+        if (!accountStats[dKey])
+          accountStats[dKey] = {
+            totalReceitas: 0,
+            totalDespesas: 0,
+            receitasCount: 0,
+            despesasCount: 0,
+          }
+        accountStats[dKey].despesasCount++
+        if (despesas[d].status === 'Pago') accountStats[dKey].totalDespesas += despesas[d].amount
+      }
+
+      var accountBreakdown = []
+      for (var b = 0; b < bankAccounts.length; b++) {
+        var baStats = accountStats[bankAccounts[b].id] || {
+          totalReceitas: 0,
+          totalDespesas: 0,
+          receitasCount: 0,
+          despesasCount: 0,
+        }
+        accountBreakdown.push({
+          accountId: bankAccounts[b].id,
+          accountName: bankAccounts[b].name,
+          tradingName: bankAccounts[b].tradingName,
+          totalReceitas: baStats.totalReceitas,
+          totalDespesas: baStats.totalDespesas,
+          saldo: baStats.totalReceitas - baStats.totalDespesas,
+          receitasCount: baStats.receitasCount,
+          despesasCount: baStats.despesasCount,
         })
       }
-      let receivedTotal = 0
-      for (const mo of months) receivedTotal += receivedByMonth[mo]
+      var noAccount = accountStats[''] || {
+        totalReceitas: 0,
+        totalDespesas: 0,
+        receitasCount: 0,
+        despesasCount: 0,
+      }
+      if (noAccount.receitasCount > 0 || noAccount.despesasCount > 0) {
+        accountBreakdown.push({
+          accountId: '',
+          accountName: 'Sem conta bancária',
+          tradingName: 'Sem conta bancária',
+          totalReceitas: noAccount.totalReceitas,
+          totalDespesas: noAccount.totalDespesas,
+          saldo: noAccount.totalReceitas - noAccount.totalDespesas,
+          receitasCount: noAccount.receitasCount,
+          despesasCount: noAccount.despesasCount,
+        })
+      }
+
+      var totalReceitas = 0
+      var totalDespesas = 0
+      for (var tr = 0; tr < receitas.length; tr++) {
+        if (receitas[tr].status === 'Recebido') totalReceitas += receitas[tr].amount
+      }
+      for (var td = 0; td < despesas.length; td++) {
+        if (despesas[td].status === 'Pago') totalDespesas += despesas[td].amount
+      }
 
       return e.json(200, {
-        months,
-        rows,
-        columnTotals,
-        grandTotal,
-        received: receivedByMonth,
-        receivedTotal,
+        month: month,
+        bankAccountId: bankAccountId,
+        statusFilter: statusFilter,
+        bankAccounts: bankAccounts,
+        summary: {
+          totalReceitas: totalReceitas,
+          totalDespesas: totalDespesas,
+          saldo: totalReceitas - totalDespesas,
+        },
+        accountBreakdown: accountBreakdown,
+        receitas: receitas,
+        despesas: despesas,
       })
     } catch (err) {
       $app.logger().error('bank-map aggregation failed', 'error', String(err))

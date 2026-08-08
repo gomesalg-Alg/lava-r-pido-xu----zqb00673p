@@ -30,12 +30,14 @@ import {
   createAccountsPayable,
   updateAccountsPayable,
   cancelAccountsPayable,
+  cancelGestorAccountsPayable,
   type AccountsPayable,
 } from '@/services/accounts-payable'
 import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
 import { Loader2, FileText, XCircle } from 'lucide-react'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
+import { useAuth } from '@/hooks/use-auth'
 
 const STATUS_OPTIONS = ['Pendente', 'Pago', 'Cancelado']
 const NONE = { value: '', label: 'Nenhum' }
@@ -49,6 +51,8 @@ interface Props {
 
 export function AccountsPayableFormDialog({ open, onOpenChange, record, onSuccess }: Props) {
   const keyboardRef = useFormKeyboard<HTMLDivElement>()
+  const { user } = useAuth()
+  const isGestorCompras = user?.role === 'Gestor de Compras'
   const [suppliers, setSuppliers] = useState<{ id: string; name: string }[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [digitalDocOpen, setDigitalDocOpen] = useState(false)
@@ -134,8 +138,13 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
   const handleCancelAccount = async () => {
     if (!record) return
     try {
-      await cancelAccountsPayable(record.id)
-      toast.success('Conta cancelada com sucesso!')
+      if (record.status === 'Pago' && isGestorCompras && record.purchase_order_id) {
+        await cancelGestorAccountsPayable(record.id)
+        toast.success('Conta excluída e quantidades devolvidas ao pedido de compra!')
+      } else {
+        await cancelAccountsPayable(record.id)
+        toast.success('Conta cancelada com sucesso!')
+      }
       setCancelDialogOpen(false)
       onOpenChange(false)
       onSuccess()
@@ -218,10 +227,16 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
     ...bankAccounts.map((b) => ({ value: b.id, label: b.trading_name || b.name })),
   ]
 
-  const canCancel = record && record.status === 'Pendente'
-  const cancelDescription = record?.purchase_order_id
-    ? 'Tem certeza que deseja cancelar esta conta a pagar gerada por recebimento? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída.'
-    : 'Tem certeza que deseja cancelar esta conta a pagar? O status será alterado para "Cancelado".'
+  const canCancel =
+    record &&
+    (record.status === 'Pendente' ||
+      (record.status === 'Pago' && isGestorCompras && !!record.purchase_order_id))
+  const cancelDescription =
+    record?.status === 'Pago' && isGestorCompras && record.purchase_order_id
+      ? 'Tem certeza que deseja excluir esta conta a pagar paga? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída. Esta ação não pode ser desfeita.'
+      : record?.purchase_order_id
+        ? 'Tem certeza que deseja cancelar esta conta a pagar gerada por recebimento? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída.'
+        : 'Tem certeza que deseja cancelar esta conta a pagar? O status será alterado para "Cancelado".'
 
   return (
     <>
@@ -359,7 +374,10 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
                 className="text-red-600 hover:bg-red-50 hover:text-red-700"
                 onClick={() => setCancelDialogOpen(true)}
               >
-                <XCircle className="w-4 h-4 mr-2" /> Cancelar Conta
+                <XCircle className="w-4 h-4 mr-2" />
+                {record?.status === 'Pago' && isGestorCompras && record.purchase_order_id
+                  ? 'Excluir Conta'
+                  : 'Cancelar Conta'}
               </Button>
             )}
             <Button variant="outline" onClick={() => onOpenChange(false)}>
