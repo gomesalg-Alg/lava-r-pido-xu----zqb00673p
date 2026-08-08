@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T21:52:40.304Z",
+  "generatedAt": "2026-08-08T22:11:38.139Z",
   "collections": [
     {
       "name": "users",
@@ -43,7 +43,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": ["Administrador", "Operador"]
+          "selectValues": ["Administrador", "Operador", "Gestor de Compras"]
         }
       ],
       "indexes": [

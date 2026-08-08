@@ -3,9 +3,11 @@ import {
   getAccountsPayable,
   deleteAccountsPayable,
   cancelAccountsPayable,
+  cancelGestorAccountsPayable,
   type AccountsPayable,
 } from '@/services/accounts-payable'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -64,6 +66,8 @@ const STATUS_OPTIONS = [
 const PAGE_SIZE = 20
 
 export default function AccountsPayablePage() {
+  const { user } = useAuth()
+  const isGestorCompras = user?.role === 'Gestor de Compras'
   const [records, setRecords] = useState<AccountsPayable[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -75,6 +79,7 @@ export default function AccountsPayablePage() {
   const [docDialogRecord, setDocDialogRecord] = useState<AccountsPayable | null>(null)
   const [payTarget, setPayTarget] = useState<AccountsPayable | null>(null)
   const [cancelTarget, setCancelTarget] = useState<AccountsPayable | null>(null)
+  const [gestorDeleteTarget, setGestorDeleteTarget] = useState<AccountsPayable | null>(null)
 
   const loadData = async () => {
     try {
@@ -150,8 +155,24 @@ export default function AccountsPayablePage() {
     }
   }
 
+  const handleGestorDelete = async () => {
+    if (!gestorDeleteTarget) return
+    try {
+      await cancelGestorAccountsPayable(gestorDeleteTarget.id)
+      toast.success('Conta excluída e quantidades devolvidas ao pedido de compra!')
+      setGestorDeleteTarget(null)
+      loadData()
+    } catch (err) {
+      toast.error(
+        getErrorMessage(err) ||
+          'Não foi possível excluir esta conta. Verifique se você tem permissão e tente novamente.',
+      )
+      setGestorDeleteTarget(null)
+    }
+  }
+
   const openEdit = (r: AccountsPayable) => {
-    if (r.status === 'Pago') return
+    if (r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)) return
     setEditingRecord(r)
     setFormOpen(true)
   }
@@ -307,7 +328,7 @@ export default function AccountsPayablePage() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        disabled={r.status === 'Pago'}
+                        disabled={r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)}
                         onClick={() => openEdit(r)}
                       >
                         <Pencil className="w-4 h-4" />
@@ -316,8 +337,14 @@ export default function AccountsPayablePage() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        disabled={r.status === 'Pago'}
-                        onClick={() => setDeleteTarget(r)}
+                        disabled={r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)}
+                        onClick={() => {
+                          if (r.status === 'Pago' && isGestorCompras && r.purchase_order_id) {
+                            setGestorDeleteTarget(r)
+                          } else {
+                            setDeleteTarget(r)
+                          }
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -404,6 +431,12 @@ export default function AccountsPayablePage() {
         onOpenChange={(o) => !o && setCancelTarget(null)}
         onConfirm={handleCancelConfirm}
         description={cancelDescription}
+      />
+      <DeleteDialog
+        open={!!gestorDeleteTarget}
+        onOpenChange={(o) => !o && setGestorDeleteTarget(null)}
+        onConfirm={handleGestorDelete}
+        description="Tem certeza que deseja excluir esta conta a pagar? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída. Esta ação não pode ser desfeita."
       />
     </div>
   )

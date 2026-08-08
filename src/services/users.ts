@@ -1,6 +1,6 @@
 import pb from '@/lib/pocketbase/client'
 
-export type UserRole = 'Administrador' | 'Operador'
+export type UserRole = 'Administrador' | 'Operador' | 'Gestor de Compras'
 
 export type User = {
   id: string
