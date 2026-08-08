@@ -20,6 +20,8 @@ export interface AccountsPayable {
   nota_compra: string
   boleto_pagamento: string
   comprovante_pagamento: string
+  purchase_order_id: string | null
+  received_items: string
   created: string
   updated: string
   expand?: {
@@ -41,3 +43,6 @@ export const updateAccountsPayable = (id: string, data: Record<string, unknown> 
   pb.collection('accounts_payable').update<AccountsPayable>(id, data)
 
 export const deleteAccountsPayable = (id: string) => pb.collection('accounts_payable').delete(id)
+
+export const cancelReceiptAccountsPayable = (id: string) =>
+  pb.send(`/backend/v1/accounts-payable/${id}/cancel-receipt`, { method: 'POST' })

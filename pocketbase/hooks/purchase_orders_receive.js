@@ -31,6 +31,7 @@ routerAdd(
     var supplierId = po.getString('supplier_id')
     var totalAmount = 0
     var updatedItems = []
+    var receivedItemsData = []
 
     for (var i = 0; i < items.length; i++) {
       var item = items[i]
@@ -86,6 +87,11 @@ routerAdd(
       var unitPrice = record.getFloat('unit_price') || 0
       totalAmount += receiveQty * unitPrice
       updatedItems.push({ id: item.id, received_quantity: newTotal })
+      receivedItemsData.push({
+        item_id: item.id,
+        received_quantity: receiveQty,
+        unit_price: unitPrice,
+      })
     }
 
     var apCol = $app.findCollectionByNameOrId('accounts_payable')
@@ -99,6 +105,8 @@ routerAdd(
     ap.set('emission_date', emissionDate || null)
     ap.set('due_date', expectedDate || null)
     ap.set('status', 'Pendente')
+    ap.set('purchase_order_id', id)
+    ap.set('received_items', JSON.stringify(receivedItemsData))
     $app.save(ap)
 
     var allItems = $app.findRecordsByFilter(

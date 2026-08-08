@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T16:42:20.175Z",
+  "generatedAt": "2026-08-08T20:15:34.171Z",
   "collections": [
     {
       "name": "users",
@@ -1593,13 +1593,27 @@
           "type": "date",
           "required": false,
           "system": false
+        },
+        {
+          "name": "purchase_order_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "purchase_orders"
+        },
+        {
+          "name": "received_items",
+          "type": "json",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
         "CREATE INDEX idx_accounts_payable_supplier_id ON accounts_payable (supplier_id)",
         "CREATE INDEX idx_accounts_payable_bank_account_id ON accounts_payable (bank_account_id)",
         "CREATE INDEX idx_accounts_payable_status ON accounts_payable (status)",
-        "CREATE INDEX idx_accounts_payable_due_date ON accounts_payable (due_date)"
+        "CREATE INDEX idx_accounts_payable_due_date ON accounts_payable (due_date)",
+        "CREATE INDEX `idx_accounts_payable_purchase_order_id` ON `accounts_payable` (purchase_order_id)"
       ]
     },
     {

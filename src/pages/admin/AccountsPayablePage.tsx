@@ -3,6 +3,7 @@ import {
   getAccountsPayable,
   updateAccountsPayable,
   deleteAccountsPayable,
+  cancelReceiptAccountsPayable,
   type AccountsPayable,
 } from '@/services/accounts-payable'
 import { useRealtime } from '@/hooks/use-realtime'
@@ -34,6 +35,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Undo2,
 } from 'lucide-react'
 import { DigitalDocumentDialog } from '@/components/admin/DigitalDocumentDialog'
 import { AdobeReaderIcon } from '@/components/admin/AdobeReaderIcon'
@@ -41,6 +43,7 @@ import { PayAccountDialog } from '@/components/admin/PayAccountDialog'
 import { toast } from 'sonner'
 import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { AccountsPayableFormDialog } from '@/components/admin/AccountsPayableFormDialog'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
 import { useSortableData } from '@/hooks/use-sortable-data'
 
@@ -73,6 +76,7 @@ export default function AccountsPayablePage() {
   const [page, setPage] = useState(1)
   const [docDialogRecord, setDocDialogRecord] = useState<AccountsPayable | null>(null)
   const [payTarget, setPayTarget] = useState<AccountsPayable | null>(null)
+  const [cancelReceiptTarget, setCancelReceiptTarget] = useState<AccountsPayable | null>(null)
 
   const loadData = async () => {
     try {
@@ -121,6 +125,20 @@ export default function AccountsPayablePage() {
   useEffect(() => {
     if (page > totalPages) setPage(1)
   }, [totalPages, page])
+
+  const handleCancelReceipt = async () => {
+    if (!cancelReceiptTarget) return
+    try {
+      await cancelReceiptAccountsPayable(cancelReceiptTarget.id)
+      toast.success(
+        'Recebimento cancelado! Quantidades devolvidas ao pedido de compra e status atualizado.',
+      )
+      setCancelReceiptTarget(null)
+      loadData()
+    } catch (err) {
+      toast.error(getErrorMessage(err) || 'Erro ao cancelar recebimento')
+    }
+  }
 
   const handleCancel = async (r: AccountsPayable) => {
     try {
@@ -320,7 +338,17 @@ export default function AccountsPayablePage() {
                           Pagar
                         </Button>
                       )}
-                      {(r.status === 'Pendente' || r.status === 'Pago') && (
+                      {r.purchase_order_id && r.status === 'Pendente' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCancelReceiptTarget(r)}
+                          className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                        >
+                          <Undo2 className="w-4 h-4 mr-1" /> Cancelar Recebimento
+                        </Button>
+                      )}
+                      {!r.purchase_order_id && (r.status === 'Pendente' || r.status === 'Pago') && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -386,6 +414,12 @@ export default function AccountsPayablePage() {
         onOpenChange={(o) => !o && setPayTarget(null)}
         record={payTarget}
         onSuccess={loadData}
+      />
+      <DeleteDialog
+        open={!!cancelReceiptTarget}
+        onOpenChange={(o) => !o && setCancelReceiptTarget(null)}
+        onConfirm={handleCancelReceipt}
+        description="Tem certeza que deseja cancelar esta conta a pagar gerada por recebimento? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída."
       />
     </div>
   )
