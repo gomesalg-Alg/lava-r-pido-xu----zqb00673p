@@ -136,7 +136,10 @@ export default function AccountsPayablePage() {
       setCancelReceiptTarget(null)
       loadData()
     } catch (err) {
-      toast.error(getErrorMessage(err) || 'Erro ao cancelar recebimento')
+      toast.error(
+        getErrorMessage(err) ||
+          'Não foi possível cancelar o recebimento. Verifique se o pedido não está cancelado ou se os itens ainda existem.',
+      )
     }
   }
 
@@ -144,8 +147,11 @@ export default function AccountsPayablePage() {
     try {
       await updateAccountsPayable(r.id, { status: 'Cancelado' })
       toast.success('Conta cancelada!')
-    } catch {
-      toast.error('Erro ao cancelar conta')
+    } catch (err) {
+      toast.error(
+        getErrorMessage(err) ||
+          'Não foi possível cancelar esta conta. Tente novamente ou contate o suporte.',
+      )
     }
   }
 
