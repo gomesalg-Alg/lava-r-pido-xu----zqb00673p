@@ -23,16 +23,18 @@ import {
   PDF_FIELDS,
   type PdfField,
 } from '@/components/admin/DigitalDocumentDialog'
+import { DeleteDialog } from '@/components/admin/DeleteDialog'
 import { getSuppliers } from '@/services/suppliers'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
 import {
   createAccountsPayable,
   updateAccountsPayable,
+  cancelAccountsPayable,
   type AccountsPayable,
 } from '@/services/accounts-payable'
-import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
+import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
-import { Loader2, FileText } from 'lucide-react'
+import { Loader2, FileText, XCircle } from 'lucide-react'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const STATUS_OPTIONS = ['Pendente', 'Pago', 'Cancelado']
@@ -51,6 +53,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [digitalDocOpen, setDigitalDocOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [pdfFiles, setPdfFiles] = useState<Record<PdfField, File | null>>({
     nota_compra: null,
@@ -128,6 +131,23 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
     setRemovedFiles((prev) => ({ ...prev, [field]: isRemoved }))
   }
 
+  const handleCancelAccount = async () => {
+    if (!record) return
+    try {
+      await cancelAccountsPayable(record.id)
+      toast.success('Conta cancelada com sucesso!')
+      setCancelDialogOpen(false)
+      onOpenChange(false)
+      onSuccess()
+    } catch (err) {
+      toast.error(
+        getErrorMessage(err) ||
+          'Não foi possível cancelar esta conta. Tente novamente ou contate o suporte.',
+      )
+      setCancelDialogOpen(false)
+    }
+  }
+
   const handleSubmit = async () => {
     setSaving(true)
     setErrors({})
@@ -198,143 +218,166 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
     ...bankAccounts.map((b) => ({ value: b.id, label: b.trading_name || b.name })),
   ]
 
+  const canCancel = record && record.status === 'Pendente'
+  const cancelDescription = record?.purchase_order_id
+    ? 'Tem certeza que deseja cancelar esta conta a pagar gerada por recebimento? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída.'
+    : 'Tem certeza que deseja cancelar esta conta a pagar? O status será alterado para "Cancelado".'
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent ref={keyboardRef} className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{record ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Fornecedor</Label>
-              <SearchableSelect
-                options={supplierOpts}
-                value={form.supplier_id}
-                onChange={(v) => set('supplier_id', v)}
-                placeholder="Selecionar..."
-                searchPlaceholder="Buscar..."
-              />
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent ref={keyboardRef} className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{record ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Fornecedor</Label>
+                <SearchableSelect
+                  options={supplierOpts}
+                  value={form.supplier_id}
+                  onChange={(v) => set('supplier_id', v)}
+                  placeholder="Selecionar..."
+                  searchPlaceholder="Buscar..."
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Banco</Label>
+                <SearchableSelect
+                  options={bankOpts}
+                  value={form.bank_account_id}
+                  onChange={(v) => set('bank_account_id', v)}
+                  placeholder="Selecionar..."
+                  searchPlaceholder="Buscar..."
+                />
+              </div>
             </div>
             <div className="space-y-1">
-              <Label>Banco</Label>
-              <SearchableSelect
-                options={bankOpts}
-                value={form.bank_account_id}
-                onChange={(v) => set('bank_account_id', v)}
-                placeholder="Selecionar..."
-                searchPlaceholder="Buscar..."
-              />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <Label>Descrição *</Label>
-            <Input
-              value={form.description}
-              onChange={(e) => set('description', e.target.value)}
-              placeholder="Descrição..."
-            />
-            {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label>Valor (R$) *</Label>
-              <CurrencyInput value={form.amount} onChange={(v) => set('amount', v)} />
-              {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
-            </div>
-            <div className="space-y-1">
-              <Label>Desconto (R$)</Label>
-              <CurrencyInput
-                value={form.discount_amount}
-                onChange={(v) => set('discount_amount', v)}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Acréscimo (R$)</Label>
-              <CurrencyInput
-                value={form.surcharge_amount}
-                onChange={(v) => set('surcharge_amount', v)}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Data de Emissão</Label>
+              <Label>Descrição *</Label>
               <Input
-                type="date"
-                value={form.emission_date}
-                onChange={(e) => set('emission_date', e.target.value)}
+                value={form.description}
+                onChange={(e) => set('description', e.target.value)}
+                placeholder="Descrição..."
               />
+              {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
             </div>
-            <div className="space-y-1">
-              <Label>Vencimento</Label>
-              <Input
-                type="date"
-                value={form.due_date}
-                onChange={(e) => set('due_date', e.target.value)}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label>Valor (R$) *</Label>
+                <CurrencyInput value={form.amount} onChange={(v) => set('amount', v)} />
+                {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
+              </div>
+              <div className="space-y-1">
+                <Label>Desconto (R$)</Label>
+                <CurrencyInput
+                  value={form.discount_amount}
+                  onChange={(v) => set('discount_amount', v)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Acréscimo (R$)</Label>
+                <CurrencyInput
+                  value={form.surcharge_amount}
+                  onChange={(v) => set('surcharge_amount', v)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Data de Emissão</Label>
+                <Input
+                  type="date"
+                  value={form.emission_date}
+                  onChange={(e) => set('emission_date', e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Vencimento</Label>
+                <Input
+                  type="date"
+                  value={form.due_date}
+                  onChange={(e) => set('due_date', e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Status *</Label>
+                <Select value={form.status} onValueChange={(v) => set('status', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Forma de Pagamento</Label>
+                <Input
+                  value={form.payment_method}
+                  onChange={(e) => set('payment_method', e.target.value)}
+                  placeholder="Ex: Pix..."
+                />
+              </div>
+            </div>
+            {form.status === 'Pago' && (
+              <div className="space-y-1">
+                <Label>Data de Pagamento</Label>
+                <Input
+                  type="date"
+                  value={form.paid_at}
+                  onChange={(e) => set('paid_at', e.target.value)}
+                />
+              </div>
+            )}
+            <div className="border-t pt-3 space-y-3">
+              <p className="text-sm font-medium text-slate-700">Documentos (PDF)</p>
+              <Button type="button" variant="outline" onClick={() => setDigitalDocOpen(true)}>
+                <FileText className="w-4 h-4 mr-2" /> Objeto Digitalizado
+              </Button>
+              <DigitalDocumentDialog
+                open={digitalDocOpen}
+                onOpenChange={setDigitalDocOpen}
+                record={record}
+                pdfFiles={pdfFiles}
+                removedFiles={removedFiles}
+                onPdfChange={handlePdfChange}
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Status *</Label>
-              <Select value={form.status} onValueChange={(v) => set('status', v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label>Forma de Pagamento</Label>
-              <Input
-                value={form.payment_method}
-                onChange={(e) => set('payment_method', e.target.value)}
-                placeholder="Ex: Pix..."
-              />
-            </div>
-          </div>
-          {form.status === 'Pago' && (
-            <div className="space-y-1">
-              <Label>Data de Pagamento</Label>
-              <Input
-                type="date"
-                value={form.paid_at}
-                onChange={(e) => set('paid_at', e.target.value)}
-              />
-            </div>
-          )}
-          <div className="border-t pt-3 space-y-3">
-            <p className="text-sm font-medium text-slate-700">Documentos (PDF)</p>
-            <Button type="button" variant="outline" onClick={() => setDigitalDocOpen(true)}>
-              <FileText className="w-4 h-4 mr-2" /> Objeto Digitalizado
+          <DialogFooter>
+            {canCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setCancelDialogOpen(true)}
+              >
+                <XCircle className="w-4 h-4 mr-2" /> Cancelar Conta
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Fechar
             </Button>
-            <DigitalDocumentDialog
-              open={digitalDocOpen}
-              onOpenChange={setDigitalDocOpen}
-              record={record}
-              pdfFiles={pdfFiles}
-              removedFiles={removedFiles}
-              onPdfChange={handlePdfChange}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
-            {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {record ? 'Salvar' : 'Criar'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <Button onClick={handleSubmit} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {record ? 'Salvar' : 'Criar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <DeleteDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleCancelAccount}
+        description={cancelDescription}
+      />
+    </>
   )
 }

@@ -44,5 +44,5 @@ export const updateAccountsPayable = (id: string, data: Record<string, unknown> 
 
 export const deleteAccountsPayable = (id: string) => pb.collection('accounts_payable').delete(id)
 
-export const cancelReceiptAccountsPayable = (id: string) =>
-  pb.send(`/backend/v1/accounts-payable/${id}/cancel-receipt`, { method: 'POST' })
+export const cancelAccountsPayable = (id: string) =>
+  pb.send(`/backend/v1/accounts-payable/${id}/cancel`, { method: 'POST' })

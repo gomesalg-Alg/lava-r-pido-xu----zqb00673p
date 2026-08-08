@@ -1,9 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   getAccountsPayable,
-  updateAccountsPayable,
   deleteAccountsPayable,
-  cancelReceiptAccountsPayable,
+  cancelAccountsPayable,
   type AccountsPayable,
 } from '@/services/accounts-payable'
 import { useRealtime } from '@/hooks/use-realtime'
@@ -75,7 +74,7 @@ export default function AccountsPayablePage() {
   const [page, setPage] = useState(1)
   const [docDialogRecord, setDocDialogRecord] = useState<AccountsPayable | null>(null)
   const [payTarget, setPayTarget] = useState<AccountsPayable | null>(null)
-  const [cancelReceiptTarget, setCancelReceiptTarget] = useState<AccountsPayable | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<AccountsPayable | null>(null)
 
   const loadData = async () => {
     try {
@@ -125,27 +124,13 @@ export default function AccountsPayablePage() {
     if (page > totalPages) setPage(1)
   }, [totalPages, page])
 
-  const handleCancelReceipt = async () => {
-    if (!cancelReceiptTarget) return
+  const handleCancelConfirm = async () => {
+    if (!cancelTarget) return
     try {
-      await cancelReceiptAccountsPayable(cancelReceiptTarget.id)
-      toast.success(
-        'Recebimento cancelado! Quantidades devolvidas ao pedido de compra e status atualizado.',
-      )
-      setCancelReceiptTarget(null)
+      await cancelAccountsPayable(cancelTarget.id)
+      toast.success('Conta cancelada com sucesso!')
+      setCancelTarget(null)
       loadData()
-    } catch (err) {
-      toast.error(
-        getErrorMessage(err) ||
-          'Não foi possível cancelar o recebimento. Verifique se o pedido não está cancelado ou se os itens ainda existem.',
-      )
-    }
-  }
-
-  const handleCancel = async (r: AccountsPayable) => {
-    try {
-      await updateAccountsPayable(r.id, { status: 'Cancelado' })
-      toast.success('Conta cancelada!')
     } catch (err) {
       toast.error(
         getErrorMessage(err) ||
@@ -185,6 +170,10 @@ export default function AccountsPayablePage() {
       </Badge>
     )
   }
+
+  const cancelDescription = cancelTarget?.purchase_order_id
+    ? 'Tem certeza que deseja cancelar esta conta a pagar gerada por recebimento? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída.'
+    : 'Tem certeza que deseja cancelar esta conta a pagar? O status será alterado para "Cancelado".'
 
   return (
     <div>
@@ -347,19 +336,7 @@ export default function AccountsPayablePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            r.purchase_order_id ? setCancelReceiptTarget(r) : handleCancel(r)
-                          }
-                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" /> Cancelar
-                        </Button>
-                      )}
-                      {!r.purchase_order_id && r.status === 'Pago' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCancel(r)}
+                          onClick={() => setCancelTarget(r)}
                           className="text-red-600 hover:bg-red-50 hover:text-red-700"
                         >
                           <XCircle className="w-4 h-4 mr-1" /> Cancelar
@@ -423,10 +400,10 @@ export default function AccountsPayablePage() {
         onSuccess={loadData}
       />
       <DeleteDialog
-        open={!!cancelReceiptTarget}
-        onOpenChange={(o) => !o && setCancelReceiptTarget(null)}
-        onConfirm={handleCancelReceipt}
-        description="Tem certeza que deseja cancelar esta conta a pagar gerada por recebimento? As quantidades recebidas serão devolvidas ao pedido de compra, o status do pedido será recalculado e a conta a pagar será excluída."
+        open={!!cancelTarget}
+        onOpenChange={(o) => !o && setCancelTarget(null)}
+        onConfirm={handleCancelConfirm}
+        description={cancelDescription}
       />
     </div>
   )
