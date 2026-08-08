@@ -122,23 +122,6 @@ export default function AccountsPayablePage() {
     if (page > totalPages) setPage(1)
   }, [totalPages, page])
 
-  const handleMarkPaid = async (r: AccountsPayable) => {
-    if (r.bank_account_id) {
-      try {
-        await updateAccountsPayable(r.id, {
-          status: 'Pago',
-          paid_at: new Date().toISOString(),
-          bank_account_id: r.bank_account_id,
-        })
-        toast.success('Conta marcada como paga!')
-      } catch {
-        toast.error('Erro ao atualizar conta')
-      }
-    } else {
-      setPayTarget(r)
-    }
-  }
-
   const handleCancel = async (r: AccountsPayable) => {
     try {
       await updateAccountsPayable(r.id, { status: 'Cancelado' })
@@ -160,6 +143,7 @@ export default function AccountsPayablePage() {
   }
 
   const openEdit = (r: AccountsPayable) => {
+    if (r.status === 'Pago') return
     setEditingRecord(r)
     setFormOpen(true)
   }
@@ -311,6 +295,7 @@ export default function AccountsPayablePage() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
+                        disabled={r.status === 'Pago'}
                         onClick={() => openEdit(r)}
                       >
                         <Pencil className="w-4 h-4" />
@@ -319,7 +304,7 @@ export default function AccountsPayablePage() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        disabled={r.status !== 'Pendente'}
+                        disabled={r.status === 'Pago'}
                         onClick={() => setDeleteTarget(r)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -328,11 +313,11 @@ export default function AccountsPayablePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleMarkPaid(r)}
+                          onClick={() => setPayTarget(r)}
                           className="text-green-600 hover:bg-green-50 hover:text-green-700"
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
-                          {r.bank_account_id ? 'Pagar' : 'Informar Banco'}
+                          Pagar
                         </Button>
                       )}
                       {(r.status === 'Pendente' || r.status === 'Pago') && (

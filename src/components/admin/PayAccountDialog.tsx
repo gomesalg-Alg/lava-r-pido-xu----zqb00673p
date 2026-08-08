@@ -5,15 +5,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SearchableSelect } from '@/components/admin/SearchableSelect'
 import { getActiveBankAccounts, type BankAccount } from '@/services/bank-accounts'
 import { updateAccountsPayable, type AccountsPayable } from '@/services/accounts-payable'
 import { toast } from 'sonner'
-import { Loader2, CheckCircle } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useFormKeyboard } from '@/hooks/use-form-keyboard'
 
 const NONE = { value: '', label: 'Nenhum' }
@@ -29,105 +29,77 @@ export function PayAccountDialog({ open, onOpenChange, record, onSuccess }: Prop
   const keyboardRef = useFormKeyboard<HTMLDivElement>()
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [bankAccountId, setBankAccountId] = useState('')
-  const [error, setError] = useState('')
+  const [paidAt, setPaidAt] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return
     getActiveBankAccounts()
-      .then((b) => setBankAccounts(b))
-      .catch(() => toast.error('Erro ao carregar contas bancárias'))
+      .then(setBankAccounts)
+      .catch(() => toast.error('Erro ao carregar bancos'))
   }, [open])
 
   useEffect(() => {
-    if (open && record) {
+    if (record) {
       setBankAccountId(record.bank_account_id || '')
-    } else {
-      setBankAccountId('')
+      setPaidAt(new Date().toISOString().split('T')[0])
     }
-    setError('')
   }, [record, open])
+
+  const handleSubmit = async () => {
+    if (!bankAccountId) {
+      toast.error('Informe o banco de origem do pagamento para continuar')
+      return
+    }
+    setSaving(true)
+    try {
+      await updateAccountsPayable(record!.id, {
+        status: 'Pago',
+        paid_at: paidAt ? new Date(paidAt).toISOString() : new Date().toISOString(),
+        bank_account_id: bankAccountId,
+      })
+      toast.success('Pagamento registrado com sucesso!')
+      onOpenChange(false)
+      onSuccess()
+    } catch {
+      toast.error('Erro ao registrar pagamento')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const bankOpts = [
     NONE,
     ...bankAccounts.map((b) => ({ value: b.id, label: b.trading_name || b.name })),
   ]
 
-  const handleSubmit = async () => {
-    if (!record) return
-    if (!bankAccountId) {
-      setError('Informe o banco de origem do pagamento para continuar.')
-      return
-    }
-    setSaving(true)
-    setError('')
-    try {
-      await updateAccountsPayable(record.id, {
-        status: 'Pago',
-        paid_at: new Date().toISOString(),
-        bank_account_id: bankAccountId,
-      })
-      toast.success('Conta marcada como paga!')
-      onOpenChange(false)
-      onSuccess()
-    } catch {
-      toast.error('Erro ao atualizar conta')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent ref={keyboardRef} className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            Confirmar Pagamento
-          </DialogTitle>
-          <DialogDescription>
-            Informe o banco de origem do pagamento para continuar.
-          </DialogDescription>
+          <DialogTitle>Registrar Pagamento</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="space-y-1">
-            <Label>Conta Bancária *</Label>
+            <Label>Banco *</Label>
             <SearchableSelect
               options={bankOpts}
               value={bankAccountId}
-              onChange={(v) => {
-                setBankAccountId(v)
-                setError('')
-              }}
-              placeholder="Selecionar conta bancária..."
-              searchPlaceholder="Buscar conta..."
+              onChange={setBankAccountId}
+              placeholder="Selecionar..."
+              searchPlaceholder="Buscar..."
             />
-            {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
-          {record && (
-            <div className="bg-slate-50 rounded-md p-3 text-sm text-slate-600">
-              <p>
-                <span className="font-medium">Descrição:</span> {record.description || '-'}
-              </p>
-              <p>
-                <span className="font-medium">Valor:</span>{' '}
-                {new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(record.amount || 0)}
-              </p>
-            </div>
-          )}
+          <div className="space-y-1">
+            <Label>Data de Pagamento *</Label>
+            <Input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={saving}
-            className="text-green-600 hover:bg-green-50 hover:text-green-700"
-          >
+          <Button onClick={handleSubmit} disabled={saving}>
             {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Confirmar Pagamento
           </Button>
