@@ -35,7 +35,6 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  Undo2,
 } from 'lucide-react'
 import { DigitalDocumentDialog } from '@/components/admin/DigitalDocumentDialog'
 import { AdobeReaderIcon } from '@/components/admin/AdobeReaderIcon'
@@ -344,17 +343,19 @@ export default function AccountsPayablePage() {
                           Pagar
                         </Button>
                       )}
-                      {r.purchase_order_id && r.status === 'Pendente' && (
+                      {r.status === 'Pendente' && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCancelReceiptTarget(r)}
-                          className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                          onClick={() =>
+                            r.purchase_order_id ? setCancelReceiptTarget(r) : handleCancel(r)
+                          }
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
                         >
-                          <Undo2 className="w-4 h-4 mr-1" /> Cancelar Recebimento
+                          <XCircle className="w-4 h-4 mr-1" /> Cancelar
                         </Button>
                       )}
-                      {!r.purchase_order_id && (r.status === 'Pendente' || r.status === 'Pago') && (
+                      {!r.purchase_order_id && r.status === 'Pago' && (
                         <Button
                           variant="outline"
                           size="sm"
