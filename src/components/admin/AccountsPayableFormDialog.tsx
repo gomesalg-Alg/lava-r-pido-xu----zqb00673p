@@ -32,6 +32,7 @@ import {
   cancelAccountsPayable,
   cancelGestorAccountsPayable,
   type AccountsPayable,
+  PAYMENT_METHOD_CODES,
 } from '@/services/accounts-payable'
 import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from 'sonner'
@@ -41,6 +42,7 @@ import { useAuth } from '@/hooks/use-auth'
 
 const STATUS_OPTIONS = ['Pendente', 'Pago', 'Cancelado']
 const NONE = { value: '', label: 'Nenhum' }
+const PAYMENT_CODE_OPTS = PAYMENT_METHOD_CODES.map((code) => ({ value: code, label: code }))
 
 interface Props {
   open: boolean
@@ -78,6 +80,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
     due_date: '',
     status: 'Pendente',
     payment_method: '',
+    payment_method_code: '',
     paid_at: '',
     discount_amount: 0,
     surcharge_amount: 0,
@@ -104,6 +107,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         due_date: record.due_date ? record.due_date.split(/[T ]/)[0] : '',
         status: record.status || 'Pendente',
         payment_method: record.payment_method || '',
+        payment_method_code: (record as any).payment_method_code || '',
         paid_at: record.paid_at ? record.paid_at.split(/[T ]/)[0] : '',
         discount_amount: record.discount_amount || 0,
         surcharge_amount: record.surcharge_amount || 0,
@@ -118,6 +122,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
         due_date: '',
         status: 'Pendente',
         payment_method: '',
+        payment_method_code: '',
         paid_at: '',
         discount_amount: 0,
         surcharge_amount: 0,
@@ -177,6 +182,7 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
       due_date: form.due_date || null,
       status: form.status,
       payment_method: form.payment_method,
+      payment_method_code: form.payment_method_code || null,
       paid_at: form.status === 'Pago' && form.paid_at ? form.paid_at : null,
       discount_amount: form.discount_amount || null,
       surcharge_amount: form.surcharge_amount || null,
@@ -334,11 +340,21 @@ export function AccountsPayableFormDialog({ open, onOpenChange, record, onSucces
               </div>
               <div className="space-y-1">
                 <Label>Forma de Pagamento</Label>
-                <Input
-                  value={form.payment_method}
-                  onChange={(e) => set('payment_method', e.target.value)}
-                  placeholder="Ex: Pix..."
-                />
+                <Select
+                  value={form.payment_method_code}
+                  onValueChange={(v) => set('payment_method_code', v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAYMENT_CODE_OPTS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             {form.status === 'Pago' && (

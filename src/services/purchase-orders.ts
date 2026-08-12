@@ -74,9 +74,10 @@ export const deletePurchaseOrderItem = (id: string) =>
 export const receivePurchaseOrderItems = (
   orderId: string,
   items: { id: string; received_quantity: number }[],
+  paymentMethodCode?: string,
 ) =>
   pb.send(`/backend/v1/purchase-orders/${orderId}/receive`, {
     method: 'POST',
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items, payment_method_code: paymentMethodCode || '' }),
     headers: { 'Content-Type': 'application/json' },
   })

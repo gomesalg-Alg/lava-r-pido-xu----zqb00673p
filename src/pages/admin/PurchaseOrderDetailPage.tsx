@@ -18,6 +18,14 @@ import { ArrowLeft, CheckCircle2, Package, Loader2, AlertCircle } from 'lucide-r
 import { formatCurrency, formatDateBR } from '@/lib/format'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { PAYMENT_METHOD_CODES } from '@/services/accounts-payable'
+import {
   getPurchaseOrder,
   getPurchaseOrderItems,
   receivePurchaseOrderItems,
@@ -32,6 +40,8 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | '
   Cancelado: 'destructive',
 }
 
+const PAYMENT_CODE_OPTS = PAYMENT_METHOD_CODES.map((code) => ({ value: code, label: code }))
+
 export default function PurchaseOrderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -41,6 +51,7 @@ export default function PurchaseOrderDetailPage() {
   const [receiving, setReceiving] = useState(false)
   const [receiveQty, setReceiveQty] = useState<Record<string, string>>({})
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [paymentMethodCode, setPaymentMethodCode] = useState<string>('')
 
   const loadData = useCallback(async () => {
     if (!id) return
@@ -98,9 +109,10 @@ export default function PurchaseOrderDetailPage() {
     setReceiving(true)
     setErrorMsg(null)
     try {
-      await receivePurchaseOrderItems(id, toReceive)
+      await receivePurchaseOrderItems(id, toReceive, paymentMethodCode)
       toast.success('Itens recebidos com sucesso!')
       setReceiveQty({})
+      setPaymentMethodCode('')
       await loadData()
     } catch (err) {
       setErrorMsg(getErrorMessage(err) || 'Erro ao receber itens')
@@ -183,10 +195,26 @@ export default function PurchaseOrderDetailPage() {
               Itens do Pedido
             </CardTitle>
             {!isCancelled && !allFullyReceived && (
-              <Button onClick={handleReceive} disabled={receiving || !hasValidItems}>
-                {receiving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Receber Itens
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-64">
+                  <Select value={paymentMethodCode} onValueChange={setPaymentMethodCode}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Forma de Pagamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_CODE_OPTS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={handleReceive} disabled={receiving || !hasValidItems}>
+                  {receiving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Receber Itens
+                </Button>
+              </div>
             )}
           </div>
         </CardHeader>

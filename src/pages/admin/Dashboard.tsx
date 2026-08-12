@@ -1,97 +1,95 @@
-import { useEffect, useState } from 'react'
-import { getPageViewsStats, type PageView } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { useEffect, useState, useCallback } from 'react'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  fetchExecDashboardData,
+  type ExecPeriod,
+  type ExecDashboardData,
+} from '@/services/executive-dashboard'
+import { useRealtime } from '@/hooks/use-realtime'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { RefreshCw } from 'lucide-react'
+import { SummaryCards } from '@/components/admin/exec-dashboard/SummaryCards'
+import { ChartsSection } from '@/components/admin/exec-dashboard/ChartsSection'
+import { StatusAndServices } from '@/components/admin/exec-dashboard/StatusAndServices'
+import { AlertsSection } from '@/components/admin/exec-dashboard/AlertsSection'
+
+const periods: { value: ExecPeriod; label: string }[] = [
+  { value: 'today', label: 'Dia' },
+  { value: '7days', label: '7 dias' },
+  { value: '30days', label: '30 dias' },
+  { value: 'month', label: 'Mês' },
+]
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<{ total: number; today: number; recent: PageView[] } | null>(
-    null,
-  )
-  const [loading, setLoading] = useState(false)
+  const [period, setPeriod] = useState<ExecPeriod>('today')
+  const [data, setData] = useState<ExecDashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await getPageViewsStats()
-      setStats(data)
+      const result = await fetchExecDashboardData(period)
+      setData(result)
     } catch {
-      toast.error('Erro ao carregar estatísticas')
+      toast.error('Erro ao carregar dados do painel')
     } finally {
       setLoading(false)
     }
-  }
+  }, [period])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
+
+  useRealtime('service_orders', () => loadData())
+  useRealtime('service_order_items', () => loadData())
+  useRealtime('order_payments', () => loadData())
+  useRealtime('customers', () => loadData())
+  useRealtime('vehicles', () => loadData())
+  useRealtime('products', () => loadData())
+  useRealtime('accounts_payable', () => loadData())
+  useRealtime('accounts_receivable', () => loadData())
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Monitoramento</h1>
-        <Button onClick={loadData} disabled={loading} variant="outline" size="sm">
-          <RefreshCw className={loading ? 'w-4 h-4 mr-2 animate-spin' : 'w-4 h-4 mr-2'} />
-          Atualizar
-        </Button>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-slate-800">Painel Executivo</h1>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={loadData} disabled={loading} variant="outline" size="sm">
+            <RefreshCw className={loading ? 'w-4 h-4 mr-2 animate-spin' : 'w-4 h-4 mr-2'} />
+            Atualizar
+          </Button>
+          {periods.map((p) => (
+            <Button
+              key={p.value}
+              variant={period === p.value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setPeriod(p.value)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Total de Visitas</h3>
-            <p className="text-4xl font-bold text-slate-900">{stats?.total || 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-sm font-medium text-slate-500 mb-2">Visitas nas últimas 24h</h3>
-            <p className="text-4xl font-bold text-slate-900">{stats?.today || 0}</p>
-          </CardContent>
-        </Card>
-      </div>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[180px]">Data / Hora</TableHead>
-                <TableHead>Caminho</TableHead>
-                <TableHead>Navegador (User Agent)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stats?.recent && stats.recent.length > 0 ? (
-                stats.recent.map((view) => (
-                  <TableRow key={view.id} className="even:bg-slate-50">
-                    <TableCell className="font-medium">
-                      {new Date(view.created).toLocaleString('pt-BR')}
-                    </TableCell>
-                    <TableCell>{view.path}</TableCell>
-                    <TableCell className="max-w-[300px] truncate" title={view.user_agent}>
-                      {view.user_agent || 'Desconhecido'}
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-6 text-slate-500">
-                    Nenhuma visita registrada ainda.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+
+      <SummaryCards
+        todayRevenue={data?.todayRevenue || 0}
+        todayOSCount={data?.todayOSCount || 0}
+        averageTicket={data?.averageTicket || 0}
+        newCustomersCount={data?.newCustomersCount || 0}
+        loading={loading}
+      />
+
+      {loading && !data ? (
+        <Skeleton className="h-[300px] w-full" />
+      ) : (
+        <>
+          <ChartsSection data={data} loading={loading} />
+          <StatusAndServices data={data} loading={loading} />
+          <AlertsSection data={data} loading={loading} />
+        </>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ routerAdd(
     const id = e.request.pathValue('id')
     const body = e.requestInfo().body || {}
     const items = body.items || []
+    var paymentMethodCode = body.payment_method_code || ''
 
     if (!items || !items.length) {
       return e.badRequestError('Nenhum item informado')
@@ -107,6 +108,9 @@ routerAdd(
     ap.set('status', 'Pendente')
     ap.set('purchase_order_id', id)
     ap.set('received_items', JSON.stringify(receivedItemsData))
+    if (paymentMethodCode) {
+      ap.set('payment_method_code', paymentMethodCode)
+    }
     $app.save(ap)
 
     var allItems = $app.findRecordsByFilter(

@@ -27,6 +27,7 @@ export interface BankMapDespesa {
   dueDate: string
   paidAt: string
   paymentMethod: string
+  paymentMethodCode: string
   status: string
   bankAccountId: string
   bankAccountName: string

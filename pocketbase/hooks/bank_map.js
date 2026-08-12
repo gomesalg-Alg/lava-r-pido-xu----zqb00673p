@@ -126,6 +126,7 @@ routerAdd(
             dueDate: apDueDate,
             paidAt: apPaidAt,
             paymentMethod: ap.getString('payment_method') || '',
+            paymentMethodCode: ap.getString('payment_method_code') || '',
             status: apStatus,
             bankAccountId: apBaId,
             bankAccountName: getBankAccountName(apBaId),

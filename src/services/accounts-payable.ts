@@ -22,6 +22,7 @@ export interface AccountsPayable {
   comprovante_pagamento: string
   purchase_order_id: string | null
   received_items: string
+  payment_method_code: string | ''
   created: string
   updated: string
   expand?: {
@@ -29,6 +30,15 @@ export interface AccountsPayable {
     bank_account_id?: BankAccount
   }
 }
+
+export const PAYMENT_METHOD_CODES = [
+  '01-Dinheiro',
+  '02-Pix',
+  '03-Transferência Bancária',
+  '04-Depósito em Conta',
+  '05-Cartão de Crédito',
+  '06-Cartão de Débito',
+] as const
 
 export const getAccountsPayable = () =>
   pb.collection('accounts_payable').getFullList<AccountsPayable>({

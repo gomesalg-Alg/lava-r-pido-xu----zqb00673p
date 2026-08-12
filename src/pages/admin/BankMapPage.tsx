@@ -421,7 +421,7 @@ export default function BankMapPage() {
                             <td className="px-3 py-2">
                               {d.paidAt ? formatDateOnlyBR(d.paidAt) : '—'}
                             </td>
-                            <td className="px-3 py-2">{d.paymentMethod || '—'}</td>
+                            <td className="px-3 py-2">{d.paymentMethodCode || '—'}</td>
                             <td className="px-3 py-2">
                               <StatusBadge status={d.status} />
                             </td>
