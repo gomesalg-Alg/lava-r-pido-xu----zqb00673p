@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { ArrowLeft, PenLine, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   getServiceOrder,
@@ -225,16 +225,37 @@ export default function PrintServiceOrderPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-8 mt-12">
-          <div className="text-center">
-            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Cliente</div>
-          </div>
-          <div className="text-center">
-            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Responsável</div>
+        <div className="mt-12 p-5 border border-blue-100 rounded-lg bg-slate-50/70">
+          <p className="text-center text-[11px] uppercase tracking-[0.3em] text-blue-800 font-semibold mb-9">
+            Assinaturas
+          </p>
+          <div className="grid grid-cols-2 gap-10">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                <PenLine className="w-3 h-3" /> Assinatura
+              </div>
+              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+                <div className="text-xs text-gray-500">Cliente</div>
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                <PenLine className="w-3 h-3" /> Assinatura
+              </div>
+              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+                <div className="text-xs text-gray-500">Responsável</div>
+                <div className="text-xs font-semibold text-gray-700 mt-0.5">Lava Rápido Xuá</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="text-center mt-8 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-center mt-8 mb-3">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="px-3 text-blue-800 text-xs">◆</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+        <div className="text-center">
           <p className="text-xs text-gray-400">
             Copyright &copy; {currentYear} {companyName} · www.lavarapidoxua.com.br
           </p>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { ArrowLeft, PenLine, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WhatsAppReceiptButton } from '@/components/admin/WhatsAppReceiptButton'
 import { getCompany, type Company } from '@/services/company'
@@ -257,9 +257,14 @@ export default function ReceiptPage() {
       </div>
 
       <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
-        <h1 className="text-3xl font-bold text-center py-2 mb-4 border-b-2 border-gray-800">
-          RECIBO
-        </h1>
+        <div className="text-center mb-5">
+          <div className="inline-block px-10 py-2 bg-blue-50 border-y-[3px] border-double border-blue-800 rounded">
+            <h1 className="text-3xl font-bold tracking-[0.2em] text-blue-900">RECIBO</h1>
+          </div>
+          <p className="text-[11px] uppercase tracking-[0.35em] text-gray-500 mt-2">
+            Lava Rápido Xuá
+          </p>
+        </div>
         <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4">
           <div className="flex items-start gap-4">
             {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 object-contain" />}
@@ -381,16 +386,37 @@ export default function ReceiptPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-8 mt-12">
-          <div className="text-center">
-            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Cliente</div>
-          </div>
-          <div className="text-center">
-            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Responsável</div>
+        <div className="mt-12 p-5 border border-blue-100 rounded-lg bg-slate-50/70">
+          <p className="text-center text-[11px] uppercase tracking-[0.3em] text-blue-800 font-semibold mb-9">
+            Assinaturas
+          </p>
+          <div className="grid grid-cols-2 gap-10">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                <PenLine className="w-3 h-3" /> Assinatura
+              </div>
+              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+                <div className="text-xs text-gray-500">Cliente</div>
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                <PenLine className="w-3 h-3" /> Assinatura
+              </div>
+              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+                <div className="text-xs text-gray-500">Responsável</div>
+                <div className="text-xs font-semibold text-gray-700 mt-0.5">Lava Rápido Xuá</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="text-center mt-8 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-center mt-8 mb-3">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="px-3 text-blue-800 text-xs">◆</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+        <div className="text-center">
           <p className="text-xs text-gray-400">
             Copyright &copy; {currentYear} {companyName} · www.lavarapidoxua.com.br
           </p>
