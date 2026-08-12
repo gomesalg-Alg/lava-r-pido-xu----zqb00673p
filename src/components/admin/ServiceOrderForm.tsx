@@ -327,10 +327,18 @@ export function ServiceOrderForm({ orderId }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Nº Prisma</Label>
-            <Input
-              value={form.prisma_number}
-              onChange={(e) => set('prisma_number', e.target.value)}
-            />
+            <Select value={form.prisma_number} onValueChange={(v) => set('prisma_number', v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 10 }, (_, i) => String(i + 1)).map((n) => (
+                  <SelectItem key={n} value={n}>
+                    {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Placa do Veículo</Label>

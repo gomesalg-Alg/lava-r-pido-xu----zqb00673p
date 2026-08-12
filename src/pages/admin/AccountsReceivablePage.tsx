@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/format'
+import { maskCPFCNPJ } from '@/lib/masks'
+import type { Customer } from '@/services/customers'
 import {
   Search,
   CheckCircle,
@@ -243,6 +245,7 @@ export default function AccountsReceivablePage() {
               >
                 Cliente
               </SortableHeader>
+              <StaticHeader>CPF/CNPJ</StaticHeader>
               <SortableHeader
                 columnKey="expand.order_id.ticket_number"
                 sortState={sortState}
@@ -291,95 +294,101 @@ export default function AccountsReceivablePage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginated.map((r) => (
-                <TableRow key={r.id} className="even:bg-slate-50">
-                  <TableCell className="font-medium">{r.description || '-'}</TableCell>
-                  <TableCell>{r.expand?.customer_id?.name || '-'}</TableCell>
-                  <TableCell>
-                    {r.expand?.order_id
-                      ? `#${String(r.expand.order_id.ticket_number).padStart(4, '0')}`
-                      : '-'}
-                  </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
-                    {formatCurrency(r.amount)}
-                  </TableCell>
-                  <TableCell>
-                    {r.due_date ? new Date(r.due_date).toLocaleDateString('pt-BR') : '-'}
-                  </TableCell>
-                  <TableCell className="text-sm text-slate-600">
-                    {r.expand?.bank_account_id?.trading_name ||
-                      r.expand?.bank_account_id?.name ||
-                      '-'}
-                  </TableCell>
-                  <TableCell>{statusBadge(r.status)}</TableCell>
-                  <TableCell className="text-sm text-slate-600">
-                    {r.received_at ? new Date(r.received_at).toLocaleDateString('pt-BR') : '-'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => openEdit(r)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        disabled={r.status !== 'Pendente'}
-                        onClick={() => setDeleteTarget(r)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
-                        <Link to={`/admin/recibo/${r.id}`}>
-                          <Printer className="w-4 h-4" />
-                        </Link>
-                      </Button>
-                      {(() => {
-                        const isVendaAvulsa = !!r.venda_avulsa_id
-                        const waPhone = isVendaAvulsa
-                          ? r.expand?.venda_avulsa_id?.whatsapp_phone || ''
-                          : r.expand?.customer_id?.phone || ''
-                        if (isVendaAvulsa && !waPhone) return null
-                        return (
-                          <WhatsAppReceiptButton
-                            customerName={r.expand?.customer_id?.name || ''}
-                            customerPhone={waPhone}
-                            receiptId={r.id}
-                            description={r.description}
-                            amount={r.amount}
-                            className="h-8 w-8 p-0"
-                          />
-                        )
-                      })()}
-                      {r.status === 'Pendente' && (
+              paginated.map((r) => {
+                const customerDoc = getCustomerDoc(r.expand?.customer_id)
+                return (
+                  <TableRow key={r.id} className="even:bg-slate-50">
+                    <TableCell className="font-medium">{r.description || '-'}</TableCell>
+                    <TableCell>{r.expand?.customer_id?.name || '-'}</TableCell>
+                    <TableCell className="text-sm text-slate-600">
+                      {customerDoc ? maskCPFCNPJ(customerDoc) : '-'}
+                    </TableCell>
+                    <TableCell>
+                      {r.expand?.order_id
+                        ? `#${String(r.expand.order_id.ticket_number).padStart(4, '0')}`
+                        : '-'}
+                    </TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">
+                      {formatCurrency(r.amount)}
+                    </TableCell>
+                    <TableCell>
+                      {r.due_date ? new Date(r.due_date).toLocaleDateString('pt-BR') : '-'}
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-600">
+                      {r.expand?.bank_account_id?.trading_name ||
+                        r.expand?.bank_account_id?.name ||
+                        '-'}
+                    </TableCell>
+                    <TableCell>{statusBadge(r.status)}</TableCell>
+                    <TableCell className="text-sm text-slate-600">
+                      {r.received_at ? new Date(r.received_at).toLocaleDateString('pt-BR') : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          onClick={() => handleMarkReceived(r.id)}
-                          className="text-green-600 hover:bg-green-50 hover:text-green-700"
+                          className="h-8 w-8 p-0"
+                          onClick={() => openEdit(r)}
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" /> Receber
+                          <Pencil className="w-4 h-4" />
                         </Button>
-                      )}
-                      {(r.status === 'Pendente' || r.status === 'Recebido') && (
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          onClick={() => handleCancel(r)}
-                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                          disabled={r.status !== 'Pendente'}
+                          onClick={() => setDeleteTarget(r)}
                         >
-                          <XCircle className="w-4 h-4 mr-1" /> Cancelar
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+                          <Link to={`/admin/recibo/${r.id}`}>
+                            <Printer className="w-4 h-4" />
+                          </Link>
+                        </Button>
+                        {(() => {
+                          const isVendaAvulsa = !!r.venda_avulsa_id
+                          const waPhone = isVendaAvulsa
+                            ? r.expand?.venda_avulsa_id?.whatsapp_phone || ''
+                            : r.expand?.customer_id?.phone || ''
+                          if (isVendaAvulsa && !waPhone) return null
+                          return (
+                            <WhatsAppReceiptButton
+                              customerName={r.expand?.customer_id?.name || ''}
+                              customerPhone={waPhone}
+                              receiptId={r.id}
+                              description={r.description}
+                              amount={r.amount}
+                              className="h-8 w-8 p-0"
+                            />
+                          )
+                        })()}
+                        {r.status === 'Pendente' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleMarkReceived(r.id)}
+                            className="text-green-600 hover:bg-green-50 hover:text-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" /> Receber
+                          </Button>
+                        )}
+                        {(r.status === 'Pendente' || r.status === 'Recebido') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCancel(r)}
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          >
+                            <XCircle className="w-4 h-4 mr-1" /> Cancelar
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

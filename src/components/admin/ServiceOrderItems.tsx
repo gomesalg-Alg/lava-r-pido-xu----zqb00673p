@@ -122,7 +122,7 @@ export function ServiceOrderItems({ items, onChange }: Props) {
       .then(setServices)
       .catch(() => {})
     getUsers()
-      .then(setUsers)
+      .then((all) => setUsers(all.filter((u) => u.role === 'Operador')))
       .catch(() => {})
   }, [])
 

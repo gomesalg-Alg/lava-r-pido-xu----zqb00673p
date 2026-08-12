@@ -27,6 +27,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency, formatDateOnlyBR } from '@/lib/format'
+import { maskCPFCNPJ } from '@/lib/masks'
+import type { Supplier } from '@/services/suppliers'
 import {
   Search,
   CheckCircle,
@@ -285,94 +287,106 @@ export default function AccountsPayablePage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
                   Nenhuma conta encontrada.
                 </TableCell>
               </TableRow>
             ) : (
-              paginated.map((r) => (
-                <TableRow key={r.id} className="even:bg-slate-50">
-                  <TableCell>{r.expand?.supplier_id?.name || '-'}</TableCell>
-                  <TableCell className="font-medium">{r.description || '-'}</TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
-                    {formatCurrency(r.amount)}
-                  </TableCell>
-                  <TableCell>{r.emission_date ? formatDateOnlyBR(r.emission_date) : '-'}</TableCell>
-                  <TableCell>{r.due_date ? formatDateOnlyBR(r.due_date) : '-'}</TableCell>
-                  <TableCell>{statusBadge(r.status)}</TableCell>
-                  <TableCell className="text-sm text-slate-600">
-                    {r.expand?.bank_account_id?.trading_name ||
-                      r.expand?.bank_account_id?.name ||
-                      '-'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {hasPdf(r) && (
+              paginated.map((r) => {
+                const supplierDoc = getSupplierDoc(r.expand?.supplier_id)
+                return (
+                  <TableRow key={r.id} className="even:bg-slate-50">
+                    <TableCell>{r.expand?.supplier_id?.name || '-'}</TableCell>
+                    <TableCell className="text-sm text-slate-600">
+                      {supplierDoc ? maskCPFCNPJ(supplierDoc) : '-'}
+                    </TableCell>
+                    <TableCell className="font-medium">{r.description || '-'}</TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">
+                      {formatCurrency(r.amount)}
+                    </TableCell>
+                    <TableCell>
+                      {r.emission_date ? formatDateOnlyBR(r.emission_date) : '-'}
+                    </TableCell>
+                    <TableCell>{r.due_date ? formatDateOnlyBR(r.due_date) : '-'}</TableCell>
+                    <TableCell>{statusBadge(r.status)}</TableCell>
+                    <TableCell className="text-sm text-slate-600">
+                      {r.expand?.bank_account_id?.trading_name ||
+                        r.expand?.bank_account_id?.name ||
+                        '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {hasPdf(r) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-slate-100"
+                            onClick={() => setDocDialogRecord(r)}
+                            title="Objeto Digitalizado"
+                          >
+                            <AdobeReaderIcon className="w-5 h-5" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 hover:bg-slate-100"
-                          onClick={() => setDocDialogRecord(r)}
-                          title="Objeto Digitalizado"
-                        >
-                          <AdobeReaderIcon className="w-5 h-5" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        disabled={r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)}
-                        onClick={() => openEdit(r)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                        disabled={r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)}
-                        onClick={() => {
-                          if (r.status === 'Pago' && isGestorCompras && r.purchase_order_id) {
-                            setGestorDeleteTarget(r)
-                          } else {
-                            setDeleteTarget(r)
+                          className="h-8 w-8 p-0"
+                          disabled={
+                            r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)
                           }
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      {r.status === 'Pendente' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setPayTarget(r)}
-                          className="text-green-600 hover:bg-green-50 hover:text-green-700"
+                          onClick={() => openEdit(r)}
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Pagar
+                          <Pencil className="w-4 h-4" />
                         </Button>
-                      )}
-                      {r.status === 'Pendente' && (
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          onClick={() => setCancelTarget(r)}
-                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                          disabled={
+                            r.status === 'Pago' && !(isGestorCompras && r.purchase_order_id)
+                          }
+                          onClick={() => {
+                            if (r.status === 'Pago' && isGestorCompras && r.purchase_order_id) {
+                              setGestorDeleteTarget(r)
+                            } else {
+                              setDeleteTarget(r)
+                            }
+                          }}
                         >
-                          <XCircle className="w-4 h-4 mr-1" /> Cancelar
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        {r.status === 'Pendente' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPayTarget(r)}
+                            className="text-green-600 hover:bg-green-50 hover:text-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Pagar
+                          </Button>
+                        )}
+                        {r.status === 'Pendente' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCancelTarget(r)}
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          >
+                            <XCircle className="w-4 h-4 mr-1" /> Cancelar
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>
