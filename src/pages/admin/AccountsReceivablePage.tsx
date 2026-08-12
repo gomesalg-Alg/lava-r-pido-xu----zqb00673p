@@ -25,8 +25,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/format'
-import { maskCPFCNPJ } from '@/lib/masks'
-import type { Customer } from '@/services/customers'
 import {
   Search,
   CheckCircle,
@@ -245,7 +243,6 @@ export default function AccountsReceivablePage() {
               >
                 Cliente
               </SortableHeader>
-              <StaticHeader>CPF/CNPJ</StaticHeader>
               <SortableHeader
                 columnKey="expand.order_id.ticket_number"
                 sortState={sortState}
@@ -295,14 +292,10 @@ export default function AccountsReceivablePage() {
               </TableRow>
             ) : (
               paginated.map((r) => {
-                const customerDoc = getCustomerDoc(r.expand?.customer_id)
                 return (
                   <TableRow key={r.id} className="even:bg-slate-50">
                     <TableCell className="font-medium">{r.description || '-'}</TableCell>
                     <TableCell>{r.expand?.customer_id?.name || '-'}</TableCell>
-                    <TableCell className="text-sm text-slate-600">
-                      {customerDoc ? maskCPFCNPJ(customerDoc) : '-'}
-                    </TableCell>
                     <TableCell>
                       {r.expand?.order_id
                         ? `#${String(r.expand.order_id.ticket_number).padStart(4, '0')}`

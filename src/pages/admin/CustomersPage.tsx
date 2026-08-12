@@ -17,6 +17,7 @@ import { SortableHeader, StaticHeader } from '@/components/admin/SortableHeader'
 import { useSortableData } from '@/hooks/use-sortable-data'
 import { Plus, Edit, Trash2, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { maskCPFCNPJ } from '@/lib/masks'
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -91,7 +92,7 @@ export default function CustomersPage() {
                 Nome
               </SortableHeader>
               <SortableHeader columnKey="cpf" sortState={sortState} onSort={toggleSort}>
-                CPF
+                CPF/CNPJ
               </SortableHeader>
               <SortableHeader columnKey="phone" sortState={sortState} onSort={toggleSort}>
                 Telefone
@@ -119,32 +120,35 @@ export default function CustomersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              sortedItems.map((c) => (
-                <TableRow key={c.id} className="even:bg-slate-50">
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell>{c.cpf}</TableCell>
-                  <TableCell>{c.phone}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{c.email || '-'}</TableCell>
-                  <TableCell>{c.city ? `${c.city}/${c.state}` : '-'}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/admin/clientes/${c.id}/editar`}>
-                          <Edit className="w-4 h-4 mr-1" /> Editar
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteTarget(c)}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" /> Excluir
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              sortedItems.map((c) => {
+                const doc = c.tipo_pessoa === 'J' ? c.cnpj : c.cpf
+                return (
+                  <TableRow key={c.id} className="even:bg-slate-50">
+                    <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell>{doc ? maskCPFCNPJ(doc) : '-'}</TableCell>
+                    <TableCell>{c.phone}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{c.email || '-'}</TableCell>
+                    <TableCell>{c.city ? `${c.city}/${c.state}` : '-'}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/admin/clientes/${c.id}/editar`}>
+                            <Edit className="w-4 h-4 mr-1" /> Editar
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDeleteTarget(c)}
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" /> Excluir
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

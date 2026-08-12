@@ -27,8 +27,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { formatCurrency, formatDateOnlyBR } from '@/lib/format'
-import { maskCPFCNPJ } from '@/lib/masks'
-import type { Supplier } from '@/services/suppliers'
 import {
   Search,
   CheckCircle,
@@ -287,25 +285,21 @@ export default function AccountsPayablePage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-slate-400">
+                <TableCell colSpan={8} className="text-center py-8 text-slate-400">
                   Nenhuma conta encontrada.
                 </TableCell>
               </TableRow>
             ) : (
               paginated.map((r) => {
-                const supplierDoc = getSupplierDoc(r.expand?.supplier_id)
                 return (
                   <TableRow key={r.id} className="even:bg-slate-50">
                     <TableCell>{r.expand?.supplier_id?.name || '-'}</TableCell>
-                    <TableCell className="text-sm text-slate-600">
-                      {supplierDoc ? maskCPFCNPJ(supplierDoc) : '-'}
-                    </TableCell>
                     <TableCell className="font-medium">{r.description || '-'}</TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
                       {formatCurrency(r.amount)}
