@@ -8,6 +8,7 @@ export type Company = {
   phone: string
   home_page: string
   logo: string
+  signature?: string
   cep: string
   address: string
   number: string

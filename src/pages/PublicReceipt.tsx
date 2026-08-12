@@ -60,6 +60,9 @@ export default function PublicReceipt() {
   const logoUrl = data.company?.logo
     ? `${import.meta.env.VITE_POCKETBASE_URL}/api/files/company/${data.company.id}/${data.company.logo}`
     : null
+  const signatureUrl = data.company?.signature
+    ? `${import.meta.env.VITE_POCKETBASE_URL}/api/files/company/${data.company.id}/${data.company.signature}`
+    : null
 
   const hasOrderItems = data.items.length > 0
   const serviceItems = hasOrderItems ? data.items.filter((i) => i.type === 'service') : []
@@ -136,6 +139,7 @@ export default function PublicReceipt() {
       companyCity: data.company?.city,
       companyState: data.company?.state,
       logoUrl,
+      signatureUrl,
       orderNumber: data.order?.ticket_number ?? null,
       emissionDate: data.created,
       status: data.status,
@@ -363,12 +367,31 @@ export default function PublicReceipt() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-8 mt-8 sm:mt-12">
-          <div className="text-center">
-            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Cliente</div>
-          </div>
-          <div className="text-center">
-            <div className="border-t border-gray-400 pt-1 text-xs text-gray-500">Responsável</div>
+        <div className="mt-12 p-5 border border-blue-100 rounded-lg bg-slate-50/70">
+          <p className="text-center text-[11px] uppercase tracking-[0.3em] text-blue-800 font-semibold mb-9">
+            Assinaturas
+          </p>
+          <div className="grid grid-cols-2 gap-10">
+            <div className="text-center">
+              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+                <div className="text-xs text-gray-500">Cliente</div>
+              </div>
+            </div>
+            <div className="text-center flex flex-col justify-end">
+              {signatureUrl ? (
+                <div className="flex justify-center mb-1">
+                  <img
+                    src={signatureUrl}
+                    alt="Assinatura Lava Rápido Xuá"
+                    className="h-12 object-contain"
+                  />
+                </div>
+              ) : null}
+              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+                <div className="text-xs text-gray-500">Responsável</div>
+                <div className="text-xs font-semibold text-gray-700 mt-0.5">Lava Rápido Xuá</div>
+              </div>
+            </div>
           </div>
         </div>
 

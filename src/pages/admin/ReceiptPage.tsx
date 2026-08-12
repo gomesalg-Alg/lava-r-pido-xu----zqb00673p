@@ -78,6 +78,9 @@ export default function ReceiptPage() {
   const logoUrl = company?.logo
     ? pb.files.getURL({ id: company.id, collectionName: 'company' } as never, company.logo)
     : null
+  const signatureUrl = company?.signature
+    ? pb.files.getURL({ id: company.id, collectionName: 'company' } as never, company.signature)
+    : null
   const vendaItems: VendaItem[] = record.expand?.venda_avulsa_id?.items || []
   const changeAmount = record.expand?.venda_avulsa_id?.change_amount || 0
   const serviceItems = orderItems.filter((i) => i.service_id)
@@ -152,6 +155,7 @@ export default function ReceiptPage() {
       companyCity: company?.city,
       companyState: company?.state,
       logoUrl,
+      signatureUrl,
       orderNumber: record.expand?.order_id?.ticket_number ?? null,
       emissionDate: record.created,
       status: record.status,
@@ -399,10 +403,20 @@ export default function ReceiptPage() {
                 <div className="text-xs text-gray-500">Cliente</div>
               </div>
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
-                <PenLine className="w-3 h-3" /> Assinatura
-              </div>
+            <div className="text-center flex flex-col justify-end">
+              {signatureUrl ? (
+                <div className="flex justify-center mb-1">
+                  <img
+                    src={signatureUrl}
+                    alt="Assinatura Lava Rápido Xuá"
+                    className="h-12 object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+                  <PenLine className="w-3 h-3" /> Assinatura
+                </div>
+              )}
               <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
                 <div className="text-xs text-gray-500">Responsável</div>
                 <div className="text-xs font-semibold text-gray-700 mt-0.5">Lava Rápido Xuá</div>

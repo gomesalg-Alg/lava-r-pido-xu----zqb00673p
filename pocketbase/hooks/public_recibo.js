@@ -326,6 +326,7 @@ routerAdd('GET', '/backend/v1/public/recibo/{id}', (e) => {
         city: company.getString('city'),
         state: company.getString('state'),
         logo: company.getString('logo'),
+        signature: company.getString('signature'),
       }
     }
   } catch (_) {}

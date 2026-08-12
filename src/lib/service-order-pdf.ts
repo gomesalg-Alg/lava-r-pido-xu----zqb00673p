@@ -112,6 +112,12 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
   const logo = buildLogoHtml(company)
   const address = buildAddressHtml(company)
 
+  const signature = company.signature ? fileUrl('company', company.id, company.signature) : null
+
+  const signatureHtml = signature
+    ? `<img src="${signature}" alt="Assinatura Lava Rápido Xuá" style="max-height:56px;max-width:200px;object-fit:contain;margin:0 auto 4px;display:block;" />`
+    : ''
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -148,6 +154,11 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
   .totals .box { min-width:260px; }
   .totals .row { display:flex; justify-content:space-between; padding:6px 0; font-size:14px; }
   .totals .grand { border-top:2px solid #1e40af; margin-top:8px; padding-top:10px; font-size:18px; font-weight:700; color:#1e40af; }
+  .sig-section { padding:24px 32px 16px; }
+  .sig-grid { display:flex; gap:32px; align-items:flex-end; }
+  .sig-box { flex:1; text-align:center; }
+  .sig-line { border-top:2px dotted #1e40af; padding-top:6px; font-size:12px; color:#64748b; }
+  .sig-company-name { font-size:12px; font-weight:700; color:#1e293b; margin-top:2px; }
   .obs { padding:16px 32px 28px; }
   .obs .obs-box { background:#f8fafc; border-left:3px solid #2563eb; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#475569; min-height:40px; }
   .footer { padding:16px 32px; background:#f1f5f9; text-align:center; font-size:11px; color:#94a3b8; border-top:1px solid #e2e8f0; }
@@ -228,7 +239,21 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
       <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:8px;">Observações</h2>
       <div class="obs-box">${order.observation || 'Sem observações.'}</div>
     </div>
-    <div class="footer">
+    <div class="sig-section">
+      <div style="text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#1e40af;font-weight:700;margin-bottom:20px;">Assinaturas</div>
+      <div class="sig-grid">
+        <div class="sig-box">
+          <div className="sig-line" style="border-top:2px dotted #1e40af;padding-top:6px;font-size:12px;color:#64748b;">Assinatura do Cliente</div>
+        </div>
+        <div class="sig-box">
+          ${signatureHtml}
+          <div className="sig-line" style="border-top:2px dotted #1e40af;padding-top:6px;font-size:12px;color:#64748b;">
+            Responsável
+            <div class="sig-company-name">Lava Rápido Xuá</div>
+          </div>
+        </div>
+      </div>
+    </div>    <div class="footer">
       Copyright &copy; ${new Date().getFullYear()} ${company.trading_name || company.name} · www.lavarapidoxua.com.br
     </div>
   </div>

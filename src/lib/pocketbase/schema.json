@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-12T17:27:35.608Z",
+  "generatedAt": "2026-08-12T17:41:16.644Z",
   "collections": [
     {
       "name": "users",
@@ -468,6 +468,12 @@
         {
           "name": "popup_enabled",
           "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "signature",
+          "type": "file",
           "required": false,
           "system": false
         }
