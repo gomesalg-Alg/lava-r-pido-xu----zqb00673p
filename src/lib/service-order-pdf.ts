@@ -243,11 +243,11 @@ function buildHtml(company: Company, order: ServiceOrder, items: ServiceOrderIte
       <div style="text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#1e40af;font-weight:700;margin-bottom:20px;">Assinaturas</div>
       <div class="sig-grid">
         <div class="sig-box">
-          <div className="sig-line" style="border-top:2px dotted #1e40af;padding-top:6px;font-size:12px;color:#64748b;">Assinatura do Cliente</div>
+          <div style="border-top:2px dotted #1e40af;padding-top:6px;font-size:12px;color:#64748b;">Assinatura do Cliente</div>
         </div>
         <div class="sig-box">
           ${signatureHtml}
-          <div className="sig-line" style="border-top:2px dotted #1e40af;padding-top:6px;font-size:12px;color:#64748b;">
+          <div style="padding-top:6px;font-size:12px;color:#64748b;">
             Responsável
             <div class="sig-company-name">Lava Rápido Xuá</div>
           </div>

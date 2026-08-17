@@ -228,12 +228,12 @@ export default function PrintServiceOrderPage() {
           </div>
         )}
 
-        <div className="mt-12 p-5 border border-blue-100 rounded-lg bg-slate-50/70">
+        <div className="mt-12">
           <p className="text-center text-[11px] uppercase tracking-[0.3em] text-blue-800 font-semibold mb-9">
             Assinaturas
           </p>
-          <div className="grid grid-cols-2 gap-10">
-            <div className="text-center">
+          <div className="flex gap-10 items-end">
+            <div className="flex-1 text-center">
               <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-1">
                 <PenLine className="w-3 h-3" /> Assinatura
               </div>
@@ -241,7 +241,7 @@ export default function PrintServiceOrderPage() {
                 <div className="text-xs text-gray-500">Cliente</div>
               </div>
             </div>
-            <div className="text-center flex flex-col justify-end">
+            <div className="flex-1 text-center">
               {signatureUrl ? (
                 <div className="flex justify-center mb-1">
                   <img
@@ -255,7 +255,7 @@ export default function PrintServiceOrderPage() {
                   <PenLine className="w-3 h-3" /> Assinatura
                 </div>
               )}
-              <div className="border-t-2 border-dotted border-blue-900/70 pt-1.5">
+              <div className="pt-1.5">
                 <div className="text-xs text-gray-500">Responsável</div>
                 <div className="text-xs font-semibold text-gray-700 mt-0.5">Lava Rápido Xuá</div>
               </div>
