@@ -89,6 +89,22 @@ export default function PrintServiceOrderPage() {
         <Button onClick={() => window.print()}>
           <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
         </Button>
+        {order.expand?.customer_id?.name && order.expand?.customer_id?.phone && (
+          <>
+            <WhatsAppShareButton
+              customerName={order.expand?.customer_id?.name}
+              customerPhone={order.expand?.customer_id?.phone}
+              ticketNumber={order.ticket_number}
+              companyName={companyName}
+              orderId={order.id}
+              showLabel
+            />
+            <p className="text-xs text-slate-500 max-w-xs">
+              💡 Após abrir o WhatsApp, faça o download do PDF e anexe manualmente à conversa para
+              enviar o documento completo.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="print-container max-w-[800px] mx-auto bg-white p-8 my-4 shadow-lg print:shadow-none print:my-0 print:max-w-none">
