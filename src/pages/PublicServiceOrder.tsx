@@ -121,7 +121,7 @@ export default function PublicServiceOrder() {
             </p>
             {order.prisma_number && <p className="text-sm">Prisma: {order.prisma_number}</p>}
             {order.emission_date && (
-              <p className="text-sm">Emissão: {toDateInput(order.emission_date)}</p>
+              <p className="text-sm">Emissão: {formatDateBR(order.emission_date)}</p>
             )}
             <p className="text-sm">
               Status: <strong>{order.status || '--'}</strong>

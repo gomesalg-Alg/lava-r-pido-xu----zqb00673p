@@ -255,6 +255,7 @@ export default function ServiceOrdersPage() {
                           ticketNumber={o.ticket_number}
                           companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
                           orderId={o.id}
+                          showLabel={false}
                         />
                       )}
                       {o.status === 'Pago' && (
