@@ -10,6 +10,8 @@ import {
   getAccountsReceivableByOrder,
   updateAccountsReceivable,
 } from '@/services/accounts-receivable'
+import { getCompany, type Company } from '@/services/company'
+import { WhatsAppShareButton } from '@/components/admin/WhatsAppShareButton'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,6 +36,7 @@ export default function ServiceOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<ServiceOrder | null>(null)
+  const [company, setCompany] = useState<Company | null>(null)
 
   const loadData = async () => {
     try {
@@ -48,6 +51,9 @@ export default function ServiceOrdersPage() {
 
   useEffect(() => {
     loadData()
+    getCompany()
+      .then(setCompany)
+      .catch(() => {})
   }, [])
   useRealtime('service_orders', () => {
     loadData()
@@ -242,6 +248,15 @@ export default function ServiceOrdersPage() {
                       >
                         <Printer className="w-4 h-4 mr-1" /> PDF
                       </Button>
+                      {o.expand?.customer_id?.name && o.expand?.customer_id?.phone && (
+                        <WhatsAppShareButton
+                          customerName={o.expand.customer_id.name}
+                          customerPhone={o.expand.customer_id.phone}
+                          ticketNumber={o.ticket_number}
+                          companyName={company?.trading_name || company?.name || 'Lava Rápido XUÁ'}
+                          orderId={o.id}
+                        />
+                      )}
                       {o.status === 'Pago' && (
                         <Button
                           variant="outline"

@@ -9,7 +9,7 @@ import {
 } from '@/services/service-orders'
 import type { Company } from '@/services/company'
 import { calculateOrderTotals } from '@/lib/order-calculations'
-import { formatCurrency, formatDuration, formatDateTimeBR } from '@/lib/format'
+import { formatCurrency, formatDuration, formatDateTimeBR, formatDateBR } from '@/lib/format'
 import { sanitizePhone, buildOrderShareMessage, buildWhatsAppShareUrl } from '@/lib/whatsapp-share'
 import { MetaTags } from '@/components/MetaTags'
 import '@/styles/print.css'
