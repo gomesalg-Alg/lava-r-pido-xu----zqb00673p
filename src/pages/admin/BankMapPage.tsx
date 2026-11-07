@@ -20,21 +20,6 @@ import { formatCurrency, formatDateOnlyBR } from '@/lib/format'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { cn } from '@/lib/utils'
 
-const MONTH_NAMES = [
-  'Janeiro',
-  'Fevereiro',
-  'Março',
-  'Abril',
-  'Maio',
-  'Junho',
-  'Julho',
-  'Agosto',
-  'Setembro',
-  'Outubro',
-  'Novembro',
-  'Dezembro',
-]
-
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos os status' },
   { value: 'settled', label: 'Recebido / Pago' },
@@ -42,17 +27,22 @@ const STATUS_OPTIONS = [
   { value: 'Cancelado', label: 'Cancelado' },
 ]
 
-function getCurrentMonth(): string {
-  const now = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}`
+function pad(n: number): string {
+  return String(n).padStart(2, '0')
 }
 
-function formatMonthLabel(month: string): string {
-  if (!month) return ''
-  const [year, m] = month.split('-')
-  const idx = parseInt(m, 10) - 1
-  return `${MONTH_NAMES[idx]}/${year}`
+function getMonthRange(): { from: string; to: string } {
+  const now = new Date()
+  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  return {
+    from: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`,
+    to: `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`,
+  }
+}
+
+function formatIsoDateBR(iso: string): string {
+  const [y, m, d] = iso.split('-')
+  return `${d}/${m}/${y}`
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -67,7 +57,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function BankMapPage() {
-  const [month, setMonth] = useState(getCurrentMonth())
+  const [period, setPeriod] = useState(getMonthRange())
   const [bankAccountId, setBankAccountId] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [data, setData] = useState<BankMapData | null>(null)
@@ -91,7 +81,12 @@ export default function BankMapPage() {
     setLoading(true)
     setError(null)
     try {
-      const result = await fetchBankMapData({ month, bankAccountId, status: statusFilter })
+      const result = await fetchBankMapData({
+        from: period.from,
+        to: period.to,
+        bankAccountId,
+        status: statusFilter,
+      })
       setData(result)
     } catch (err) {
       setError(getErrorMessage(err))
@@ -100,7 +95,7 @@ export default function BankMapPage() {
       setLoading(false)
       loadingRef.current = false
     }
-  }, [month, bankAccountId, statusFilter])
+  }, [period, bankAccountId, statusFilter])
 
   useEffect(() => {
     loadData()
@@ -125,14 +120,26 @@ export default function BankMapPage() {
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1">
-            <Label htmlFor="month" className="text-xs">
-              Mês/Ano
+            <Label htmlFor="period-from" className="text-xs">
+              De
             </Label>
             <Input
-              id="month"
-              type="month"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
+              id="period-from"
+              type="date"
+              value={period.from}
+              onChange={(e) => setPeriod((p) => ({ ...p, from: e.target.value }))}
+              className="w-[160px]"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="period-to" className="text-xs">
+              Até
+            </Label>
+            <Input
+              id="period-to"
+              type="date"
+              value={period.to}
+              onChange={(e) => setPeriod((p) => ({ ...p, to: e.target.value }))}
               className="w-[160px]"
             />
           </div>
@@ -202,8 +209,13 @@ export default function BankMapPage() {
       {data && !error && (
         <div className={cn('space-y-6', loading && 'pointer-events-none opacity-50')}>
           <p className="text-sm text-muted-foreground">
-            Período: <span className="font-medium">{formatMonthLabel(data.month)}</span> — O saldo
-            considera apenas movimentações liquidadas (Recebido/Pago).
+            Período:{' '}
+            <span className="font-medium">
+              {data.from || data.to
+                ? `${data.from ? formatIsoDateBR(data.from) : '—'} a ${data.to ? formatIsoDateBR(data.to) : '—'}`
+                : 'Todos os lançamentos'}
+            </span>{' '}
+            — O saldo considera apenas movimentações liquidadas (Recebido/Pago).
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -239,7 +251,7 @@ export default function BankMapPage() {
                   <Wallet className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Saldo do Mês</p>
+                  <p className="text-sm text-muted-foreground">Saldo do Período</p>
                   <p
                     className={cn(
                       'text-xl font-bold',

@@ -51,7 +51,8 @@ export interface BankMapSummary {
 }
 
 export interface BankMapData {
-  month: string
+  from: string
+  to: string
   bankAccountId: string
   statusFilter: string
   bankAccounts: BankMapAccount[]
@@ -62,12 +63,14 @@ export interface BankMapData {
 }
 
 export async function fetchBankMapData(params: {
-  month: string
+  from?: string
+  to?: string
   bankAccountId?: string
   status?: string
 }): Promise<BankMapData> {
   const searchParams = new URLSearchParams()
-  searchParams.set('month', params.month)
+  if (params.from) searchParams.set('from', params.from)
+  if (params.to) searchParams.set('to', params.to)
   if (params.bankAccountId) searchParams.set('bankAccountId', params.bankAccountId)
   if (params.status) searchParams.set('status', params.status)
   return pb.send(`/backend/v1/bank-map?${searchParams.toString()}`, { method: 'GET' })

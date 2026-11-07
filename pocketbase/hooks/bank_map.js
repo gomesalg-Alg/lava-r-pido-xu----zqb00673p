@@ -4,17 +4,10 @@ routerAdd(
   (e) => {
     try {
       const query = e.requestInfo().query || {}
-      let month = query.month || ''
+      const dateFrom = query.from || ''
+      const dateTo = query.to || ''
       const bankAccountId = query.bankAccountId || ''
       const statusFilter = query.status || 'all'
-
-      if (!month) {
-        const now = new Date()
-        const pad = function (n) {
-          return String(n).padStart(2, '0')
-        }
-        month = now.getFullYear() + '-' + pad(now.getMonth() + 1)
-      }
 
       var bankAccountRecs = $app.findRecordsByFilter('bank_accounts', '', 'name', 0, 0)
       var bankAccounts = []
@@ -51,9 +44,12 @@ routerAdd(
         return recordStatus === statusFilter
       }
 
-      function matchesMonth(dateStr) {
+      function matchesPeriod(dateStr) {
         if (!dateStr) return false
-        return dateStr.substring(0, 7) === month
+        var day = dateStr.substring(0, 10)
+        if (dateFrom && day < dateFrom) return false
+        if (dateTo && day > dateTo) return false
+        return true
       }
 
       function getRelevantDate(status, settledDate, dueDate) {
@@ -87,7 +83,7 @@ routerAdd(
           var arReceivedAt = ar.getString('received_at') || ''
           var arDueDate = ar.getString('due_date') || ''
           var arRelevant = getRelevantDate(arStatus, arReceivedAt, arDueDate)
-          if (!matchesMonth(arRelevant)) continue
+          if (!matchesPeriod(arRelevant)) continue
           var arCustId = ar.getString('customer_id') || ''
           receitas.push({
             id: ar.id,
@@ -116,7 +112,7 @@ routerAdd(
           var apPaidAt = ap.getString('paid_at') || ''
           var apDueDate = ap.getString('due_date') || ''
           var apRelevant = getRelevantDate(apStatus, apPaidAt, apDueDate)
-          if (!matchesMonth(apRelevant)) continue
+          if (!matchesPeriod(apRelevant)) continue
           var apSupId = ap.getString('supplier_id') || ''
           despesas.push({
             id: ap.id,
@@ -219,7 +215,8 @@ routerAdd(
       }
 
       return e.json(200, {
-        month: month,
+        from: dateFrom,
+        to: dateTo,
         bankAccountId: bankAccountId,
         statusFilter: statusFilter,
         bankAccounts: bankAccounts,
