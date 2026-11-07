@@ -17,7 +17,6 @@ import {
   Tag,
   BarChart3,
   Activity,
-  TrendingUp,
   Settings,
   Building2,
   User,
@@ -84,7 +83,6 @@ const menuGroups: MenuGroup[] = [
     label: 'RELATÓRIO',
     icon: BarChart3,
     items: [
-      { label: 'Dashboard de Vendas', to: '/admin/dashboard', icon: TrendingUp },
       { label: 'Mapa Bancário', to: '/admin/mapa-bancario', icon: Table2 },
       { label: 'Monitoramento', to: '/admin/monitoramento', icon: Activity },
     ],

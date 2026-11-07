@@ -36,7 +36,6 @@ import AccountsReceivablePage from './pages/admin/AccountsReceivablePage'
 import CardRatesPage from './pages/admin/CardRatesPage'
 import ReceiptPage from './pages/admin/ReceiptPage'
 import PublicReceipt from './pages/PublicReceipt'
-import SalesDashboard from './pages/admin/SalesDashboard'
 import BankAccountsPage from './pages/admin/BankAccountsPage'
 import AccountsPayablePage from './pages/admin/AccountsPayablePage'
 import BankMapPage from './pages/admin/BankMapPage'
@@ -73,7 +72,6 @@ const App = () => (
             }
           >
             <Route index element={<WelcomePage />} />
-            <Route path="dashboard" element={<SalesDashboard />} />
             <Route path="monitoramento" element={<AdminDashboard />} />
             <Route path="empresa" element={<CompanyListPage />} />
             <Route path="empresa/novo" element={<CompanyPage />} />
